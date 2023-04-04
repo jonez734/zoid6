@@ -1,0 +1,36 @@
+.calendars {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: stretch;
+  align-content: stretch;
+  margin: 0;
+  padding: 0;
+}
+.calendars .body {
+  margin: 0;
+  padding: 0;
+}
+
+.calContainer {
+  flex: 0 1 auto;
+}
+.calContainer .calCell {
+  border: 1px solid #666666;
+  border-collapse: collapse;
+  background-color: #AAAAAA;
+  color: black;
+}
+.calContainer .calCellBusy {
+  background-color: green;
+  color: white;
+}
+.calContainer table tr th {
+  border-width: 1px;
+  padding: 8px;
+  border-style: solid;
+  border-color: #666666;
+  background-color: #dedede;
+  color: black;
+}

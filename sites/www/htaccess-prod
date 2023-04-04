@@ -1,0 +1,19 @@
+#
+# $Id: htaccess,v 1.8 2006/06/25 01:36:56 jam Exp $
+#
+# php_flag register_globals off
+
+RewriteEngine On
+RewriteBase /
+RewriteOptions Inherit
+
+RewriteRule ^about[/]?$ /page.php?name=about&mode=template [last,qsappend]
+RewriteRule ^jamhacks[/]?$ /page.php?name=jamhacks&mode=template [last,qsappend]
+
+#RewriteRule ^moneyday[/]?$ /moneyday.php [last]
+
+RewriteRule ^sitenewsarchive[/]?$ /sitenewsarchive.php [last]
+
+<RequireAll>
+    Require all granted
+</RequireAll>

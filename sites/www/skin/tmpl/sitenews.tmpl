@@ -1,0 +1,12 @@
+{if count($sitenews) > 0}
+<div class="blurb">
+  <div class="header"><h1>sitenews</h1></div>
+  <div class="body">
+  <ul>
+  {foreach $sitenews as $post}
+   <li>{include file="post.tmpl" post=$post}</li>
+  {/foreach}
+  </ul>
+  </div> {* body *}
+ </div> {* sitenews *}
+{/if}

@@ -1,0 +1,94 @@
+{extends file="page.tmpl"}
+{block name="title"}site news archive!{/block}
+{block name="content"}
+<div class="blurb">
+<div class="header"><h1>site news archive</h1></div>
+<div class="body">
+
+<div class="blurb">
+<h3>June 15, 2015</h3>
+<p>Fixed a bug in the mantra summary that did not set the 'returnto' correctly</p>
+</div>
+
+<div class="blurb">
+  <h3>July 1, 2015</h3>
+  <p>working on <a href="{$smarty.const.SOPHIAURL}">sophia (blog/forum)</a></p>
+</div>
+
+<div class="blurb">
+<h3>June 29, 2015</h3>
+<ul>
+<li>Fixed several bugs in the <a href="{$smarty.const.REPOURL}">software repo</a> that would allow any file, even if hidden, to be downloaded/viewed.</li>
+<li>Fixed a bug in displayerrorpage() that was not correctly setting the http result code. That meant that for an error that was supposed to be a 403, a 200 was returned. a <a href="http://php.net/manual/en/function.http-response-code.php#116539">comment on php.net regarding the http_response_code function</a> was the major inspiration behind this fix.<//li>
+</ul>
+</div>
+
+<div class="blurb">
+<h3>May 6, 2015</h3>
+<ul>
+<li> added use of the "<a href="https://css-tricks.com/almanac/properties/t/transition/">transition</a>" css3 property to the "A" tags on zoidtechnologies.com by adding a few lines to zoidweb2.css.</li>
+<li> hacked a glitch in the digital clock when using chrome. The hack was to use a ":" and a "!" instead of using &amp;nbsp;</li>
+</ul>
+</div>
+<div class="blurb">
+<h3>March 25, 2015</h3>
+<ul>
+<li> updated <a href="{$smarty.const.ACHILLESURL}">Achilles</a> with a new link plus a couple of notes.</li>
+</ul>
+</div>
+<div class="blurb">
+<h3>December, 2014</h3>
+<ul>
+<li>new feature: added light use of <a href="http://fortawesome.github.io/Font-Awesome/">Font Awesome</a></li>
+<li>new page: <a href="/moneyday">moneyday</a>, a script to calculate the next disbursement date for social security recipients</li>
+<li>bug fix: last login date is now properly handled. getlastlogin() and setlastlogin() have been added to the engine.</li>
+</ul>
+</div>
+<div class="blurb">
+<h3>September, 2014</h3>
+<ul>
+<li>new page: <a href="/jamhacks">jamhacks</a> which is a portfolio of sorts inspired by <a href="http://www.jwz.org/hacks/">jwzhacks</a></li>
+<li>new feature: change password</li>
+<li>enhancement: broken links on Vulcan are now sorted to the bottom (new links blurb, links on teos, etc)</li>
+<li>enhancement: to accomodate mobile platforms, entering a handle into the login form is case insensitive</li>
+</ul>
+</div>
+<div class="blurb">
+<h3>August, 2014</h3>
+<ul>
+<li>new project: <a href="//achilles.zoidtechnologies.com/">Achilles</a> is a project
+which studies the amount of monosodium glutamate (MSG) in the typical
+American diet and what effects, if any, it has on the body.</li>
+<li>enhancement: to save processor power, digital clock is disabled when the site's tab is hidden</li>
+<li>enhancement: clock uses non-standard font ("<a href="http://www.dafont.com/digital-7.font?text=zoidweb2&amp;psize=xs#null">digital 7</a>")</li>
+</ul>
+</div>
+<div class="blurb">
+<h3>July, 2014</h3>
+<ul>
+<li>new feature: sticky topbar inspired by yahoo.com</li>
+<li>new feature: digital clock with flashing colon</li>
+</ul>
+</div>
+<div class="blurb">
+<h3>May, 2014</h3>
+<ul>
+<li>the <a href="http://repo.zoidtechnologies.com/">software repository</a> is up and running again</li>
+<li><a href="http://vulcan.zoidtechnologies.com/">vulcan</a> is up and running</li>
+<li><a href="http://teos.zoidtechnologies.com/">teos</a> is up and running</li>
+</ul>
+</div>
+<div class="blurb">
+<h3>March, 2014</h3>
+<p><a href="http://bbsengine.org/">bbsengine</a> now uses &quot;schemas&quot; which have been a feature in Postgresql for a while.</p>
+</div>
+
+<div class="blurb">
+<h3>October, 2013</h3>
+<ul>
+<li> After being down for about a year, I am slowly restoring zoidtechnologies.com including the user database.</li>
+</ul>
+</div>
+</div>
+</div>
+{/block}

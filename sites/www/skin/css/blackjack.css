@@ -1,0 +1,7 @@
+ul.hand ul {
+  list-style: none;
+  display: inline;
+}
+ul.hand li {
+  display: inline;
+}

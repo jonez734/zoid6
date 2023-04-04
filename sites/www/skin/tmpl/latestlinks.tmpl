@@ -1,0 +1,16 @@
+{if count($latestlinks) > 0}
+<div class="blurb">
+ <div class="header"><h1>latest links</h1></div>
+ <div class="body">
+ {if count($latestlinks) > 0}
+  <ul{* class="nobullets"*}>
+   {foreach from=$latestlinks item=link}
+    <li>{include file="vulcan-terse.tmpl" link=$link showsig=True}</li>
+   {/foreach}
+  </ul> 
+ {else}
+  <p>No links have been added in the last 30 days.</p> 
+ {/if}
+ </div> {* body *}
+</div> {* blurb *}
+{/if} {* count(latestlinks) *}

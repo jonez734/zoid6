@@ -1,0 +1,15 @@
+{* based on page.tmpl *}
+{* {include file="pageheader.tmpl"} *}
+{* {if $maturecontent}{include file="maturecontentwarning.tmpl"}{/if} *}
+<main class="scene">
+{* <div class="element animation-fadein">
+{include file="topbar.tmpl" topbardata=$topbardata|default:[]}
+</div> *}
+{* <div class="element animation-fadein">
+{include file="sidebar.tmpl" data=$sidebardata}
+</div> *}
+<div class="element animation-fadein">
+{$body}
+</div> {* element *}
+</main> {* scene *}
+{include file="pagefooter.tmpl"}

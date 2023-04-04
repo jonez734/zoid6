@@ -1,0 +1,80 @@
+#
+# $Id: htaccess,v 1.8 2006/06/25 01:36:56 jam Exp $
+#
+php_flag register_globals off
+
+RewriteEngine On
+RewriteBase /
+RewriteOptions Inherit
+
+RewriteRule     ^gfile/add/([0-9]+)$ gfile.php?mode=add&sigid=$1 [last]
+RewriteRule     ^gfile/([a-z]+)/([0-9]+)$  gfile.php?mode=$1&id=$2 [last]
+RewriteRule     ^gfile/summary[/]?$ gfile.php?mode=summary [last]
+
+RewriteRule     ^article/add/([0-9]+)$ article.php?mode=add&sigid=$1 [last]
+RewriteRule     ^article/summary/([0-9]+)[/]?$ article.php?mode=summary&pageID=$1 [last]
+RewriteRule     ^article/summary[/]?$ article.php?mode=summary [last]
+RewriteRule     ^article/([a-z]+)/([0-9]+)$  article.php?mode=$1&id=$2 [last]
+RewriteRule     ^article/add[/]?$ article.php?mode=add [last]
+
+RewriteRule     ^newscategory/add[/]?$  newscategory.php?mode=add [last]
+RewriteRule     ^newscategory/summary[/]?$  newscategory.php?mode=summary [last]
+RewriteRule     ^newscategory/([a-z]+)/([0-9]+)$    newscategory.php?mode=$1&id=$2 [last]
+
+RewriteRule	^sig/browse/([0-9]+)$ http://teos.zoidtechnologies.com/id-$1 [r=301,last]
+
+RewriteRule     ^sig/([a-z]+)/([0-9]+)$  sig.php?mode=$1&id=$2 [last]
+RewriteRule     ^sig/summary[/]?$ sig.php?mode=summary [last]
+
+RewriteRule	^link/view/([0-9]+)$ http://vulcan.zoidtechnologies.com/detail-$1 [r=301,last]
+RewriteRule	^link/redirect/([0-9]+)$ http://vulcan.zoidtechnologies.com/redirect-$1 [r=301,last]
+
+RewriteRule     ^rssfeed/add/([0-9]+)$ rssfeed.php?mode=add&sigid=$1 [last]
+RewriteRule     ^rssfeed/add[/]?$ rssfeed.php?mode=add [last]
+RewriteRule     ^rssfeed/([a-z]+)/([0-9]+)$  rssfeed.php?mode=$1&id=$2 [last]
+RewriteRule     ^rssfeed/summary[/]?$ rssfeed.php?mode=summary [last]
+
+RewriteRule     ^feed/view/([0-9]+)$ http://demeter.zoidtechnologies.com/feed-view-$1 [r=301,last]
+
+RewriteRule     ^feed/add/([0-9]+)$ rssfeed.php?mode=add&sigid=$1 [last]
+RewriteRule     ^feed/add[/]?$ rssfeed.php?mode=add [last]
+RewriteRule     ^feed/summary[/]?$ rssfeed.php?mode=summary [last]
+RewriteRule     ^feed/([a-z]+)/([0-9]+)$ rssfeed.php?mode=$1&id=$2 [last]
+
+RewriteRule     ^post/reply/([0-9]+)/([0-9]+)$ post.php?mode=reply&sigid=$1&parent=$2 [last]
+RewriteRule     ^post/add[/]?$ post.php?mode=add [last]
+RewriteRule     ^post/add/([0-9]+)$ post.php?mode=add&sigid=$1 [last]
+RewriteRule     ^post/([a-z]+)/([0-9]+)$  post.php?mode=$1&id=$2 [last]
+RewriteRule     ^post/summary[/]?$ post.php?mode=summary [last]
+
+RewriteRule     ^comment/add/([0-9]+)/([0-9]+)$ comment.php?mode=add&articleid=$1&parent=$2 [last]
+RewriteRule     ^comment/add/([0-9]+)$ comment.php?mode=add&articleid=$1 [last]
+RewriteRule     ^comment/([a-z]+)/([0-9]+)$  comment.php?mode=$1&id=$2 [last]
+RewriteRule     ^comment/summary[/]?$ comment.php?mode=summary [last]
+
+RewriteRule	 ^mantra-summary$ mantra.php?mode=summary [last]
+RewriteRule	 ^mantra-summary-([0-9]+)$ mantra.php?mode=summary&pageID=$1 [last]
+RewriteRule	 ^mantra-add$ mantra.php?mode=add [last]
+RewriteRule      ^mantra-([a-z]+)-([0-9]+)$ mantra.php?mode=$1&id=$2 [last,qsappend]
+
+RewriteRule     ^gfile/add[/]?$  gfile.php?mode=add [last]
+RewriteRule     ^gfile/summary[/]?$  gfile.php?mode=summary [last]
+RewriteRule     ^gfile/([a-z]+)/([0-9]+)$    gfile.php?mode=$1&id=$2 [last]
+
+RewriteRule     ^aolbonics/(.*)$  http://aolbonics.zoidtechnologies.com/$1 [R=301,L]
+
+DirectoryIndex index.php index.html
+
+RewriteRule ^about[/]?$ /page.php?name=about [last,qsappend]
+RewriteRule ^jamhacks[/]?$ /page.php?name=jamhacks [last,qsappend]
+
+RewriteRule ^ping[/]?$ /ping.php [last]
+
+RewriteRule ^maux$ /maux.php [last]
+
+RewriteRule ^moneyday[/]?$ /moneyday.php [last]
+
+RewriteRule ^sitenewsarchive[/]?$ /sitenewsarchive.php [last]
+
+# added 2016-jul-29 after looking at google webmaster tools
+RewriteRule ^projects/python/ttyio/dist$ http://repo.zoidtechnologies.com/project-detail/ttyio/ [last]

@@ -1,0 +1,14 @@
+{* $Id: gfile-summary.tmpl 1492 2011-04-13 01:15:07Z jam $ *}
+
+{* summary in this context means it displays more than one gfile on the
+page, with appropriate links to change pages *}
+
+<div class="leftcontent">
+
+<div style="text-align: center;">{$page.links}</div>
+{section name=a loop=$page.data}
+{include file="gfile.tmpl" gfile=$page.data[a]}
+{/section}
+<div style="text-align: center;">{$page.links}</div>
+
+</div>

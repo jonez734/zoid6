@@ -1,0 +1,36 @@
+{extends file="page.tmpl"}
+<!-- zoidweb4-www-index.tmpl -->
+{block name="head" append}
+<link rel="stylesheet" type="text/css" href="/skin/css/index.css" media="screen" />
+{/block}
+{block name="content"}
+<div class="blurb vstretch">
+<div class="body">
+<h1>returning soon</h1>
+</div>
+</div>
+{*{include file="southcarolinavoterinfoembed.tmpl"}*}
+<ul class="nobullets nopadding nomargin">
+{*<li>{include file="maturecontentwarning.tmpl"}</li>*}
+{*<li>{include file="sitenews.tmpl" sitenews=$data.sitenews}</li>*}
+<li>{include file="latestlinks.tmpl" latestlinks=$data.latestlinks}</li>
+<li>{include file="latestreleases.tmpl" latestreleases=$data.latestreleases}</li>
+{*<li>{include file="needsapproval.tmpl" needsapproval=$data.needsapproval}</li>*}
+</ul>
+{/block}
+{if $currentmember.flags.ANSALUMNI}
+{block name="title"}{$smarty.block.parent} - software that sucks less{/block}
+{else}
+{block name="title"}{$smarty.block.parent} - custom information systems{/block}
+{/if}
+{block name="pageheader"}
+<div class="body">
+ <h1 class="animated lightSpeedIn">Zoid Technologies</h1>
+  {if $currentmember.flags.ANSALUMNI}
+   <h2>Software That Sucks Less</h2>
+  {else}
+   <h2 class="animated lightSpeedIn">Custom Information Systems</h2>
+  {/if}
+  <h2 class="animated lightSpeedIn">~ Est. 2002 ~</h2>
+</div> {* body *}
+{/block}

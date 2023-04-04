@@ -1,0 +1,33 @@
+{extends file="page.tmpl"}
+{block name="title"}jamhacks. a r&eacute;sum&eacute; of sorts{/block}
+{block name="head" append}
+<link rel="stylesheet" type="text/css" href="/skin/css/jamhacks.css" media="screen" />
+{/block}
+{block name="content"}
+{* <article> *}
+<div>
+{* <h2>jamhacks</h2> *}
+<section>{include file="jamhacks-summary.tmpl"}</section>
+<section>{include file="jamhacks-specialities.tmpl"}</section>
+<section>{include file="jamhacks-programminglanguages.tmpl"}</section>
+<section>{include file="jamhacks-preprocessors.tmpl"}</section>
+<section>{include file="jamhacks-frontend.tmpl"}</section>
+<section>{include file="jamhacks-demos.tmpl"}</section>
+<section>{include file="jamhacks-backend.tmpl"}</section>
+<section>{include file="jamhacks-database.tmpl"}</section>
+<section>{include file="jamhacks-webapis.tmpl"}</section>
+<section>{include file="jamhacks-frameworks.tmpl"}</section>
+<section>{include file="jamhacks-networking.tmpl"}</section>
+<section>{include file="jamhacks-operatingsystems.tmpl"}</section>
+{*<section>{include file="jamhacks-work.tmpl"}</section> *}
+<section>{include file="jamhacks-school.tmpl"}</section>
+<section>{include file="jamhacks-volunteering.tmpl"}</section>
+{if $currentmember.flags.AUTHENTICATED}
+<section>{include file="jamhacks-living.tmpl"}</section>
+{/if}
+<section>{include file="jamhacks-movies.tmpl"}</section>
+<section>{include file="jamhacks-thanks.tmpl"}</section>
+<!-- thanks to http://www.jwz.org/hacks/ for the inspiration to write this document -->
+{* </article>*} 
+</div>
+{/block} {* content *}

@@ -1,0 +1,22 @@
+{* $Id: gfile.tmpl 1492 2011-04-13 01:15:07Z jam $ *}
+<div class="blurb gfile">
+<div class="header">
+<h1>{$gfile.title}</h1>
+<p>posted on {$gfile.datepostedepoch|datestamp} by <a href="{$smarty.const.ENGINEURL}member-detail-{$gfile.authorid}">{$gfile.postedbyname}</a>
+to the <a href="/sig/browse/{$gfile.sigid}">{$gfile.sigtitle}</a>
+sig.</p>
+</div> {* header *}
+<div class="body">
+{$gfile.body|escape:"htmlall"|wpprop}
+</div> {* body *}
+<div class="footer">
+{* the following checks to be sure there is at least one action before printing the list tags *}
+{if $gfile.action.view or $gfile.action.edit or $gfile.action.delete}
+<ul>
+{if $gfile.action.view}<li><a href="/gfile/view/{$gfile.id}">view</a></li>{/if}
+{if $gfile.action.edit}<li><a href="/gfile/edit/{$gfile.id}">edit</a></li>{/if}
+{if $gfile.action.delete}<li><a href="/gfile/delete/{$gfile.id}">delete</a></li>{/if}
+</ul>
+{/if} {* if *}
+</div> {* footer *}
+</div> {* gfile *}

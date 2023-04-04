@@ -1,0 +1,16 @@
+{if $currentmember.flags.ADMIN === True}
+ {if count($vulcanneedsapproval) > 0}
+  <li>
+  <div class="blurb">
+   <div class="header"><h1>vulcan needs approval</h1></div>
+   <div class="body">
+    <ul{* class="nobullets"*}> 
+     {foreach from=$vulcanneedsapproval item=link}
+      <li>{include file="vulcan-terse.tmpl" link=$link}</li>
+     {/foreach}
+    </ul>
+   </div> {* body *}
+  </div> {* blurb *}
+  </li>
+ {/if}
+{/if}

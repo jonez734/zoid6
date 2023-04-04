@@ -1,0 +1,13 @@
+{extends file="page.tmpl"}
+
+<!-- zoidweb4-www-index-page.tmpl -->
+{block name="content"}{$data.content}{/block}
+
+{block name="head" append}
+<!-- block 'head' in index-page.tmpl of zoidweb4-www -->
+{* <link rel="stylesheet" type="text/css" href="/skin/css/www.css" media="screen" />
+*}
+<script src="/js/index.js"></script>
+<link rel="stylesheet" type="text/css" href="{$smarty.const.STATICSKINURL}css/maturecontentwarning.css" media="screen" />
+{/block}
+{block name="title"}zoid technologies - custom information systems{/block}
