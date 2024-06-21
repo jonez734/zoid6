@@ -1,0 +1,23 @@
+{extends file="page.tmpl"}
+{$mantra = $data.mantra}
+{$mantra|var_export}
+{block name="title"}mantra detail{/block}
+{block name="content"}
+<div class="blurb mantra vstretch">
+{*
+{if count($mantra.description) > 0}
+<div class="header"><h1>{$mantra.description|truncate:40:"..."|escape|wpprop}</h1></div>
+{/if}
+*}
+<div class="metadata novstretch">Author: {$mantra.author|escape|wpprop} Reference: {$mantra.reference|escape|wpprop} Date Posted: {$mantra.datepostedepoch|datestamp} by <a class="tooltip" href="{$smarty.const.ENGINEURL}member-detail-{$mantra.postedbyid}"
+data-contenturl="{$smarty.const.ENGINEURL}member-detail-{$mantra.postedbyid}?bare">{$mantra.postedbyname}</a></div>
+<div class="body vstretch">
+{$mantra.description|escape|wpprop}
+</div>
+{if count($mantra.actions) > 0}
+ <div class="footer novstretch">
+  {include file="actions.tmpl" actions=$mantra.actions}
+ </div>
+{/if}
+</div>
+{/block}

@@ -1,0 +1,14 @@
+{* @see https://developers.google.com/analytics/devguides/collection/analyticsjs *}
+{if strlen($smarty.const.GOOGLEANALYTICSACCOUNT) > 0}
+<!-- Google Analytics -->
+<script>
+{literal}
+window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+{/literal}
+ga('create', '{$smarty.const.GOOGLEANALYTICSACCOUNT}', 'auto');
+ga('set', 'transport', 'beacon');
+ga('send', 'pageview');
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+<!-- End Google Analytics -->
+{/if}

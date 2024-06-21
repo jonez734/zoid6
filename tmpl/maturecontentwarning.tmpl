@@ -1,0 +1,25 @@
+<div class="blurb maturecontentwarning">
+<div class="header warning"><h1>WARNING</h1></div>
+<div class="body">
+<span style="color: yellow;" class="fa fa-warning fa-lg"></span><span>This website contains content that is
+not intended for a general audience. If you are a parent concerned about the
+types of content your children are consuming, contact your ISP for available
+options.{* We have listed with <a
+href="https://www.asacp.org/page.php?content=RTA">RTA</a>.*}</span>
+{*
+, for
+example the topics of </span>
+<ul class="commadelimited">
+ <li>"{teos path="politics"}"</li>
+ <li>"{teos path="society_culture.religion_spirituality"}"</li> 
+ {if $currentmember.flags.AUTHENTICATED}
+  <li>"{teos path="health.drugs"}"</li>
+ {/if}
+ <li>"{teos path="entertainment.professional_wrestling" title="pro' wraslin"}"</li>
+ <li>R-rated Videos in Agora</li>
+{if $currentmember.flags.AUTHENTICATED}
+ <li>"<a href="//casino.zoidtechnologies.com/">gambling</a>"</li>
+{/if}
+*}
+</div> {* body *}
+</div> {* maturecontentwarning *}

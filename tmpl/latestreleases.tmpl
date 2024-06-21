@@ -1,0 +1,20 @@
+{if count($latestreleases) > 0}
+<div class="blurb">
+<div class="header"><h1>latest open source software releases</h1></div>
+ <ul{* class="nobullets"*}>
+ {foreach from=$latestreleases item=release}
+   <li> <div class="blurb">
+    <div class="header"><h1>{$release.title|escape|wpprop}</h1></div>
+    <div class="body">
+     {if $release.hidden == True}[HIDDEN]{/if}
+     {if $release.releasecount == 1}1 release{else}{$release.releasecount} releases{/if}<br />
+     {if $release.latestrelease}
+        <a href="//repo.zoidtechnologies.com/release-detail/{$release.latestrelease.name|escape}">{$release.latestrelease.title|escape}</a> released on {$release.latestrelease.datereleasedepoch|datestamp} ({$release.latestrelease.datereleasedepoch|ago} ago)
+     {/if}
+    </div> {* body *}
+    <div class="footer">{include file="actions.tmpl" actions=$release.actions}</div>
+  </div>{* </li> *}
+ {/foreach} {* latestreleases *}
+ </ul>
+</div> {* blurb *}
+{/if}

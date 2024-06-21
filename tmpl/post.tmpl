@@ -1,0 +1,22 @@
+{*<pre>{$post|var_dump}</pre>*}
+<div class="blurb post gradient-border">
+ <div class="header"><h1>{$post.title|escape|wpprop}</h1></div>
+ <div class="metadata">posted to {include file="siglist.tmpl" siglist=$post.sigs}
+  by {if $post.postedbyid == 0}a. nonymous{else}<a class="tooltip" href="{$smarty.const.ENGINEURL}member-detail-{$post.postedbyid}" data-contenturl="{$smarty.const.ENGINEURL}member-detail-{$post.postedbyid}?bare">{$post.postedbyname}</a>{/if} 
+  on {$post.datepostedepoch|datestamp} 
+	{if $post.datemodifiedepoch > $post.datepostedepoch}[&nbsp;edited&nbsp;]{/if}
+	{if $post.frozen === True}[&nbsp;frozen&nbsp;]{/if}
+	{if $post.draft === True}[&nbsp;draft&nbsp;]{/if}
+	{if $post.junk === True}&nbsp;junk&nbsp;]{/if}
+	id={$post.id} replies={count($post.replies)}
+ </div> {* metadata *}
+ <div class="body gradient-box">{$post.body|escape|wpprop}<br /></div>
+ <div class="footer">{include file="actions.tmpl" actions=$post.actions}</div>
+</div> {* post *}
+{if count($post.replies) > 0}
+<ul>
+{foreach $post.replies as $reply}
+<li>{include file="post.tmpl" post=$reply}</li>
+{/foreach}
+</ul>
+{/if}

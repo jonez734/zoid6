@@ -1,0 +1,19 @@
+<div class="blurb sidebar">
+<div class="header"><h1>choices</h1></div>
+<div class="body">
+<ul class="inlinelist commadelimited">
+{foreach from=$sidebar item=m}
+{if ($currentsite == $m.name and $currentpage == "index") or ($currentpage == $m.name)}
+<li class="currentsite">{$m.title|default:"NEEDTITLE"|escape|wpprop}</li>
+{else}
+<li><a href="{$m.url}" title="{$m.desc|escape|wpprop}">{$m.title|default:"NEEDTITLE"|escape|wpprop}</a></li>
+{/if}
+{/foreach}
+</ul>
+<ul class="inlinelist">
+<li><a href="https://bbsengine.org/">bbsengine.org</a></li>
+{*<li><span class="strike">vfw memorial post #10058</span></li>*}
+</ul>
+</div> {* body *}
+</div> {* blurb sidebar *}
+{* amazonsearch.tmpl *}
