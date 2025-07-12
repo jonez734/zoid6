@@ -1,57 +1,38 @@
 export HOST = merlin
+export PROJECT = theaiconsensus.com
 
-export PROJECT = zoidweb6
+export PROD = $(HOST):/srv/www/vhosts/$(PROJECT)/
+export STAGE = /srv/www/vhosts/$(PROJECT)/
 
-export PROD = $(HOST):/srv/www/vhosts/www.zoidtechnologies.com/
-export PRODDOCROOT = $(PROD)html/
-export STAGEPROD = /srv/www/vhosts/www.zoidtechnologies.com/
-export STAGEPRODDOCROOT = $(STAGEPROD)html/
+#export STATICPROD = $(HOST):/srv/www/vhosts/static.zoidtechnologies.com/
+#export STATICSTAGE = /srv/www/vhosts/static.zoidtechnologies.com/
 
-# @since 20230404
-export SCSSLOADPATH = --load-path $(HOME)/projects/zoidweb6/skin/scss/ --load-path $(HOME)/projects/bbsengine6/skin/scss/
-
-#export STAGEPRODSSLDOCROOT = $(STAGEPROD)html/
-
-export datestamp = $(shell date +%Y%m%d-%H%M)
-export archivename = $(PROJECT)-$(datestamp)-$(USER)
-export installfile = $(RSYNC)
-#export installfile = install --mode=0660
+export SCSSLOADPATH = --load-path $(HOME)/projects/$(PROJECT)/skin/scss/ --load-path $(HOME)/projects/bbsengine6/skin/scss/
+export SCSS = sass --line-numbers --stop-on-error --trace --style expanded --sourcemap=none $(SCSSLOADPATH)
 
 export RSYNC = rsync --chmod=Dg=rwxs,Fgu=rw,Fo=r --no-times --verbose \
 	--archive --update --backup --recursive \
 	--human-readable --checksum --rsh=ssh \
-	--no-owner --no-group \
-	--delete-after \
-	--links \
-	--mkpath \
-	--exclude '.~lock*' \
-	--exclude '*~'
+	--delete-after --mkpath --exclude '.well-known' --exclude '*~' --exclude 'templates_c'
+
+export ENGINESTAGEDOCROOT = /srv/www/vhosts/$(PROJECT)/html/engine/
+export STATICSTAGEDOCROOT = /srv/www/vhosts/($PROJECT)/html/static/
 
 all:
 
 clean:
 	-rm *~
-	$(MAKE) -C skin clean
 	$(MAKE) -C php clean
-	$(MAKE) -C smarty clean
-	$(MAKE) -C js clean
+	$(MAKE) -C skin clean
+	$(MAKE) -C engine clean
 
-prod:	export DOCROOT = $(STAGEPRODDOCROOT)
-prod:	export STAGE = $(STAGEPROD)
 prod:
-	python -m areyousure || (echo "aborted $$?"; exit 1)
-	mkdir -p $(DOCROOT)
-	mkdir -p $(STAGE)templates_c/
-	mkdir -p $(DOCROOT)captchas/
-
-	$(MAKE) -C php install
-	$(MAKE) -C skin install
-	$(MAKE) -C smarty install
-	$(MAKE) -C js install
-	$(installfile) config-prod.php $(DOCROOT)config.php
-	#$(installfile) ../private/htpasswd-prod $(DOCROOT).htpasswd
-	$(installfile) htaccess-prod $(DOCROOT).htaccess
-	$(installfile) google067c1cb56376e896.html $(DOCROOT)google067c1cb56376e896.html
+	mkdir -p $(STAGE)
+	$(MAKE) -C php stage
+	$(MAKE) -C smarty stage
+	$(MAKE) -C skin stage
+	$(MAKE) -C engine stage
+	$(MAKE) -C static stage
+	$(RSYNC) config-prod.php $(STAGE)html/config.php
+	$(RSYNC) htaccess-prod $(STAGE)html/.htaccess
 	$(RSYNC) $(STAGE) $(PROD)
-
-.PHONY: prod
