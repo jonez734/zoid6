@@ -28,3 +28,27 @@
   -webkit-animation-name: rubberBand;
   animation-name: rubberBand;
 }
+
+.returning-soon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 90vw;
+  height: 90vh;
+  text-align: center;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  span {
+    display: block;
+    width: 100%;
+
+    // Fallback for IE
+    font-size: 3rem;
+
+    // Modern browsers
+    font-size: clamp(1rem, 10vw, 20vh);
+  }
+}
