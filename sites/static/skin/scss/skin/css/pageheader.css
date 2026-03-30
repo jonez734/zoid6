@@ -1,0 +1,52 @@
+/* 2020MAR24 */
+/* 'css3prefix mixin' @see https://github.com/matthieua/sass-css3-mixins/blob/master/css3-mixins.scss */
+/* 'keyframes' mixin @see http://zerosixthree.se/8-sass-mixins-you-must-have-in-your-toolbox/*/
+/* 'animation' mixin from https://developer.mozilla.org/en-US/docs/Web/CSS/animation */
+/* legacy-direction function @see http://www.sitepoint.com/building-linear-gradient-mixin-sass/ */
+/* 'transition' mixin @see http://codepen.io/sawmac/pen/cayhK */
+/* 'gradientanimation' mixin @see https://medium.com/@dave_lunny/animating-css-gradients-using-only-css-d2fd7671e759#.jlbdgs4jl */
+/* 'animation' mixin @see http://zerosixthree.se/8-sass-mixins-you-must-have-in-your-toolbox/ */
+header#pageheader {
+  border: 0;
+  flex: 0 1 auto;
+  background-color: gray;
+  overflow: hidden;
+  font-family: pageheaderfont;
+  font-size: large;
+  text-align: center;
+}
+header#pageheader .body {
+  -webkit-text-stroke-width: 1px;
+  -webkit-text-stroke-color: black;
+  color: #006633;
+  border: 0.125em solid black;
+}
+header#pageheader .body h1 {
+  font-size: 2.5em;
+}
+header#pageheader .body h2 {
+  font-size: 2.0em;
+}
+header#pageheader .body h2 a {
+  color: green;
+  text-decoration: underline;
+  text-decoration-color: greenyellow;
+}
+header#pageheader .body h2 a:hover {
+  text-decoration-color: #98fb00;
+  background-color: black;
+}
+header#pageheader .body h2 .est2002 {
+  font-family: estfont;
+}
+header#pageheader a {
+  color: white;
+}
+
+@font-face {
+  font-family: estfont;
+  src: url("//static.zoidtechnologies.com/skin/fonts/BFTinyHand-Regular.otf");
+}
+@font-face {
+  font-family: pageheader;
+}

@@ -1,0 +1,50 @@
+/* line 1, ../../../lists.scss */
+ul {
+  /* http://stackoverflow.com/questions/6587807/comma-delimited-lists-with-css-i-want-an-oxford-comma */
+}
+/* line 2, ../../../lists.scss */
+ul.nobullets {
+  list-style-type: none;
+}
+/* line 5, ../../../lists.scss */
+ul.nobullets li ul {
+  list-style-type: none;
+}
+/* line 11, ../../../lists.scss */
+ul.commadelimited {
+  border: 0px solid red;
+  display: inline;
+  margin: 0;
+  padding: 0;
+}
+/* line 17, ../../../lists.scss */
+ul.commadelimited > li {
+  display: inline;
+  padding: 0.125em;
+  margin: 0;
+}
+/* line 22, ../../../lists.scss */
+ul.commadelimited > li:after {
+  content: ", ";
+}
+/* line 26, ../../../lists.scss */
+ul.commadelimited > li:last-child:after {
+  content: "";
+}
+/* line 30, ../../../lists.scss */
+ul.commadelimited > li:nth-last-child(2):after {
+  content: " and ";
+}
+/* line 34, ../../../lists.scss */
+ul.commadelimited > li:nth-last-child(3) + li:after {
+  content: ", and ";
+}
+/* line 39, ../../../lists.scss */
+ul.inlinelist {
+  margin: 0;
+  padding: 0.125em;
+}
+/* line 43, ../../../lists.scss */
+ul.inlinelist > li {
+  display: inline;
+}

@@ -1,0 +1,11 @@
+/* line 1, ../../../breadcrumbs.scss */
+ul.breadcrumbs {
+  padding: 0.125em;
+  font-weight: bold;
+  margin: 0;
+  display: inline;
+}
+/* line 7, ../../../breadcrumbs.scss */
+ul.breadcrumbs li {
+  display: inline;
+}

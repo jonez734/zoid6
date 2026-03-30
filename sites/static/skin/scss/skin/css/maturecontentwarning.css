@@ -1,0 +1,26 @@
+/* 2020MAR24 */
+/* 'css3prefix mixin' @see https://github.com/matthieua/sass-css3-mixins/blob/master/css3-mixins.scss */
+/* 'keyframes' mixin @see http://zerosixthree.se/8-sass-mixins-you-must-have-in-your-toolbox/*/
+/* 'animation' mixin from https://developer.mozilla.org/en-US/docs/Web/CSS/animation */
+/* legacy-direction function @see http://www.sitepoint.com/building-linear-gradient-mixin-sass/ */
+/* 'transition' mixin @see http://codepen.io/sawmac/pen/cayhK */
+/* 'gradientanimation' mixin @see https://medium.com/@dave_lunny/animating-css-gradients-using-only-css-d2fd7671e759#.jlbdgs4jl */
+/* 'animation' mixin @see http://zerosixthree.se/8-sass-mixins-you-must-have-in-your-toolbox/ */
+.maturecontentwarning {
+  flex: 0 1 auto;
+}
+.maturecontentwarning .header h1 {
+  margin: 0px;
+  padding: 0.50em;
+  font-weight: bold;
+  font-size: 130%;
+  background-color: #E6B24C;
+  color: #000000;
+  background-image: linear-gradient(to left top, #ffb733, #cc8400);
+}
+.maturecontentwarning p {
+  margin: 2.0em;
+}
+.maturecontentwarning .body {
+  overflow: hidden;
+}

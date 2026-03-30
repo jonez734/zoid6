@@ -4,4 +4,4 @@ clean:
 	-rm *~
 
 stage:
-	$(RSYNC) --verbose *.tmpl $(STAGE)skin/tmpl/
+	$(RSYNC) *.tmpl $(STAGE)skin/tmpl/

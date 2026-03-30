@@ -7,12 +7,20 @@ RewriteEngine On
 RewriteBase /
 RewriteOptions Inherit
 
-RewriteRule ^about[/]?$ /page.php?name=about&mode=template [last,qsappend]
-RewriteRule ^jamhacks[/]?$ /page.php?name=jamhacks&mode=template [last,qsappend]
+
+RewriteCond %{HTTPS} off
+RewriteCond %{REQUEST_URI} !/.well-known [NC]
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+RewriteRule ^about[/]?$ /about.php [last,qsappend]
 
 #RewriteRule ^moneyday[/]?$ /moneyday.php [last]
 
 RewriteRule ^sitenewsarchive[/]?$ /sitenewsarchive.php [last]
+
+RewriteRule ^login[/]?$ /engine/login.php [last]
+RewriteRule ^logout[/]?$ /engine/logout.php [last]
+RewriteRule ^join[/]?$ /engine/join.php [last]
 
 <RequireAll>
     Require all granted

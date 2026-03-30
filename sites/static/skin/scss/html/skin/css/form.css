@@ -1,0 +1,71 @@
+/* 2020MAR24 */
+/* 'css3prefix mixin' @see https://github.com/matthieua/sass-css3-mixins/blob/master/css3-mixins.scss */
+/* 'keyframes' mixin @see http://zerosixthree.se/8-sass-mixins-you-must-have-in-your-toolbox/*/
+/* 'animation' mixin from https://developer.mozilla.org/en-US/docs/Web/CSS/animation */
+/* legacy-direction function @see http://www.sitepoint.com/building-linear-gradient-mixin-sass/ */
+/* 'transition' mixin @see http://codepen.io/sawmac/pen/cayhK */
+/* 'gradientanimation' mixin @see https://medium.com/@dave_lunny/animating-css-gradients-using-only-css-d2fd7671e759#.jlbdgs4jl */
+/* 'animation' mixin @see http://zerosixthree.se/8-sass-mixins-you-must-have-in-your-toolbox/ */
+/* line 4, ../../../form.scss */
+form {
+  margin: 0.250em;
+  padding: 0;
+}
+/* line 8, ../../../form.scss */
+form fieldset {
+  border: 0;
+  margin: 0.250em;
+  padding: 0;
+}
+/* line 13, ../../../form.scss */
+form fieldset h1 {
+  background-color: #F0F0F0;
+  padding: 0.250em;
+  margin: 0;
+  color: #000000;
+  border: 0;
+  border-bottom: 2px solid #999999;
+}
+/* line 22, ../../../form.scss */
+form fieldset label {
+  color: white;
+}
+/* line 24, ../../../form.scss */
+form fieldset label.error {
+  background-color: yellow;
+  color: #000;
+}
+/* line 30, ../../../form.scss */
+form fieldset input {
+  color: #9d9e9e;
+  text-shadow: 1px 1px 0 white;
+}
+/* line 35, ../../../form.scss */
+form fieldset input:focus {
+  background: #dfe9ec;
+  color: #414848;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25);
+  -moz-box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25);
+  -webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+/* line 46, ../../../form.scss */
+div.errors {
+  color: white;
+}
+/* line 49, ../../../form.scss */
+div.errors h1 {
+  padding: 0.25em;
+  margin: 0;
+  color: white;
+}
+
+/* line 56, ../../../form.scss */
+.requiredstar {
+  color: red;
+}
+
+/* line 60, ../../../form.scss */
+.captchaclass img {
+  margin-bottom: 0.25em;
+}

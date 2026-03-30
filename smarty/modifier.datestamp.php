@@ -21,14 +21,14 @@ require_once("config.php");
  * Purpose:  convert UNIX-epoch timestamp into a human readable string.
  * Input:    integer to evaluate
  * Example:  {$var|datestamp}
- * @author   Jeff MacDonald <jam [at] zoid technologies dot com>
+ * @author   zoidtechnologies.com
  * @version 1.0
  * @param string
  * @return string
  */
 function smarty_modifier_datestamp($string)
 {
-    return strftime(DATEFORMAT, $string);
+    return date(\config\DATEFORMAT, $string);
 }
 
 ?>

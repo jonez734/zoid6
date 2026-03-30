@@ -1,30 +1,32 @@
 {* thanks ric for metadata ideas, april 2011 *}
+{$flags = $link.flags}
 <div class="blurb vulcan terse gradient-border">
  <div class="header"> {* title *}
 {*<pre>{$link|var_dump}</pre>*}
 {* <pre>{$link.breadcrumbs|var_dump}</pre> *}
-  {if $link.broken === True}
-    <h1>{$link.title|escape|wpprop} [BROKEN]</h1>
+<pre>link.broken={$link.broken}</pre>
+  {if $link.broken === true}
+    <h1><i class="fa fa-fw {$link.icon}"></i> {$link.title|escape|wpprop} [BROKEN]</h1>
   {else}
-    <h1><a href="{$link.url}">{$link.title|escape|wpprop}</a></h1>
+    <h1><i class="fa fa-fw {$link.icon}"></i><a href="{$link.url}">{$link.title|escape|wpprop}</a></h1>
   {/if}
  </div>
  <div class="metadata">
   posted on {$link.datepostedepoch|datestamp} ({$link.datepostedepoch|ago} ago)
-  by {if $link.postedby > 0}<a href="{$smarty.const.ENGINEURL}member-detail-{$link.postedby}" data-contenturl="{$smarty.const.ENGINEURL}member-detail-{$link.postedby}?bare" class="tooltip zoidweb">{$link.postedbyname|escape}</a>{else}{$link.postedbyname|escape}{/if}
+  by {if $link.postedbymoniker !== null}<a href="{$smarty.const.ENGINEURL}member-detail-{$link.postedby}" data-contenturl="{$smarty.const.ENGINEURL}member-detail-{$link.postedbymoniker}?bare" class="tooltip zoidweb">{$link.postedbyname|escape}</a>{else}{$link.postedbyname|escape}{/if}
   {if (count($link.sigs) > 0)}
   in
 <ul class="inlinelist commadelimited">
 {foreach $link.sigs as $sig}
-<li>{include file="breadcrumbs.tmpl" breadcrumbs=$crumb linklast=True itemprop=True}</li>
+<li>{include file="breadcrumbs.tmpl" breadcrumbs=$crumb linklast=true itemprop=true}</li>
 {/foreach}
 </ul>
   {/if}
-{if $link.approved === True}
+{if $link.approved === true}
   approved by {$link.approvedbyname|escape} on {$link.dateapprovedepoch|datestamp} ({$link.dateapprovedepoch|ago} ago)
 {/if}
 {if $link.broken === true}marked broken by {$link.brokenbyname|default:"a. nonymous"|escape} on {$link.datebrokenepoch|datestamp} ({$link.datebrokenepoch|ago} ago){/if}
-{if $link.magic === True} MAGIC {/if}
+{if $flags.magic === true} MAGIC {/if}
  </div> {* metadata *}
  {if $link.description}
  <div class="body">

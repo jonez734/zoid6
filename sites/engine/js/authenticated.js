@@ -5,7 +5,7 @@ function updateauthenticated() {
     async: false,
     type: "GET",
     dataType: "jsonp",
-    url: "//engine.zoidtechnologies.com/get-topbar-authenticated?callback=?",
+    url: "//zoidtechnologies.com/engine/get-topbar-authenticated?callback=?",
     error: function(jqxjr, error) {
       var err = jqxjr.textStatus + ', ' + error;
       be.logentry("updateauthenticated.error: " + err);

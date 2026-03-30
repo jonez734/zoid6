@@ -22,19 +22,20 @@ function smarty_function_teos($options, Smarty_Internal_Template $template)
 //  logentry("options=".var_export($options, True));
 //  $template->smarty->loadPlugin("modifier.escape.php");
 //  $template->smarty->loadPlugin("modifier.wpprop.php");
+//  \bbsengine6\logentry("function.teos.php: $template=".var_export($template, True));
   require_once(buildpluginfilepath($template->smarty, "modifier.escape.php"));
   require_once(buildpluginfilepath($template->smarty, "modifier.wpprop.php"));
 
   $path = isset($options["path"]) ? $options["path"] : null;
   $path = \bbsengine6\normalizelabelpath($path);
   
-  $breadcrumbs = isset($options["breadcrumbs"]) ? $options["breadcrumbs"] : False;
+  $breadcrumbs = isset($options["breadcrumbs"]) ? $options["breadcrumbs"] : false;
   
-  $itemprop = isset($options["itemprop"]) ? $options["itemprop"] : False;
+  $itemprop = isset($options["itemprop"]) ? $options["itemprop"] : false;
   
 //  logentry("function.teos.200: path=".var_export($options["path"], True)." labelpath=".var_export($labelpath, True));
 
-  $dbh = \bbsengine6\database\connect(SYSTEMDSN);
+  $dbh = \bbsengine6\database\connect(\config\SYSTEMDSN);
 /*
   if (PEAR::isError($dbh))
   {
@@ -52,8 +53,8 @@ function smarty_function_teos($options, Smarty_Internal_Template $template)
     $stmt->execute($dat);
     if ($stmt->rowcount() === 0)
     {
-      \bbsengine6\logentry("zoidweb6.teos.smarty_function_teos.100: path ".var_export($path, true)." not found.");
-      return "TEOS.NOTFOUND";
+      \bbsengine6\util\logentry("zoidweb6.teos.smarty_function_teos.100: path ".var_export($path, true)." not found.");
+      return "TEOS.PATHNOTFOUND";
     }
     
     $res = $stmt->fetch();

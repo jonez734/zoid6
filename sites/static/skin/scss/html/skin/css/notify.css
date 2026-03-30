@@ -1,0 +1,59 @@
+/* line 1, ../../../notify.scss */
+#notifications {
+  list-style-type: none;
+  position: absolute;
+  top: 0;
+  right: 1.0em;
+  max-width: 25%;
+}
+
+/* line 9, ../../../notify.scss */
+#notifications li {
+  margin: 5px;
+}
+
+/* line 13, ../../../notify.scss */
+#notifications li div.notify {
+  background-color: #004F86;
+  border-radius: 6px 6px 6px 6px;
+  color: #FFFFFF;
+  margin: 0px;
+  padding: 1em;
+  width: 100%;
+  float: right;
+  clear: both;
+  margin: 5px;
+}
+
+/*
+#notifications li div.notify:hover {
+  opacity: 0.15;
+}
+*/
+/* line 31, ../../../notify.scss */
+#notifications li div.closebutton {
+  background: url(/images/notificationclosebutton.gif);
+  width: 22px;
+  height: 22px;
+  cursor: hand;
+  cursor: pointer;
+}
+
+/* line 38, ../../../notify.scss */
+#notifications li div.notify a:link {
+  color: #FFFFFF;
+}
+
+/* line 47, ../../../notify.scss */
+.blurb.notify.popup .footer {
+  background-color: #004F86;
+  border: 0;
+}
+/* line 50, ../../../notify.scss */
+.blurb.notify.popup .footer ul.actions {
+  background-color: #004F86;
+}
+/* line 52, ../../../notify.scss */
+.blurb.notify.popup .footer ul.actions li {
+  background-color: #000000;
+}

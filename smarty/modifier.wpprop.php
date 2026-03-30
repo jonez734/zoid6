@@ -338,7 +338,7 @@ function wp_prop_eval($str)
  * Purpose:  evaluate wpprop codes and return html
  * Input:    string to evaluate
  * Example:  {$var|wpprop}
- * @author   Jeff MacDonald <jam@zoidtechnologies.com>
+ * @author   zoidtechnologies.com <jam@zoidtechnologies.com>
  * @version 1.0
  * @param string
  * @return string

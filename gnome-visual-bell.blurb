@@ -1,0 +1,3 @@
+(https://askubuntu.com/questions/492595/terminal-in-gnome-3-disable-audible-bell-enable-visual-bell)[Terminal in Gnome 3: Disable audible bell, enable visual bell]
+is a couple of lines of code that disables the audible bell and enables
+visual bell. I thought the terminal had the setting, but it does not.

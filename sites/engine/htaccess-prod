@@ -1,0 +1,43 @@
+RewriteEngine On
+
+Options -Indexes
+
+RewriteBase /engine/
+
+RewriteRule ^get-notify-count[/]?$ /engine/bed.php?var=topbar.notifycount [last,qsappend] # /topbar.php?mode=notifycount [last,qsappend]
+RewriteRule ^get-notify-summary[/]?$ /engine/notify.php?mode=summary [last,qsappend]
+RewriteRule ^get-credit-count[/]?$ /engine/bed.php?var=topbar.creditcount [last,qsappend]
+# RewriteRule ^get-topbar-authenticated[/]?$ /topbar.php?mode=authenticated [last,qsappend]
+RewriteRule ^get-topbar-loginlogout$ /engine/bed.php?var=topbar.loginlogout [last,qsappend] # /topbar.php?mode=loginlogout [last,qsappend]
+RewriteRule ^get-topbar-join$ /engine/bed.php?var=topbar.join [last,qsappend] # /topbar.php?mode=join [last,qsappend]
+RewriteRule ^get-topbar-greetings$ /engine/bed.php?var=topbar.greetings [last,qsappend] # /topbar.php?mode=greetings [last,qsappend]
+
+## RewriteRule ^get-nav$ /nav.php?mode=choices [last,qsappend]
+
+# RewriteRule ^get-topbar[/]?$ /topbar.php?mode=all [last,qsappend]
+# RewriteRule ^get-topbar-content[/]?$ /topbar.php?mode=content [last,qsappend]
+
+RewriteRule	^about[/]?$ page.php?name=about [last]
+##RewriteRule	^join[/]?$ join.php [last]
+##RewriteRule	^logout[/]?$ logout.php [last]
+##RewriteRule	^login[/]?$ login.php [last]
+
+##RewriteRule     ^member-(edit|detail)-([\d]+)$ /member.php?mode=$1&id=$2 [last,qsappend]
+
+RewriteRule	^notify-(delete)-([\d]+)$ /engine/notify.php?mode=$1&id=$2 [last]
+
+# RewriteRule	^togglesitedebug$ /site.php?var=sitedebug&type=boolean [last]
+# RewriteRule	^toggle-sitevar/([a-z]+)$ /site.php?mode=toggle&var=$1 [last]
+
+RewriteRule	 ^flag-add$ /engine/flag.php?mode=add [last,qsappend]
+
+RewriteRule      ^getvar-currentmemberid$ /engine/bed.php?var=engine.currentmemberid&type=int [last,qsappend]
+
+RewriteRule	 ^getvar-topbarupdateinterval$ /engine/bed.php?var=engine.topbarupdateinterval [last,qsappend]
+
+<IfModule mod_headers.c>
+    SetEnvIf Origin "https://(static|engine).zoidtechnologies.com$" ACAO=$0
+    SetEnvIf Origin "http://(sophia|teos).zoidtechnologies.com$" ACAO=$0
+    Header set Access-Control-Allow-Origin "%{ACAO}e" env=ACAO
+    Header set Access-Control-Allow-Methods "GET"
+</IfModule>

@@ -1,94 +1,100 @@
 <?php
 
-/**
- * http://pear.php.net/manual/en/package.database.db.intro-dsn.php
- */
-define("SYSTEMDSN", "pgsql://apache@127.0.0.1:5433/zoidweb4");
-// define("OLDSYSTEMDSN", "pgsql://apache@127.0.0.1/zoidweb3");
-// define("SYSTEMDSN", "pgsql://apache@localhost/zoidweb2");
+namespace {
+  /*
+   * @since 20190817
+   * @since 20221104
+   */
+  $includepath = get_include_path().":/srv/www/zoid6/php/:/srv/www/bbsengine6/php/:/srv/www/smarty/:/srv/www/markdown/";
+  if (set_include_path($includepath) === false)
+  {
+      print("include path fail");
+  }
+}
 
+namespace config {
+
+/**
+ * @since 20200423
+ * 7
+ */
+define("GOOGLEANALYTICSACCOUNT", "UA-23705021-1");
+
+define("IMAGESURL", "//zoidtechnologies.com/static/");
+
+define("SYSTEMDSN", "pgsql:host=127.0.0.1;port=5432;dbname=zoid6");
+define("SESSIONNAME", "zoid6");
+
+define("TEOSURL", "https://teos.zoidtechnologies.com/");
+define("VULCANURL", "https://vulcan.zoidtechnologies.com/");
+//define("DATEFORMAT", "c"); // "%Y-%m-%d %H:%M"
 define("DATEFORMAT", "%Y-%b-%d %l:%M%p %Z (%a)"); // @see https://php.net/strftime
 
 define("CAPTCHAFONTPATH", "");
-if (defined("SESSIONCOOKIEDOMAIN") === False)
-{
-  define("SESSIONCOOKIEEXPIRE", 60*60*12);
-  define("SESSIONCOOKIEDOMAIN", ".zoidtechnologies.com");
-  define("SESSIONCOOKIEPATH", "/");
-}
+
+define("SESSIONCOOKIEEXPIRE", 60*60*12);
+define("SESSIONCOOKIEDOMAIN", "zoidtechnologies.com");
+define("SESSIONCOOKIEPATH", "/");
 
 // @since 20181111
-define("ENGINEVHOSTDIR", "/srv/www/vhosts/engine.zoidtechnologies.com/");
-define("ENGINEDOCUMENTROOT", ENGINEVHOSTDIR . "html/");
-define("ENGINESKINDIR", ENGINEDOCUMENTROOT . "skin/");
-define("ENGINEFONTSDIR", ENGINESKINDIR. "fonts/");
+define("ENGINEVHOSTDIR", "/srv/www/vhosts/zoidtechnologies.com/engine/");
+define("ENGINEDOCUMENTROOT", \ENGINEVHOSTDIR . "html/");
+define("ENGINESKINDIR", \ENGINEDOCUMENTROOT . "skin/");
+define("ENGINEFONTSDIR", \ENGINESKINDIR. "fonts/");
+define("ENGINEURL", "/engine/");
+define("LOGINURL", "/login");
+define("LOGOUTURL", "/logout");
+define("JOINURL", "/join");
+
 define("CAPTCHAFONTFILE", "cour.ttf");
 
-define("DEMETERURL", "https://demeter.zoidtechnologies.com/");
-define("SOPHIAURL", "https://sophia.zoidtechnologies.com/");
-// define("AOLBONICSURL", "http://aolbonics.zoidtechnologies.com/");
-define("TEOSURL", "https://teos.zoidtechnologies.com/");
-define("WWWURL", "https://www.zoidtechnologies.com/");
-define("VULCANURL", "https://vulcan.zoidtechnologies.com/");
-// @since 20180502 changed to https
-define("STATICURL", "https://static.zoidtechnologies.com/");
-define("STATICSKINURL", STATICURL."skin/");
+define("STATICURL", "/static/");
+define("STATICSKINURL", \STATICURL."skin/");
 // @since 20220103
-define("STATICARTURL", STATICSKINURL."art/");
+define("STATICARTURL", \STATICSKINURL."art/");
 
-define("REPOURL", "https://repo.zoidtechnologies.com/");
-define("PROJECTSURL", "https://projects.zoidtechnologies.com/");
-define("TUNEBOXURL", "http://tunebox.zoidtechnologies.com/");
-define("AMOREJEWELRY", "http://amorejewelry.zoidtechnologies.com/");
-define("TRAILERSDEMOURL", "http://trailersdemo.zoidtechnologies.com/");
-define("ACHILLESURL", "https://achilles.zoidtechnologies.com/");
-// @since 20150727, changed to https @since 20180502
-define("ENGINEURL", "https://engine.zoidtechnologies.com/");
 define("NONCESALTLENGTH", 10);
-define("PSYCHEURL", "https://psyche.zoidtechnologies.com/");
-
-// @since 20190811
-define("AGORAURL", "https://agora.zoidtechnologies.com/");
 
 // @since 20150120
 //define("APIURL", "//api.zoidtechnologies.com/");
 
 // @since 20140803
-define("STATICJAVASCRIPTURL", ENGINEURL. "js/");
-
-define("LOGOUTURL", ENGINEURL."logout");
-define("LOGINURL", ENGINEURL."login");
+define("STATICJAVASCRIPTURL", \ENGINEURL. "js/");
 
 // define("CRYPTSALT", '$2a$07$ChorErjIv9oteff');
 
 // @since 20141203
 // removed 2018aug15
-//define("FONTAWESOMECSSURL", "//maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css");
-//define("FONTAWESOMECSSURL", "//static.zoidtechnologies.com/font-awesome-4.2.0/css/font-awesome.min.css");
-
-define("CASINOURL", "https://casino.zoidtechnologies.com/");
-
-define("USEMEMBERCREDITS", True);
+// @since 20251223
+define("FONTAWESOMEURL", "https://kit.fontawesome.com/684c5b77b8.js");
 
 date_default_timezone_set("America/New_York");
 
 define("SITETYPE", "webpage");
 
-// define("VHOSTDIR", "/srv/www/vhosts/www.zoidtechnologies.com/");
-// define("DOCUMENTROOT", VHOSTDIR . "80/html/");
+define("RECAPTCHASITEKEY", "6Leb_S0qAAAAABOm1eXSHRJn5YIqH_xAqyg7qvKl");
+define("config\TOPBARUPDATEINTERVAL", 15000);
 
-// define("SKINDIR", DOCUMENTROOT . "skin/");
-// define("SKINURL", SITEURL . "skin/");
+} /* config namespace */
 
-// define("SMARTYCOMPILEDTEMPLATESDIR", VHOSTDIR . "templates_c/");
-// define("SMARTYPLUGINSDIR", VHOSTDIR . "smarty/");
-// define("SMARTYTEMPLATESDIR", SKINDIR . "tmpl/");
+namespace zoid6 {
 
-// define("LOGENTRYPREFIX", "zoidweb3-www");
+function buildchoices($choices=[])
+{
+    $choices[] = ["name" => "teos", "title" => "teos", "url" => "/teos/", "desc" => ""];
+    $choices[] = ["name" => "achilles", "title" => "a study of sodium glutamates", "url" => "https://zoidtechnologies.com/achilles/", "desc" => ""];
+    $choices[] = ["name" => "asimov", "title" => "asimov: robotics, ai, and augmented reality", "url" => "/asimov/", "desc" => ""];
+    // $choices[] = ["name" => "socrates", "title" => "threaded forum", "url" => "https://socrates.zoidtechnologies.com/", "desc" => ""];
+    $choices[] = ["name" => "www", "title" => "www site", "url" => "https://zoidtechnologies.com", "desc" => "www site"];
+//    $choices[] = ["name" => "repo", "title" => "download site", "url" => "https://repo.zoidtechnologies.com", "desc" => "repo site"];
+//    \bbsengine6\util\logentry("choices=".var_export($choices, true));
+    return \bbsengine6\buildchoices($choices);
+}
 
 require_once("HTML/QuickForm2/Element/Captcha/Image.php");
-require_once("libagora.php");
+//require_once("libagora.php");
 
+/*
 function accessgfile($op, $data=null, $memberid=null)
 {
   if ($op === "view")
@@ -97,6 +103,7 @@ function accessgfile($op, $data=null, $memberid=null)
   }
   return False;
 }
+*/
 
 function buildcaptchafieldset($form, $options=null)
 {
@@ -149,7 +156,7 @@ function buildbreadcrumblist($link, $table, $key="id")
 {
   $id = $link[$key];
   
-  $dbh = dbconnect(SYSTEMDSN);
+  $dbh = dbconnect(\SYSTEMDSN);
   if (PEAR::isError($dbh))
   {
     logentry("buildbreadcrumblist.10: " . $dbh->toString());
@@ -666,11 +673,11 @@ function getpage($title, $options=null)
    if (getsitevar("smoothstate") === True)
    {
      // @FIX local copy because I had to make a small patch so that forms would work properly (confirmed?)
-     $page->addScript(ENGINEURL."js/jquery.smoothState.js");
-     $page->addScript(ENGINEURL."js/initsmoothstate.js");
+     $page->addScript(\ENGINEURL."js/jquery.smoothState.js");
+     $page->addScript(\ENGINEURL."js/initsmoothstate.js");
    }
-   $page->addStyleSheet(STATICSKINURL."css/animate.css");
-   $page->addStyleSheet(STATICSKINURL."css/page.css");
+   $page->addStyleSheet(\STATICSKINURL."css/animate.css");
+   $page->addStyleSheet(\STATICSKINURL."css/page.css");
     // @since 20170420
     $page->addStyleSheet("//fonts.googleapis.com/css?family=Montserrat|Open+Sans");
 }
@@ -682,7 +689,7 @@ function uniqueurl($url)
 {
  logentry("uniqueurl.100: url=".var_export($url, True));
  
- $dbh = dbconnect(SYSTEMDSN);
+ $dbh = dbconnect(\SYSTEMDSN);
  $sql = "select 1 from vulcan.link where url=? or url=?||'/'";
  $dat = array($url, $url);
  $res = $dbh->getOne($sql, ["integer"], $dat, ["text", "text"]);
@@ -910,8 +917,8 @@ function buildlinkactions($memberid, $data)
 function getsmarty($options=null)
 {
   $options = [];
-  $options["pluginsdir"] = [SMARTYPLUGINSDIR, "/srv/www/zoidweb4/smarty/"];
-  $options["templatedir"] = [SMARTYTEMPLATESDIR, "/srv/www/zoidweb4/skin/tmpl/"];
+  $options["pluginsdir"] = [SMARTYPLUGINSDIR, "/srv/www/zoid6/smarty/"];
+  $options["templatedir"] = SMARTYTEMPLATESDIR;
   $options["compiledir"] = SMARTYCOMPILEDTEMPLATESDIR;
   $options["compileid"] = LOGENTRYPREFIX;
   return _getsmarty($options);
@@ -961,7 +968,7 @@ function fetchpagefooter($options=null)
  */
 function getprojectid($projectname)
 {
- $dbh = dbconnect(SYSTEMDSN);
+ $dbh = dbconnect(\SYSTEMDSN);
  if (PEAR::isError($dbh))
  {
   logentry("getprojectid.100: " . $dbh->toString());
@@ -997,9 +1004,9 @@ function accesspost($op, $data=null, $memberid=null)
 
 //  logentry("accesspost.199: post.frozen=".var_export($post["frozen"], True));
 
-  $frozen = toboolean($post["frozen"], "zoidweb4.accesspost.frozen");
-  $draft = toboolean($post["draft"], "zoidweb4.accesspost.draft");
-  $junk = toboolean($post["junk"], "zoidweb4.accesspost.junk");
+  $frozen = toboolean($post["frozen"], "zoid6.accesspost.frozen");
+  $draft = toboolean($post["draft"], "zoid6.accesspost.draft");
+  $junk = toboolean($post["junk"], "zoid6.accesspost.junk");
 
 //  logentry("accesspost.200: op=".var_export($op, True)." memberid=".var_export($memberid, True)." frozen=".var_export($frozen, True)." draft=".var_export($draft, True));
  
@@ -1421,7 +1428,7 @@ function getpost($id, $maxdepth=0, $currentdepth=0)
 //  $sql = "select * from sophia.post where id=?";
   $sql = "select * from sophia.post where id=?";
   $dat = [$id];
-  $dbh = dbconnect(SYSTEMDSN);
+  $dbh = dbconnect(\SYSTEMDSN);
   $post = $dbh->getRow($sql, null, $dat, array("integer"));
   if (PEAR::isError($post))
   {
@@ -1433,9 +1440,9 @@ function getpost($id, $maxdepth=0, $currentdepth=0)
     logentry("getpost.104: id=".var_export($id, True)." returned null");
     return $post;
   }
-  $post["frozen"] = toboolean($post["frozen"], "zoidweb4.getpost.frozen");
-  $post["draft"] = toboolean($post["draft"], "zoidweb4.getpost.draft");
-  $post["junk"] = toboolean($post["junk"], "zoidweb4.getpost.junk");
+  $post["frozen"] = toboolean($post["frozen"], "zoid6.getpost.frozen");
+  $post["draft"] = toboolean($post["draft"], "zoid6.getpost.draft");
+  $post["junk"] = toboolean($post["junk"], "zoid6.getpost.junk");
   $post["postedbyid"] = intval($post["postedbyid"]);
 
   $sigmap = getsigmap("sophia.map_post_sig", "postid", $id);
@@ -1598,7 +1605,7 @@ function getsiglinkmap($linkid)
  */
 function gettotalposts()
 {
-  $dbh = dbconnect(SYSTEMDSN);
+  $dbh = dbconnect(\SYSTEMDSN);
   if (PEAR::isError($dbh))
   {
     logentry("gettotalpostcount.100: " . $dbh->toString());
@@ -1614,7 +1621,7 @@ function gettotalposts()
  */
 function gettotallinks()
 {
-  $dbh = dbconnect(SYSTEMDSN);
+  $dbh = dbconnect(\SYSTEMDSN);
   if (PEAR::isError($dbh))
   {
     logentry("gettotallinkcount.100: " . $dbh->toString());
@@ -1630,7 +1637,7 @@ function gettotallinks()
  */
 function getmemberposts($memberid)
 {
-  $dbh = dbconnect(SYSTEMDSN);
+  $dbh = dbconnect(\SYSTEMDSN);
   if (PEAR::isError($dbh))
   {
     logentry("getmemberpostcount.100: " . $dbh->toString());
@@ -1647,7 +1654,7 @@ function getmemberposts($memberid)
  */
 function getmemberlinks($memberid)
 {
-  $dbh = dbconnect(SYSTEMDSN);
+  $dbh = dbconnect(\SYSTEMDSN);
   if (PEAR::isError($dbh))
   {
     logentry("getmemberlinkcount.100: " . $dbh->toString());
@@ -1663,7 +1670,7 @@ function getpostreplycount($postid)
 {
   static $count = 0;
   
-  $dbh = dbconnect(SYSTEMDSN);
+  $dbh = dbconnect(\SYSTEMDSN);
   if (PEAR::isError($dbh))
   {
     logentry("getpostreplycount.100: ".$dbh->toString());
@@ -1720,7 +1727,7 @@ function displaygenericpage($pagename)
 
 function getreplycount($postid)
 {
-  $dbh = dbconnect(SYSTEMDSN);
+  $dbh = dbconnect(\SYSTEMDSN);
   $sql = "with recursive t as (select id from sophia.post where parentid=? union all select post.id from sophia.post join t on (sophia.post.parentid=t.id)) select count(*) from t";
   $dat = [$postid];
   $res = $dbh->getOne($sql, null, $dat, null);
@@ -1835,7 +1842,7 @@ function displaypage($page, $data=[])
 
 function vulcangetneedsapproval()
 {
-  $dbh = dbconnect(SYSTEMDSN);
+  $dbh = dbconnect(\SYSTEMDSN);
   $sql = "select * from vulcan.link where approved='f' and eros='f'";
   $dat = [];
   $res = $dbh->getAll($sql, null, $dat, null);
@@ -1868,7 +1875,7 @@ function vulcangetneedsapproval()
 
 function vulcangetrecentlyadded()
 {
-  $dbh = dbconnect(SYSTEMDSN);
+  $dbh = dbconnect(\SYSTEMDSN);
   if (PEAR::isError($dbh))
   {
     logentry("vulcangetrecentlyadded.100: " . $dbh->toString());
@@ -2037,4 +2044,7 @@ function getamznitem($nodeid)
   return buildamznitem($res);
 }
 */
+
+}
+
 ?>

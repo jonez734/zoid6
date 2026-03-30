@@ -6,17 +6,17 @@ body {
 /*  font-family: Arial, Helvetica, sans-serif; */
   font-family: 'Roboto Condensed', sans-serif;
   font-size: 1.0em;
-  color: $page-color;
+  color: $page-textcolor;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
   margin: 0;
   padding: 0;
-/* https://naldzgraphics.net/free-seamless-metal-textures/ */
-/* https://www.wildtextures.com/free-textures/aged-piece-of-exotic-wood/ */
+// /* https://naldzgraphics.net/free-seamless-metal-textures/ */
+// /* https://www.wildtextures.com/free-textures/aged-piece-of-exotic-wood/ */
 //  background-image: url(https://static.zoidtechnologies.com/skin/art/wildtextures_aged-piece-of-wood.jpg);
 // too dark  background-image: url(https://static.zoidtechnologies.com/skin/art/spacefield_a-000.png);
-  background-image: url(https://static.zoidtechnologies.com/skin/art/free-seamless-metal-textures.jpg);
+  background-image: url(https://zoidtechnologies.com/static/skin/art/free-seamless-metal-textures.jpg);
 //  background-image: url(https://static.zoidtechnologies.com/skin/art/turkey-with-pilgrim-hat.jpg);
 //  background-image: url(https://static.zoidtechnologies.com/skin/art/christmas2018.jpeg);
 //  background-image: url(https://static.zoidtechnologies.com/skin/art/pixel-christmas-tree-star-top-ornaments-animation-gif.gif);

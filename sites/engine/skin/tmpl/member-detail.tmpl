@@ -1,0 +1,33 @@
+<div class="blurb vstretch">
+<div class="header"><h1>member details - {$member.name|escape|wpprop}</h1></div>
+<div class="body">
+<div class="row"><span class="label">Handle: </span><span class="data">{$member.name|escape}</span></div>
+{if $currentmember.flags.ADMIN === True || $currentmemberid === $member.id}
+<div class="row"><span class="label">Date Registered: </span><span class="data">{$member.dateregisteredepoch|datestamp} ({$member.dateregisteredepoch|ago} ago)</span></div>
+<div class="row"><span class="label">Last Login: </span><span class="data">{$member.lastloginepoch|datestamp} ({$member.lastloginepoch|ago} ago) from {$member.lastloginfrom}</span></div>
+<div class="row"><span class="label">Real Name: </span><span class="data">{$member.realname|escape}</span></div>
+<div class="row"><span class="label">Posts: </span><span class="data">{$member.totalmemberposts} of {$member.totalposts} ({$member.postspercent|string_format:"%6.3f"}%)</span></div>
+<div class="row"><span class="label">Links: </span><span class="data">{$member.totalmemberlinks} of {$member.totallinks} ({$member.linkspercent|string_format:"%6.3f"}%)</span></div>
+<div class="row"><span class="label">Credits: </span><span class="data">{$member.credits}</span></div>
+{if count($member.flags) > 0}
+<div class="row">
+  <span class="label">Flags: </span>
+  <span class="data">
+  <ul class="commadelimited">
+    {foreach $member.flags as $flag}
+      <li>{$flag}</li>
+    {/foreach}
+  </ul>
+  </span>
+</div>
+{/if}
+<div class="row"><span class="label">Email: </span><span class="data">{$member.email}</span></div>
+{/if}
+</div> {* body *}
+{if count($member.actions) > 0}
+<div class="footer">
+{include file="actions.tmpl" actions=$member.actions}
+</div> {* footer *}
+{/if}
+</div>
+

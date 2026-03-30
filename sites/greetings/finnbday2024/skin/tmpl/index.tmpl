@@ -1,0 +1,22 @@
+{extends file="page.tmpl"}
+{block name="content"}
+<div class="blurb vstretch">
+<div class="body">
+<h1>returning soon</h1>
+</div>
+</div>
+<ul class="nobullets nopadding nomargin">
+{*<li>{include file="maturecontentwarning.tmpl"}</li>*}
+{*<li>{include file="sitenews.tmpl" sitenews=$data.sitenews}</li>*}
+<li>{include file="latestlinks.tmpl" latestlinks=$data.latestlinks}</li>
+<li>{include file="latestreleases.tmpl" latestreleases=$data.latestreleases}</li>
+{*<li>{include file="needsapproval.tmpl" needsapproval=$data.needsapproval}</li>*}
+</ul>
+{/block}
+{block name="title"}Happy Birthday 2022, Finn!{/block}
+{block name="pageheader"}
+<div class="body">
+ <h1 class="animated lightSpeedIn">Happy Birthday 2022, Finn!</h1>
+ <h2 class="animated lightSpeedIn">~ Est. 2009 ~</h2>
+</div> {* body *}
+{/block}

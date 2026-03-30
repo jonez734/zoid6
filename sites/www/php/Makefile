@@ -3,5 +3,7 @@ all:
 clean:
 	-rm *~
 
-install:
-	$(installfile) *.php $(DOCROOT)
+stage:
+	$(RSYNC) *.php $(DOCROOT)
+
+

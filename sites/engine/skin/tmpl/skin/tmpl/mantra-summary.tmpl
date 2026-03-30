@@ -1,0 +1,25 @@
+{extends file="page.tmpl"}
+{$pageinfo = $data.pageinfo}
+{block name="title"}mantra summary{/block}
+{block name="head" append}
+<link rel="stylesheet" type="text/css" href="{$smarty.const.STATICSKINURL}css/mantra-summary.css" media="screen" />
+<link rel="stylesheet" type="text/css" href="{$smarty.const.STATICSKINURL}css/pagerinfo.css" media="screen" />
+<link rel="stylesheet" type="text/css" href="{$smarty.const.STATICSKINURL}css/pagelinks.css" media="screen" />
+{/block}
+{block name="content"}
+{include file="pageinfo.tmpl" pageinfo=$pageinfo}
+<div class="blurb mantra summary">
+<div class="body">
+<ul>
+ {foreach from=$pageinfo.data item=item}
+  <li class="{cycle values="even,odd"}">
+   <div class="terse">{$item.description|escape|wpprop} - {$item.author|escape|wpprop}
+   {include file="actions.tmpl" actions=$item.actions}
+   </div> {* mantra *}
+  </li>
+ {/foreach}
+</ul>
+</div> {* body *}
+</div>
+{include file="pageinfo.tmpl" pageinfo=$pageinfo}
+{/block} {* content *}

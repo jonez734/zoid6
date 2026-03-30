@@ -1,0 +1,74 @@
+/* 2020MAR24 */
+/* 'css3prefix mixin' @see https://github.com/matthieua/sass-css3-mixins/blob/master/css3-mixins.scss */
+/* 'keyframes' mixin @see http://zerosixthree.se/8-sass-mixins-you-must-have-in-your-toolbox/*/
+/* 'animation' mixin from https://developer.mozilla.org/en-US/docs/Web/CSS/animation */
+/* legacy-direction function @see http://www.sitepoint.com/building-linear-gradient-mixin-sass/ */
+/* 'transition' mixin @see http://codepen.io/sawmac/pen/cayhK */
+/* 'gradientanimation' mixin @see https://medium.com/@dave_lunny/animating-css-gradients-using-only-css-d2fd7671e759#.jlbdgs4jl */
+/* 'animation' mixin @see http://zerosixthree.se/8-sass-mixins-you-must-have-in-your-toolbox/ */
+/* skin/scss/pagefooter.scss */
+/* line 6, ../../../pagefooter.scss */
+footer#pagefooter {
+  text-shadow: 4px 3px 3px rgba(0, 0, 0, 0.4);
+  padding: 0.50em;
+  text-align: center;
+  flex: 0 1 auto;
+}
+/* line 15, ../../../pagefooter.scss */
+footer#pagefooter .copyright {
+  text-align: center;
+  font-size: 0.75em;
+}
+/* line 20, ../../../pagefooter.scss */
+footer#pagefooter img {
+  border: 0px;
+}
+/* line 24, ../../../pagefooter.scss */
+footer#pagefooter a:hover {
+  background: none;
+  text-decoration: none;
+}
+/* line 29, ../../../pagefooter.scss */
+footer#pagefooter .mantra {
+  font-size: 0.90em;
+}
+/* line 33, ../../../pagefooter.scss */
+footer#pagefooter .body {
+  border: 0.125em solid black;
+}
+/* line 37, ../../../pagefooter.scss */
+footer#pagefooter ul {
+  margin: 0;
+  padding: 0;
+}
+
+/*
+@mixin gradient-animation( $start, $end, $transTime ){
+  background-size: 100%;
+  background-image: linear-gradient($start, $end);
+  position: relative;
+  z-index: 100;
+  &:before {
+    background-image: linear-gradient($end, $start);
+    content: '';    
+    display: block;
+    height: 100%;
+    position: absolute;
+    top: 0; left: 0;
+    opacity: 0;
+    width: 100%;
+    z-index: -100;
+    transition: opacity $transTime;
+  }
+  &:hover {
+     &:before {
+       opacity: 1; 
+     }
+  }
+}
+*/
+/*
+footer#pagefooter .poweredby {
+	@include gradient-animation(#FFF, #000, 0.50s);
+}
+*/

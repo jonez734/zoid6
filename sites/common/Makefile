@@ -1,5 +1,5 @@
 export HOST = merlin
-export PROJECT = engine
+export PROJECT = common
 #export REPODIR = /srv/repo/zoidweb3-engine/
 
 export PROD = $(HOST):/srv/www/vhosts/zoidtechnologies.com/

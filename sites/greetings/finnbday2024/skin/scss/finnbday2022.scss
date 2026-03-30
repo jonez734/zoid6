@@ -1,0 +1,26 @@
+body {
+  background: gray; // #F56600;
+  color: white;
+}
+
+// https://teamcolorcodes.com/clemson-tigers-colors/
+// clemson orange: #F56600
+// regalia: #522d80
+
+#box {
+	display: none;
+	background: #F56600;
+	width: 50%;
+	margin: 0;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+}
+
+#box #copy,
+#box #est,
+#box #teen {
+	text-align: center;
+	background: #522d80;
+}

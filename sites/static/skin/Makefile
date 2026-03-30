@@ -6,3 +6,7 @@ clean:
 	$(MAKE) -C fonts clean
 	$(MAKE) -C scss clean
 
+stage:
+	$(MAKE) -C art stage
+	$(MAKE) -C fonts stage
+	$(MAKE) -C scss stage

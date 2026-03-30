@@ -1,0 +1,76 @@
+/* 2020MAR24 */
+/* 'css3prefix mixin' @see https://github.com/matthieua/sass-css3-mixins/blob/master/css3-mixins.scss */
+/* 'keyframes' mixin @see http://zerosixthree.se/8-sass-mixins-you-must-have-in-your-toolbox/*/
+/* 'animation' mixin from https://developer.mozilla.org/en-US/docs/Web/CSS/animation */
+/* legacy-direction function @see http://www.sitepoint.com/building-linear-gradient-mixin-sass/ */
+/* 'transition' mixin @see http://codepen.io/sawmac/pen/cayhK */
+/* 'gradientanimation' mixin @see https://medium.com/@dave_lunny/animating-css-gradients-using-only-css-d2fd7671e759#.jlbdgs4jl */
+/* 'animation' mixin @see http://zerosixthree.se/8-sass-mixins-you-must-have-in-your-toolbox/ */
+/* line 4, ../../../poweredby.scss */
+.poweredby:hover .bolt {
+  background: rgba(0, 0, 0, 0);
+  background: -webkit-linear-gradient(top, rgba(0, 0, 0, 0) 0%, rgba(187, 187, 187, 0.25) 25%, rgba(119, 119, 119, 0.5) 50%, rgba(51, 51, 51, 0.75) 75%, black 100%);
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(187, 187, 187, 0.25) 25%, rgba(119, 119, 119, 0.5) 50%, rgba(51, 51, 51, 0.75) 75%, black 100%);
+  /*	@include transform(skew(-10deg, 0deg)); */
+  -webkit-animation: 1s ease 0s infinite alternate-reverse both running boltkeyframes;
+  -khtml-animation: 1s ease 0s infinite alternate-reverse both running boltkeyframes;
+  -moz-animation: 1s ease 0s infinite alternate-reverse both running boltkeyframes;
+  -ms-animation: 1s ease 0s infinite alternate-reverse both running boltkeyframes;
+  -o-animation: 1s ease 0s infinite alternate-reverse both running boltkeyframes;
+  animation: 1s ease 0s infinite alternate-reverse both running boltkeyframes;
+}
+
+@-webkit-keyframes boltkeyframes {
+  0% {
+    opacity: 0.5;
+    color: #000000;
+  }
+  100% {
+    opacity: 1.0;
+    color: #FFFFFF;
+  }
+}
+@-moz-keyframes boltkeyframes {
+  0% {
+    opacity: 0.5;
+    color: #000000;
+  }
+  100% {
+    opacity: 1.0;
+    color: #FFFFFF;
+  }
+}
+@-ms-keyframes boltkeyframes {
+  0% {
+    opacity: 0.5;
+    color: #000000;
+  }
+  100% {
+    opacity: 1.0;
+    color: #FFFFFF;
+  }
+}
+@-o-keyframes boltkeyframes {
+  0% {
+    opacity: 0.5;
+    color: #000000;
+  }
+  100% {
+    opacity: 1.0;
+    color: #FFFFFF;
+  }
+}
+@keyframes boltkeyframes {
+  0% {
+    opacity: 0.5;
+    color: #000000;
+  }
+  100% {
+    opacity: 1.0;
+    color: #FFFFFF;
+  }
+}
+/* line 29, ../../../poweredby.scss */
+.poweredby .bolt {
+  color: lightblue;
+}

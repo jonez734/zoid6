@@ -88,10 +88,12 @@
              $string_new .= "$form $ul[1]<a href=\"javascript:void(0)\" onclick=\"document.sub$key.submit(); return false;\" rel=\"nofollow\">" . kuerzen("$ul[2]$ul[3]",$length)."</a>$ul[4]"; 
           } 
           $string = $string_new; 
-             $string = str_ireplace("value=\"www.","value=\"http://www.",$string); 
+             $string = str_ireplace("value=\"www.","value=\"https://www.",$string); 
           break; 
        } 
     return $string; 
     } 
- 
- ?>
+
+//$smarty->registerPlugin(\Smarty\Smarty::PLUGIN_MODIFIER, 'linkurl', 'smarty_modifier_linkurl');
+
+?>

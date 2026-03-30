@@ -1,7 +1,6 @@
 clean:
 	-rm *~
 	
-install:
+stage:
 	mkdir -p $(STAGE)smarty/
-	-$(installfile) modifier.*.php $(STAGE)smarty/
-
+	-$(RSYNC) modifier.*.php $(STAGE)smarty/
