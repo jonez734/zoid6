@@ -1,6 +1,16 @@
 // zoid6/scss/_vars.scss
 // Base variables for all zoid6 sites
 // Site-specific overrides should be defined in site's _vars.scss
+//
+// This file defines the canonical variable names used across zoid6 projects.
+// Project-specific values should override these in site's _vars.scss via:
+//   @import "zoid6vars";
+//   $my-var: #custom-color;
+
+// =============================================================================
+// CANONICAL VARIABLES - Primary naming convention
+// These are the main variable names used in SCSS components
+// =============================================================================
 
 $page-backgroundcolor: #3a5a40;
 $page-textcolor: #dad7cd;
@@ -51,6 +61,7 @@ $blurb-a-hover-color: white;
 $blurb-a-hover-backgroundcolor: gray;
 
 $blurb-border: 0.125em solid $blurb-textcolor;
+$blurb-border-color: darken($blurb-textcolor, 20%) !default;
 
 $body-fontsize: 1.5em;
 
@@ -67,20 +78,29 @@ $topbar-anchor-visitedcolor: #3A5A40;
 
 $pagefooter-margin: 0.50em;
 
-// BC: legacy variable from older sites
-$backgroundcolor: gray;
+// =============================================================================
+// BC (BACKWARD COMPATIBILITY) - Legacy variables
+// @deprecated - Use canonical variable names above instead
+// Legacy variable from older sites, kept for backward compatibility
+// =============================================================================
+$backgroundcolor: gray;  // BC: Legacy variable - avoid using in new code
 
 // =============================================================================
-// BC ALIASES - remove in future migration
-// These allow older SCSS files using old naming to work with new variable names
+// BC ALIASES (BACKWARD COMPATIBILITY)
+// @deprecated - These aliases support legacy SCSS naming conventions
+// Allow older SCSS files using old naming to work with new variable names
+// MIGRATION PLAN: Remove in future major version after all projects updated
 // =============================================================================
 
-$page-color: $page-textcolor !default;
-$blurb-color: $blurb-textcolor !default;
-$blurb-body-color: $blurb-body-textcolor !default;
-$blurb-header-color: $blurb-header-textcolor !default;
-$blurb-footer-textcolor: $blurb-footer-color !default;
-$blurb-body-background-color: $blurb-body-backgroundcolor !default;
-$blurb-body-text-color: $blurb-body-textcolor !default;
-$page-text-color: $page-textcolor !default;
-$page-background-color: $page-backgroundcolor !default;
+// Page-related BC aliases
+$page-color: $page-textcolor !default;                           // BC: Use $page-textcolor
+$page-text-color: $page-textcolor !default;                      // BC: Use $page-textcolor
+$page-background-color: $page-backgroundcolor !default;          // BC: Use $page-backgroundcolor
+
+// Blurb-related BC aliases
+$blurb-color: $blurb-textcolor !default;                         // BC: Use $blurb-textcolor
+$blurb-body-color: $blurb-body-textcolor !default;               // BC: Use $blurb-body-textcolor
+$blurb-body-text-color: $blurb-body-textcolor !default;          // BC: Use $blurb-body-textcolor
+$blurb-body-background-color: $blurb-body-backgroundcolor !default;  // BC: Use $blurb-body-backgroundcolor
+$blurb-header-color: $blurb-header-textcolor !default;           // BC: Use $blurb-header-textcolor
+$blurb-footer-textcolor: $blurb-footer-color !default;           // BC: Use $blurb-footer-color
