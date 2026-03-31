@@ -1,7 +1,5 @@
 <?php
 
-namespace config {
-
 /**
  * http://pear.php.net/manual/en/package.database.db.intro-dsn.php
  */
@@ -60,10 +58,6 @@ define("SITECSS", SKINURL . "css/www.css");
 
 define("USESHOPPINGCART", False);
 
-}
-
-namespace {
-
 $PAGEMETADATA = [
     ["tag" => "meta", "name" => "description", "content" => "custom information systems for your intranet, extranet, or public website" ],
     ["tag" => "link", "rel" => "canonical", "href" => "http://wwwdev.zoidtechnologies.com/" ],
@@ -80,4 +74,4 @@ $includepath = get_include_path();
 $zoidweb4 = str_replace("zoidweb3", "zoidweb4", $includepath);
 set_include_path($zoidweb4);
 
-}
+?>
