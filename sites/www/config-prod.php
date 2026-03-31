@@ -1,11 +1,12 @@
 <?php
 
+namespace config {
+
 require_once('/srv/www/bbsengine6/php/bootstrap.php');
 require_once('util.php');
 \bbsengine6\util\add_include_paths(['/srv/www/zoid6/php/', '/srv/www/bbsengine6/php/', '/srv/www/smarty/']);
 
 // Define configuration constants in config namespace (required by bbsengine6)
-namespace config {
     define("SITENAME", "zoid technologies");
     define("VHOSTDIR", "/srv/www/vhosts/zoidtechnologies.com/html/");
     define("SITEURL", "https://zoidtechnologies.com/");

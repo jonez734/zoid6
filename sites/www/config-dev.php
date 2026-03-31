@@ -1,6 +1,5 @@
 <?php
 
-// Define configuration constants in config namespace (required by bbsengine6)
 namespace config {
 
 /**
