@@ -250,26 +250,36 @@ SQL;
     
     function add()
     {
-        if (!flag("ADMIN"))
-        {
-            permissiondenied();
-            return True;
-        }
+         if (!flag("ADMIN"))
+         {
+             permissiondenied();
+             return True;
+         }
 
-        $sigid = $_REQUEST["sigid"];
-//        $sigid = preparestring($sigid);
-        $sigid = intval($sigid);
+         $sigid = $_REQUEST["sigid"];
+ //        $sigid = preparestring($sigid);
+         $sigid = intval($sigid);
 
-        $data = array();
-        $data["sigid"] = $sigid;
+         $data = array();
+         $data["sigid"] = $sigid;
 
-        $form = $this->getform("add");
-        $form->setDefaults($data);
-        if ($form->validate())
-        {
-            $form->freeze();
-            return $form->process(array(&$this, "insert"), False);
-        }
+         $form = $this->getform("add");
+         $form->setDefaults($data);
+         if ($form->validate())
+         {
+             // CSRF validation for form submission
+             if (!\bbsengine6\util\csrfCheckRequest())
+             {
+                 $remoteAddr = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : 'unknown';
+                 $userAgent = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'unknown';
+                 \bbsengine6\util\logentry("CSRF validation failed for gfile.add: ip={$remoteAddr}, user_agent={$userAgent}");
+                 displayerrorpage("Invalid security token. Please try again (code: gfile.add.csrf)");
+                 return False;
+             }
+             
+             $form->freeze();
+             return $form->process(array(&$this, "insert"), False);
+         }
 
         $renderer = new HTML_QuickForm_Renderer_Array(True);
         $form->accept($renderer);
@@ -326,37 +336,47 @@ SQL;
     
     function edit()
     {
-        if (!flag("ADMIN"))
-        {
-            permissiondenied();
-            return True;
-        }
+         if (!flag("ADMIN"))
+         {
+             permissiondenied();
+             return True;
+         }
 
-        $id = $_REQUEST["id"];
-//        $id = preparestring($id);
-        $id = intval($id);
-        if (empty($id))
-        {
-            displayerrormessage("gfile: edit: must specify id");
-            return False;
-        }
-        
-        $gfile = $this->get($id);
-        if ($gfile == False)
-        {
-            displayerrormessage("gfile: edit: gfile does not exist");
-            return False;
-        }
+         $id = $_REQUEST["id"];
+ //        $id = preparestring($id);
+         $id = intval($id);
+         if (empty($id))
+         {
+             displayerrormessage("gfile: edit: must specify id");
+             return False;
+         }
+         
+         $gfile = $this->get($id);
+         if ($gfile == False)
+         {
+             displayerrormessage("gfile: edit: gfile does not exist");
+             return False;
+         }
 
-        $form = $this->getform("edit", $id);
-        $form->setDefaults($gfile, "unhtmlentities");
+         $form = $this->getform("edit", $id);
+         $form->setDefaults($gfile, "unhtmlentities");
 
-        if ($form->validate())
-        {
-            $form->freeze();
-            $form->process(array(&$this, "update"), False);
-            return True;
-        }
+         if ($form->validate())
+         {
+             // CSRF validation for form submission
+             if (!\bbsengine6\util\csrfCheckRequest())
+             {
+                 $remoteAddr = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : 'unknown';
+                 $userAgent = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'unknown';
+                 \bbsengine6\util\logentry("CSRF validation failed for gfile.edit: ip={$remoteAddr}, user_agent={$userAgent}");
+                 displayerrorpage("Invalid security token. Please try again (code: gfile.edit.csrf)");
+                 return False;
+             }
+             
+             $form->freeze();
+             $form->process(array(&$this, "update"), False);
+             return True;
+         }
 
         $renderer = new HTML_QuickForm_Renderer_Array(True);
         $form->accept($renderer);
@@ -415,65 +435,78 @@ SQL;
 
     function delete()
     {
-        if (!flag("ADMIN"))
-        {
-            permissiondenied();
-            return False;
-        }
-        
-//        $id = preparestring($_GET["id"]);
-        $id = isset($_GET["id"]) ? $_GET["id"] : null;
-        if (strlen($id) == 0)
-        {
-            displayerrormessage("gfile: delete: must specify id of document to delete.");
-            return False;
-        }
-        
-        $sql = "select title from gfile where id=?";
-        $res = $this->dbh->getOne($sql, array($id));
-        if ($res == null)
-        {
-            displayerrormessage("www: gfile: delete: execute returned null");
-            return False;
-        }
-        
-        if (PEAR::isError($res))
-        {
-            displayerrormessage("www: gfile: delete: execute returned error");
-            logentry("www: gfile: delete: " . $res->toString());
-            return False;
-        }
+         if (!flag("ADMIN"))
+         {
+             permissiondenied();
+             return False;
+         }
+         
+ //        $id = preparestring($_GET["id"]);
+         $id = isset($_GET["id"]) ? $_GET["id"] : null;
+         if (strlen($id) == 0)
+         {
+             displayerrormessage("gfile: delete: must specify id of document to delete.");
+             return False;
+         }
+         
+         $sql = "select title from gfile where id=?";
+         $res = $this->dbh->getOne($sql, array($id));
+         if ($res == null)
+         {
+             displayerrormessage("www: gfile: delete: execute returned null");
+             return False;
+         }
+         
+         if (PEAR::isError($res))
+         {
+             displayerrormessage("www: gfile: delete: execute returned error");
+             logentry("www: gfile: delete: " . $res->toString());
+             return False;
+         }
 
-        if (count($res) == 0)
-        {
-            displayerrormessage("gfile: delete: unable to retrieve document with id '{$id}' from database.");
-            return False;
-        }
+         if (count($res) == 0)
+         {
+             displayerrormessage("gfile: delete: unable to retrieve document with id '{$id}' from database.");
+             return False;
+         }
 
-        $confirm = isset($_GET["confirm"]) ? $_GET["confirm"] : null;
-        if (empty($confirm))
-        {
-            deleteconfirmation("gfile - delete - confirmation required", "are you sure you wish to delete the gfile entitled '{$res}'?", "/gfile.php?mode=delete&confirm=1&id={$id}", "/gfile.php?mode=summary");
-            return True;
-        }
-        
-        $sql = "delete from www.gfile where id=?";
-        $res = $this->dbh->query($sql, array($id));
-        if ($res == null)
-        {
-            displayerrormessage("www: gfile: delete: execute returned null");
-            return False;
-        }
-        
-        if (PEAR::isError($res))
-        {
-            displayerrormessage("www: gfile: delete: execute returned error");
-            logentry("www: gfile: delete: " . $res->toString());
-            return False;
-        }
-        
-        redirectpage("OK", "/gfile/summary");
-        return True;
+         $confirm = isset($_GET["confirm"]) ? $_GET["confirm"] : null;
+         if (empty($confirm))
+         {
+             deleteconfirmation("gfile - delete - confirmation required", "are you sure you wish to delete the gfile entitled '{$res}'?", "/gfile.php?mode=delete&confirm=1&id={$id}", "/gfile.php?mode=summary");
+             return True;
+         }
+         
+         // CSRF validation for delete confirmation
+         if ($_SERVER['REQUEST_METHOD'] === 'POST')
+         {
+             if (!\bbsengine6\util\csrfCheckRequest())
+             {
+                 $remoteAddr = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : 'unknown';
+                 $userAgent = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'unknown';
+                 \bbsengine6\util\logentry("CSRF validation failed for gfile.delete: ip={$remoteAddr}, user_agent={$userAgent}");
+                 displayerrorpage("Invalid security token. Please try again (code: gfile.delete.csrf)");
+                 return False;
+             }
+         }
+         
+         $sql = "delete from www.gfile where id=?";
+         $res = $this->dbh->query($sql, array($id));
+         if ($res == null)
+         {
+             displayerrormessage("www: gfile: delete: execute returned null");
+             return False;
+         }
+         
+         if (PEAR::isError($res))
+         {
+             displayerrormessage("www: gfile: delete: execute returned error");
+             logentry("www: gfile: delete: " . $res->toString());
+             return False;
+         }
+         
+         redirectpage("OK", "/gfile/summary");
+         return True;
     }
         
     function main()

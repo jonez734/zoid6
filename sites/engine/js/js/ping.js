@@ -1,8 +1,26 @@
 // http://stackoverflow.com/questions/4746249/get-user-timezone/10103105#10103105
 $(document).ready(function () {
+  /**
+   * Get CSRF token from hidden form field
+   * @return {string} CSRF token or empty string if not found
+   */
+  function getCsrfToken()
+  {
+    var token = $('input[name="csrf_token"]').val();
+    return token || '';
+  }
+
   function postJSON(url, data)
   {
-    var options = { url: url, type: "POST", dataType: "json", contentType: "application/json; charset=UTF-8" };
+    var options = { 
+      url: url, 
+      type: "POST", 
+      dataType: "json", 
+      contentType: "application/json; charset=UTF-8",
+      headers: {
+        'X-CSRF-TOKEN': getCsrfToken()
+      }
+    };
     if (data !== undefined)
     {
       options.data = JSON.stringify(data);

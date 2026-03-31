@@ -129,6 +129,19 @@ class notify
   // @since 20130516
   function markread($notifyid)
   {
+    // CSRF validation for state-changing request
+    if ($_SERVER['REQUEST_METHOD'] === 'POST')
+    {
+      require_once("../../../bbsengine6/php/util.php");
+      if (!\bbsengine6\util\csrfCheckRequest())
+      {
+        $remoteAddr = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : 'unknown';
+        $userAgent = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'unknown';
+        \bbsengine6\util\logentry("CSRF validation failed for notify.markread: ip={$remoteAddr}, user_agent={$userAgent}");
+        return \PEAR::raiseError("Invalid security token (code: notify.markread.csrf)");
+      }
+    }
+    
     $notify = array();
     $notify["read"] = True;
     $notify["dateread"] = "now()";
@@ -166,6 +179,20 @@ class notify
       displaydeleteconfirmation("Are you sure you want to delete this notify?", "/notify-delete-{$notifyid}?confirm", "Yes", getreturntourl(), "No");
       return;
     }
+    
+    // CSRF validation for delete confirmation
+    if ($_SERVER['REQUEST_METHOD'] === 'POST')
+    {
+      require_once("../../../bbsengine6/php/util.php");
+      if (!\bbsengine6\util\csrfCheckRequest())
+      {
+        $remoteAddr = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : 'unknown';
+        $userAgent = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'unknown';
+        \bbsengine6\util\logentry("CSRF validation failed for notify.delete: ip={$remoteAddr}, user_agent={$userAgent}");
+        return \PEAR::raiseError("Invalid security token (code: notify.delete.csrf)");
+      }
+    }
+    
     $res = $this->dbh->autoExecute("__notify", null, MDB2_AUTOQUERY_DELETE, "id=".$this->dbh->quote($notifyid, "integer"));
     if (PEAR::isError($res))
     {
