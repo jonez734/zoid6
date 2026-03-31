@@ -13,7 +13,7 @@ define("SKINURL", SITEURL . "skin/");
 
 define("SMARTYCOMPILEDTEMPLATESDIR", VHOSTDIR . "templates_c/");
 define("SMARTYPLUGINSDIR", VHOSTDIR . "smarty/");
-define("SMARTYTEMPLATESDIR", SKINDIR . "tmpl/");
+define("SMARTYTEMPLATESDIR", [ 0 => SKINDIR . "tmpl/", 1 => "/srv/www/zoid6/shared/skin/tmpl/" ]);
 
 /*
 define("SYSTEMDSN", "pgsql://apache@localhost/zoidweb3");

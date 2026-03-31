@@ -14,7 +14,7 @@ define("SKINURL", SITEURL . "skin/");
 
 define("config\SMARTYCOMPILEDTEMPLATESDIR", VHOSTDIR . "templates_c");
 define("config\SMARTYPLUGINSDIR", [ 0 => VHOSTDIR . "smarty/"]);
-define("config\SMARTYTEMPLATESDIR", [ 0 => DOCUMENTROOT . "skin/tmpl/", 1=> "/srv/www/bbsengine6/skin/tmpl/"]);
+define("config\SMARTYTEMPLATESDIR", [ 0 => DOCUMENTROOT . "skin/tmpl/", 1 => "/srv/www/zoid6/shared/skin/tmpl/", 2 => "/srv/www/bbsengine6/skin/tmpl/"]);
 
 define("config\SESSIONCOOKIEEXPIRE", 60*60*12);
 define("config\SESSIONCOOKIEDOMAIN", "zoidtechnologies.com");

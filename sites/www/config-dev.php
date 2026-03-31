@@ -40,7 +40,7 @@ define("config\SKINURL", \config\SITEURL . "skin/");
 
 define("config\SMARTYCOMPILEDTEMPLATESDIR", \config\VHOSTDIR . "templates_c/");
 define("config\SMARTYPLUGINSDIR", \config\VHOSTDIR . "smarty/");
-define("config\SMARTYTEMPLATESDIR", \config\SKINDIR . "tmpl/");
+define("config\SMARTYTEMPLATESDIR", [ 0 => \config\SKINDIR . "tmpl/", 1 => "/srv/www/zoid6/shared/skin/tmpl/" ]);
 
 define("config\LOGENTRYPREFIX", "wwwdotzoiddev");
 

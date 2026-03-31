@@ -17,7 +17,7 @@ define("config\JSURL", "/engine/js/");
 // Define SMARTY* constants before including zoid6config.php so it can create global aliases
 define("config\SMARTYCOMPILEDTEMPLATESDIR", \config\VHOSTDIR . "templates_c");
 define("config\SMARTYPLUGINSDIR", [ 0 => \config\VHOSTDIR . "smarty/", 1 => "/srv/www/zoid6/smarty/"]);
-define("config\SMARTYTEMPLATESDIR", [ 0 => \config\VHOSTDIR . "skin/tmpl/", 1=> "/srv/www/zoid6/skin/tmpl/", 2 => "/srv/www/bbsengine6/skin/tmpl/"]);
+define("config\SMARTYTEMPLATESDIR", [ 0 => \config\VHOSTDIR . "skin/tmpl/", 1 => "/srv/www/zoid6/shared/skin/tmpl/", 2 => "/srv/www/zoid6/skin/tmpl/", 3 => "/srv/www/bbsengine6/skin/tmpl/"]);
 
 // Include zoid6config.php to create global aliases
 require_once("zoid6config.php");
