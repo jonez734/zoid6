@@ -67,6 +67,10 @@ define("DOCUMENTROOT", \config\DOCUMENTROOT);
 define("SKINDIR", \config\SKINDIR);
 define("SKINURL", \config\SKINURL);
 define("SITECSS", \config\SITECSS);
+define("SMARTYTEMPLATESDIR", \config\SMARTYTEMPLATESDIR);
+define("SMARTYCOMPILEDTEMPLATESDIR", \config\SMARTYCOMPILEDTEMPLATESDIR);
+define("SMARTYPLUGINSDIR", \config\SMARTYPLUGINSDIR);
+define("LOGENTRYPREFIX", \config\LOGENTRYPREFIX);
 
 $PAGEMETADATA = [
     ["tag" => "meta", "name" => "description", "content" => "custom information systems for your intranet, extranet, or public website" ],
