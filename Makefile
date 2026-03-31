@@ -21,6 +21,7 @@ clean:
 	-rm *~
 	$(MAKE) -C php clean
 	$(MAKE) -C skin clean
+	$(MAKE) -C shared clean
 
 prod:
 #	python -m areyousure || (echo "aborted $$?"; exit 1)
@@ -29,6 +30,7 @@ prod:
 	$(MAKE) -C smarty stage
 	$(MAKE) -C skin stage
 	$(MAKE) -C scss stage
+	$(MAKE) -C shared stage
 #	$(MAKE) -C js stage
 #	$(MAKE) -C sites/www/ stage
 #	$(RSYNC) htaccess-prod $(STATICSTAGE)html/.htaccess
