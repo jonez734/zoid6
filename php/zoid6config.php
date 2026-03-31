@@ -8,23 +8,12 @@
 // Shared Smarty configuration constants
 // These apply to all projects that inherit templates from zoid6 and bbsengine6
 
-// NOTE: SMARTYTEMPLATESDIR is now defined in each project's config-prod.php file
-// after SKINDIR has been properly defined, avoiding circular dependencies
-
-// SMARTYCOMPILEDTEMPLATESDIR - compiled template cache directory
-if (!defined("config\SMARTYCOMPILEDTEMPLATESDIR")) {
-    define("config\SMARTYCOMPILEDTEMPLATESDIR", \config\VHOSTDIR . "templates_c");
-}
-
-// SMARTYPLUGINSDIR - plugin directories for custom Smarty functions and modifiers
-if (!defined("config\SMARTYPLUGINSDIR")) {
-    define("config\SMARTYPLUGINSDIR", [
-        0 => \config\VHOSTDIR . "smarty/",
-        1 => "/srv/www/zoid6/smarty/"
-    ]);
-}
+// NOTE: SMARTY* constants are now defined in each project's config-prod.php file
+// after their dependencies (SKINDIR, VHOSTDIR) have been properly defined,
+// avoiding circular dependencies and undefined constant errors.
 
 // Global aliases for backward compatibility with code that doesn't use namespace
+// (The actual constants are defined in config-prod.php)
 if (!defined("SMARTYTEMPLATESDIR")) {
     define("SMARTYTEMPLATESDIR", \config\SMARTYTEMPLATESDIR);
 }
