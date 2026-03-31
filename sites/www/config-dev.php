@@ -1,5 +1,8 @@
 <?php
 
+// Define configuration constants in config namespace (required by bbsengine6)
+namespace config {
+
 /**
  * http://pear.php.net/manual/en/package.database.db.intro-dsn.php
  */
@@ -58,6 +61,19 @@ define("SITECSS", SKINURL . "css/www.css");
 
 define("USESHOPPINGCART", False);
 
+}
+
+namespace {
+
+// Create global aliases for config constants for code that references them directly
+if (!defined("SITENAME")) define("SITENAME", \config\SITENAME);
+if (!defined("SITEURL")) define("SITEURL", \config\SITEURL);
+if (!defined("DOCUMENTROOT")) define("DOCUMENTROOT", \config\DOCUMENTROOT);
+if (!defined("SKINDIR")) define("SKINDIR", \config\SKINDIR);
+if (!defined("SKINURL")) define("SKINURL", \config\SKINURL);
+if (!defined("JSURL")) define("JSURL", \config\JSURL);
+if (!defined("SITECSS")) define("SITECSS", \config\SITECSS);
+
 $PAGEMETADATA = [
     ["tag" => "meta", "name" => "description", "content" => "custom information systems for your intranet, extranet, or public website" ],
     ["tag" => "link", "rel" => "canonical", "href" => "http://wwwdev.zoidtechnologies.com/" ],
@@ -74,4 +90,4 @@ $includepath = get_include_path();
 $zoidweb4 = str_replace("zoidweb3", "zoidweb4", $includepath);
 set_include_path($zoidweb4);
 
-?>
+}
