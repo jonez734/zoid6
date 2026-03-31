@@ -1,41 +1,43 @@
+@import "_zoid6vars";
+@import "../../../bbsengine6/skin/scss/_mixins";
+
 summary {
-  border: 0.125em solid #dad7cd;
+  border: $blurb-border;
   overflow: hidden;
   opacity: 0.90;
+
   outline: none;
+  &:focus {
+    border-color: black;
+  }
   padding: 1rem;
   display: block;
-  background: #a3b18a;
+  background: $blurb-header-backgroundcolor; 
   color: white;
   padding-left: 2.2rem;
   position: relative;
   cursor: pointer;
-}
-summary:focus {
-  border-color: black;
-}
-summary h1 {
-  margin: 0px;
-  padding: 10px;
-  text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.4);
-  background-image: linear-gradient(to left top, #a3b18a, #9ead84);
-  color: #dad7cd;
-  background-color: #a3b18a;
+  h1 {
+    margin: 0px;
+    padding: 10px;
+    @include textshadow();
+    @include backgroundgradient($blurb-header-backgroundcolor, darken($blurb-header-backgroundcolor, 2%));
+    color: $blurb-header-textcolor;
+    background-color: $blurb-header-backgroundcolor;
+  }
+
 }
 
 details {
   box-sizing: border-box;
   margin-top: 5px;
 }
-
 details summary::-webkit-details-marker {
-  display: none;
+  display:none;
 }
-
 details[open] > summary:before {
   transform: rotate(90deg);
 }
-
 summary:before {
   content: '';
   border-width: .4rem;
@@ -59,15 +61,13 @@ summary:before {
 p {
   margin: 0;
   padding-bottom: 10px;
+  &:last-child {
+    padding: 0;
+  }
 }
-p:last-child {
-  padding: 0;
-}
-
 img {
   max-width: 100%;
 }
-
 body {
   font-family: 'Open Sans', sans-serif;
 }
