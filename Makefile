@@ -7,7 +7,7 @@ export STAGE = /srv/www/$(PROJECT)/
 export STATICPROD = $(HOST):/srv/www/vhosts/static.zoidtechnologies.com/
 export STATICSTAGE = /srv/www/vhosts/static.zoidtechnologies.com/
 
-export SCSSLOADPATH = --load-path $(HOME)/projects/$(PROJECT)/skin/scss/ --load-path $(HOME)/projects/bbsengine6/skin/scss/
+export SCSSLOADPATH = --load-path $(HOME)/projects/$(PROJECT)/skin/scss/ --load-path $(HOME)/projects/zoid6/scss/ --load-path $(HOME)/projects/bbsengine6/skin/scss/
 export SCSS = sass --line-numbers --stop-on-error --trace --style expanded --sourcemap=none $(SCSSLOADPATH)
 
 export RSYNC = rsync --chmod=Dg=rwxs,Fgu=rw,Fo=r --no-times --verbose \
@@ -28,6 +28,7 @@ prod:
 	$(MAKE) -C php stage
 	$(MAKE) -C smarty stage
 	$(MAKE) -C skin stage
+	$(MAKE) -C scss stage
 #	$(MAKE) -C js stage
 #	$(MAKE) -C sites/www/ stage
 #	$(RSYNC) htaccess-prod $(STATICSTAGE)html/.htaccess
