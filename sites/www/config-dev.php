@@ -1,7 +1,5 @@
 <?php
 
-namespace config {
-
 /**
  * http://pear.php.net/manual/en/package.database.db.intro-dsn.php
  */
@@ -11,43 +9,45 @@ namespace config {
  * define the base url for the site. 
  * THIS VALUE MUST BE TERMINATED WITH A TRAILING SLASH ("/")
  */
-define("SITEURL", "//wwwdev.zoidtechnologies.com/");
-define("SITETITLE", "Zoid Technologies - Custom Information Systems");
-define("SITEKEYWORDS", "intranet, extranet, public website, custom information systems");
-define("SITEDESCRIPTION", "design, build, operate, and maintain custom information systems for your intranet, extranet, or public website");
-define("FACEBOOKAPPID", "1680719402198764");
+// Define configuration constants in config namespace (required by bbsengine6)
+// Using backslash prefix makes them accessible via defined('\config\CONSTANT')
+define("config\SITEURL", "//wwwdev.zoidtechnologies.com/");
+define("config\SITETITLE", "Zoid Technologies - Custom Information Systems");
+define("config\SITEKEYWORDS", "intranet, extranet, public website, custom information systems");
+define("config\SITEDESCRIPTION", "design, build, operate, and maintain custom information systems for your intranet, extranet, or public website");
+define("config\FACEBOOKAPPID", "1680719402198764");
 
-define("IMAGESURL", "//static.zoidtechnologies.com/");
+define("config\IMAGESURL", "//static.zoidtechnologies.com/");
 
-define("SYSOPEMAILADDRESS", "jam@zoidtechnologies.com");
+define("config\SYSOPEMAILADDRESS", "jam@zoidtechnologies.com");
 
-define("SITENAME", "zoid technologies dev");
+define("config\SITENAME", "zoid technologies dev");
 
 /**
  * strftime() compatible date format string.
  */
 // define("DATEFORMAT", "%A %Y-%m-%d %I:%M %p %Z"); // <--- MOVED TO zoidweb.php
 
-define("UPLOADDIR", "files/");
+define("config\UPLOADDIR", "files/");
 
-define("VHOSTDIR", "/srv/www/vhosts/wwwdev.zoidtechnologies.com/");
-define("DOCUMENTROOT", VHOSTDIR . "80/html/");
+define("config\VHOSTDIR", "/srv/www/vhosts/wwwdev.zoidtechnologies.com/");
+define("config\DOCUMENTROOT", \config\VHOSTDIR . "80/html/");
 
-define("SKINDIR", DOCUMENTROOT . "skin/");
-define("SKINURL", SITEURL . "skin/");
+define("config\SKINDIR", \config\DOCUMENTROOT . "skin/");
+define("config\SKINURL", \config\SITEURL . "skin/");
 
 // define("COMMONTEMPLATEDIR", "/srv/www/zoidweb2/skin/tmpl/");
 
-define("SMARTYCOMPILEDTEMPLATESDIR", VHOSTDIR . "templates_c/");
-define("SMARTYPLUGINSDIR", VHOSTDIR . "smarty/");
-define("SMARTYTEMPLATESDIR", SKINDIR . "tmpl/");
+define("config\SMARTYCOMPILEDTEMPLATESDIR", \config\VHOSTDIR . "templates_c/");
+define("config\SMARTYPLUGINSDIR", \config\VHOSTDIR . "smarty/");
+define("config\SMARTYTEMPLATESDIR", \config\SKINDIR . "tmpl/");
 
-define("LOGENTRYPREFIX", "wwwdotzoiddev");
+define("config\LOGENTRYPREFIX", "wwwdotzoiddev");
 
 /**
  * @since 20110601
  */
-define("GOOGLEANALYTICSACCOUNT", "UA-23705021-1");
+define("config\GOOGLEANALYTICSACCOUNT", "UA-23705021-1");
 
 // define("SMARTY3", True);
 
@@ -56,22 +56,17 @@ define("GOOGLEANALYTICSACCOUNT", "UA-23705021-1");
  */
 //define("PEARHTTPSESSION", True);
 
-define("SITECSS", SKINURL . "css/www.css");
+define("config\SITECSS", \config\SKINURL . "css/www.css");
 
-define("USESHOPPINGCART", False);
+define("config\USESHOPPINGCART", False);
 
-}
-
-namespace {
-
-// Create global aliases for config constants for code that references them directly
-if (!defined("SITENAME")) define("SITENAME", \config\SITENAME);
-if (!defined("SITEURL")) define("SITEURL", \config\SITEURL);
-if (!defined("DOCUMENTROOT")) define("DOCUMENTROOT", \config\DOCUMENTROOT);
-if (!defined("SKINDIR")) define("SKINDIR", \config\SKINDIR);
-if (!defined("SKINURL")) define("SKINURL", \config\SKINURL);
-if (!defined("JSURL")) define("JSURL", \config\JSURL);
-if (!defined("SITECSS")) define("SITECSS", \config\SITECSS);
+// Create global aliases for code that references constants directly without namespace
+define("SITENAME", \config\SITENAME);
+define("SITEURL", \config\SITEURL);
+define("DOCUMENTROOT", \config\DOCUMENTROOT);
+define("SKINDIR", \config\SKINDIR);
+define("SKINURL", \config\SKINURL);
+define("SITECSS", \config\SITECSS);
 
 $PAGEMETADATA = [
     ["tag" => "meta", "name" => "description", "content" => "custom information systems for your intranet, extranet, or public website" ],
@@ -89,4 +84,4 @@ $includepath = get_include_path();
 $zoidweb4 = str_replace("zoidweb3", "zoidweb4", $includepath);
 set_include_path($zoidweb4);
 
-}
+?>
