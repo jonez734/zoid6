@@ -116,7 +116,7 @@ namespace {
     {
       \bbsengine6\session\start();
 
-      \bbsengine6\setcurrentsite("www");
+      \bbsengine6\setcurrentsite(defined('\config\SITENAME') ? \config\SITENAME : "NEEDINFO");
       \bbsengine6\setcurrentpage("index");
       \bbsengine6\setcurrentaction("index");
       \bbsengine6\setreturnto(SITEURL);
