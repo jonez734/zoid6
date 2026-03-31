@@ -6,7 +6,7 @@ export STAGE = /srv/www/vhosts/zoidtechnologies.com/html/$(PROJECT)/
 export PRODDOCROOT = $(HOST):/srv/www/vhosts/zoidtechnologies.com/html/$(PROJECT)/
 export STAGEDOCROOT = /srv/www/vhosts/zoidtechnologies.com/html/$(PROJECT)/
 
-export SCSSLOADPATH = --load-path $(HOME)/projects/zoid6/skin/scss/ --load-path $(HOME)/projects/bbsengine6/skin/scss/
+export SCSSLOADPATH = --load-path $(HOME)/projects/zoid6/scss/ --load-path $(HOME)/projects/zoid6/skin/scss/ --load-path $(HOME)/projects/bbsengine6/skin/scss/
 export SCSS = sass --line-numbers --stop-on-error --trace --style expanded --sourcemap=none $(SCSSLOADPATH)
 
 export RSYNC = rsync --chmod=Dg=rwxs,Fgu=rw,Fo=r --no-times --verbose \

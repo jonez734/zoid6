@@ -1,4 +1,6 @@
 //
+// zoid6/scss/_mixins.scss
+// Common mixins for all zoid6 sites
 // @see https://gist.github.com/garyharan/957284
 //
 
@@ -19,34 +21,22 @@
 @mixin boxshadow($spread: 0px, $color: rgba(black, 0.5), $blur: 2px, $horizontaloffset: 3px, $verticaloffset: 3px)
 {
 	box-shadow: $horizontaloffset $verticaloffset $blur $spread $color;
-//@include css3prefix(box-shadow, $horizontaloffset $verticaloffset $blur $size $color);
 }
 
 @mixin textshadow($horizontal: 3px, $vertical: 3px, $offset: 0px, $color: rgba(0, 0, 0, 0.4))
 {
-	//@include css3prefix(text-shadow, $horizontal $vertical $offset $color);
 	text-shadow: $horizontal $vertical $offset $color;
 }
 
 @mixin backgroundgradient($from, $to, $directionstart:to left top, $directionend:right bottom)
 {
 	background-image: linear-gradient($directionstart, $from, $to);
-	//background-image: -webkit-gradient(linear, $directionstart, $directionend, from($from), to($to));
-	//background-image: -webkit-linear-gradient($directionstart, $from, $to);
-	//background-image:    -moz-linear-gradient($directionstart, $from, $to);
-	//background-image:     -ms-linear-gradient($directionstart, $from, $to);
-	//background-image:      -o-linear-gradient($directionstart, $from, $to);
-	//background-image:         linear-gradient($directionstart, $from, $to);
 }
 
 @mixin bordergradient($from, $to, $directionstart:left top, $directionend:right bottom)
 {
- // border: 2px solid transparent;
- //-moz-border-image: -moz-linear-gradient($directionstart, $from 0%, $to 100%);
- //-webkit-border-image: -webkit-linear-gradient($directionstart, $from, $to 0%, $to 100%);
- border-image: linear-gradient($directionend, $from 0%, $to 100%);
- border-image-slice: 1;
-
+  border-image: linear-gradient($directionend, $from 0%, $to 100%);
+  border-image-slice: 1;
 }
 
 ///* 'keyframes' mixin @see http://zerosixthree.se/8-sass-mixins-you-must-have-in-your-toolbox/*/
@@ -69,26 +59,12 @@
 }
 
 ///* 'animation' mixin from https://developer.mozilla.org/en-US/docs/Web/CSS/animation */
-// duration | timing-function | delay | iteration-count | direction | fill-mode | play-state | name
-// duration | timing-function | delay | name 
-// duration | name 
 @mixin animation($str) {
  animation: #{$str};
-//@include css3prefix("animation", $str);
-  //-webkit-animation: #{$str};
-  //-moz-animation: #{$str};
-  //-ms-animation: #{$str};
-  //-o-animation: #{$str};
-  //animation: #{$str};      
 }
 
 @mixin transform($transforms...) {
-// @include css3prefix("transform", $transforms);
 	transform: #{$transforms};
-//	   -moz-transform: #{$transforms};
-//	     -o-transform: #{$transforms};
-//	    -ms-transform: #{$transforms};
-//	-webkit-transform: #{$transforms};
 }
 
 // 
@@ -126,7 +102,6 @@
 }
 
 @mixin lineargradient($direction, $color-stops...) {
-  // Direction has been omitted and happens to be a color-stop
   @if is-direction($direction) == false {
     $color-stops: $direction, $color-stops;
     $direction: 180deg;
@@ -139,46 +114,21 @@
 ///* 'transition' mixin @see http://codepen.io/sawmac/pen/cayhK */
 @mixin transition($transition...) {
  transition: $transition;
-//@include css3prefix("transition", $transition);
-//  -moz-transition:    $transition;
-//  -o-transition:      $transition;
-//  -webkit-transition: $transition;
-//  transition:         $transition;
 }
 @mixin transition-property($property...) {
 @include css3prefix("transition-property", $property);
-//  -moz-transition-property:    $property;
-//  -o-transition-property:      $property;
-//  -webkit-transition-property: $property;
-//  transition-property:         $property;
 }
 @mixin transition-duration($duration...) {
   @include css3prefix("transition-duration", $duration);
-//  -moz-transition-property:    $duration;
-//  -o-transition-property:      $duration;
-//  -webkit-transition-property: $duration;
-//  transition-property:         $duration;
 }
 @mixin transition-timing-function($timing...) {
  @include css3prefix("transition-timing-function", $timing);
- // -moz-transition-timing-function:    $timing;
- // -o-transition-timing-function:      $timing;
- // -webkit-transition-timing-function: $timing;
- // transition-timing-function:         $timing;
 }
 @mixin transition-delay($delay...) {
  @include css3prefix("transition-delay", $delay);
-//  -moz-transition-delay:    $delay;
-//  -o-transition-delay:      $delay;
-//  -webkit-transition-delay: $delay;
-//  transition-delay:         $delay;
 }
 
 ///* 'gradientanimation' mixin @see https://medium.com/@dave_lunny/animating-css-gradients-using-only-css-d2fd7671e759#.jlbdgs4jl */
-// @since 20151231
-// this is a mixin that will animate between two gradients.  the gradients are
-// generated at run time using the backgroundgradient mixin and are based on
-// variables in _vars.scss.
 @mixin gradientanimation($start, $end, $transTime) {
   background-size: 100%;
   @include backgroundgradient($start, $end);
@@ -193,7 +143,6 @@
     opacity: 0;
     width: 100%;
     @include transition(opacity $transTime);
-    //transition: opacity $transTime;
   }
   &:hover {
      &:before {
@@ -201,12 +150,33 @@
      }
   }
 }
+
 ///* 'animation' mixin @see http://zerosixthree.se/8-sass-mixins-you-must-have-in-your-toolbox/ */
 @mixin animation($str...) {
   @include css3prefix("animation", $str);
-//  -webkit-animation: #{$str};
-//  -moz-animation: #{$str};
-//  -ms-animation: #{$str};
-//  -o-animation: #{$str};
-//  animation: #{$str};
+}
+
+// Additional gradient-animation mixin from static
+@mixin gradient-animation($start, $end, $transTime) {
+  background-size: 100%;
+  background-image: linear-gradient($start, $end);
+  position: relative;
+  z-index: 100;
+  &:before {
+    background-image: linear-gradient($end, $start);
+    content: '';    
+    display: block;
+    height: 100%;
+    position: absolute;
+    top: 0; left: 0;
+    opacity: 0;
+    width: 100%;
+    z-index: -100;
+    transition: opacity $transTime;
+  }
+  &:hover {
+     &:before {
+       opacity: 1; 
+     }
+  }
 }

@@ -1,0 +1,59 @@
+@import "vars";
+@import "mixins";
+
+.spoiler {
+//  border: 1px solid #999;
+//  padding: 2px;
+//  background: #cfc;
+}
+
+.spoiler-btn {
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.spoiler-btn:hover {
+//  color: #e00;
+	color: $blurb-body-backgroundcolor;
+	background-color: $blurb-body-textcolor;
+
+}
+
+//.spoiler-btn-bottom {
+//  width: 100%;
+//  text-align: right;
+//}
+
+.spoiler-body {
+  display: none;
+}
+
+.spoiler .show,
+.spoiler.expanded .hide {
+  display: inline;
+}
+
+.spoiler .hide,
+.spoiler.expanded .show {
+  display: none;
+}
+
+//.spoiler.simple .spoiler-btn {
+//  width: 100%;
+//}
+//.spoiler.simple .spoiler-btn-bottom {
+//  display: none;
+//}
+//.spoiler.simple.expanded .spoiler-btn-bottom {
+//  display: block;
+//}
+
+//#content {
+//  max-height: 640px;
+//  width: 100%;
+//  max-width: 570px;
+//  margin: 0 auto;
+//}
