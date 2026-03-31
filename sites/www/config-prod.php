@@ -13,15 +13,22 @@ define("config\DOCUMENTROOT", \config\VHOSTDIR);
 define("config\SKINDIR", \config\DOCUMENTROOT . "skin/");
 define("config\SKINURL", \config\SITEURL . "skin/");
 define("config\JSURL", "/engine/js/");
+
+// Define SMARTY* constants before including zoid6config.php so it can create global aliases
 define("config\SMARTYCOMPILEDTEMPLATESDIR", \config\VHOSTDIR . "templates_c");
 define("config\SMARTYPLUGINSDIR", [ 0 => \config\VHOSTDIR . "smarty/", 1 => "/srv/www/zoid6/smarty/"]);
 define("config\SMARTYTEMPLATESDIR", [ 0 => \config\VHOSTDIR . "skin/tmpl/", 1=> "/srv/www/zoid6/skin/tmpl/", 2 => "/srv/www/bbsengine6/skin/tmpl/"]);
+
+// Include zoid6config.php to create global aliases
+require_once("zoid6config.php");
+
 define("config\LOGENTRYPREFIX", "zoid6www");
 define("config\SITECSS", \config\SKINURL . "css/www.css");
 
 require_once("zoid6.php");
 
-// Create global aliases for code that references constants directly without namespace
+// Create global aliases for non-SMARTY constants
+// (SMARTY* aliases are created by zoid6config.php)
 define("SITENAME", \config\SITENAME);
 define("SITEURL", \config\SITEURL);
 define("DOCUMENTROOT", \config\DOCUMENTROOT);
@@ -29,9 +36,6 @@ define("SKINDIR", \config\SKINDIR);
 define("SKINURL", \config\SKINURL);
 define("JSURL", \config\JSURL);
 define("SITECSS", \config\SITECSS);
-define("SMARTYTEMPLATESDIR", \config\SMARTYTEMPLATESDIR);
-define("SMARTYCOMPILEDTEMPLATESDIR", \config\SMARTYCOMPILEDTEMPLATESDIR);
-define("SMARTYPLUGINSDIR", \config\SMARTYPLUGINSDIR);
 define("LOGENTRYPREFIX", \config\LOGENTRYPREFIX);
 
 $PAGEMETADATA = [
