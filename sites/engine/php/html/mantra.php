@@ -109,7 +109,7 @@ class mantra
     $data["pageinfo"] = $pageinfo;
 /*
     $page->addStyleSheet(SKINURL."css/mantra.css");
-    $page->addStylesheet(STATICSKINURL."css/pagerinfo.css");
+    $page->addStylesheet(ENGINESKINURL."css/pagerinfo.css");
     $page->addBodyContent(fetchpageheader());
     $page->addBodyContent(fetchtopbar());
     $page->addBodyContent(fetchsidebar());

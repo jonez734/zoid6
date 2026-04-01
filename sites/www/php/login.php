@@ -164,7 +164,7 @@ class login
     $renderer = getquickformrenderer();
     $form->render($renderer);
     $options = [];
-    $options["stylesheets"] = [STATICSKINURL."css/login.css"];
+    $options["stylesheets"] = [SHAREDSKINURL."css/login.css"];
     $res = displayform($renderer, "knock, knock, neo...", $options);
     if (PEAR::isError($res))
     {

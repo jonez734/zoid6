@@ -12,7 +12,7 @@ all: $(cssfiles)
 	$(SCSS) $< $@
 
 stage:
-	$(SCSS) --update .:$(STAGE)skin/css/
+	$(SCSS) --update .:$(SHAREDSTAGEDOCROOT)/
 
 clean:
 	-rm *~ *.css *.css.map

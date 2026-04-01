@@ -4,6 +4,12 @@ export PROJECT = zoid6
 export PROD = $(HOST):/srv/www/$(PROJECT)/
 export STAGE = /srv/www/$(PROJECT)/
 
+export SHAREDPROD = $(HOST):/srv/www/vhosts/zoidtechnologies.com/html/shared/
+export SHAREDSTAGE = /srv/www/zoid6/shared/
+
+export SHAREDSTAGEDOCROOT = /srv/www/zoid6/shared/skin/css/
+export SHAREDPRODDOCROOT = $(HOST):/srv/www/vhosts/zoidtechnologies.com/html/shared/skin/css/
+
 export STATICPROD = $(HOST):/srv/www/vhosts/static.zoidtechnologies.com/
 export STATICSTAGE = /srv/www/vhosts/static.zoidtechnologies.com/
 
@@ -35,7 +41,14 @@ prod:
 #	$(MAKE) -C sites/www/ stage
 #	$(RSYNC) htaccess-prod $(STATICSTAGE)html/.htaccess
 	$(RSYNC) $(STAGE) $(PROD)
-#	$(RSYNC) $(STATICSTAGE) $(STATICPROD)
+
+shared:
+	$(MAKE) -C shared stage
+	$(MAKE) -C scss stage
+	$(RSYNC) $(SHAREDSTAGE) $(SHAREDPROD)
+	$(RSYNC) $(SHAREDSTAGEDOCROOT) $(SHAREDPRODDOCROOT)
 
 backup:
 	rsync --recursive --verbose --exclude=.venv . /run/media/jam/AEAB-CF37/projects/$(PROJECT)/
+
+.PHONY: shared

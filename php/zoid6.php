@@ -48,10 +48,12 @@ define("JOINURL", "/join");
 
 define("CAPTCHAFONTFILE", "cour.ttf");
 
-define("STATICURL", "/static/");
-define("STATICSKINURL", \STATICURL."skin/");
+define("SHAREDURL", "/shared/");
+define("SHAREDSKINURL", \SHAREDURL."skin/");
 // @since 20220103
-define("STATICARTURL", \STATICSKINURL."art/");
+define("SHAREDARTURL", \SHAREDSKINURL."art/");
+
+define("ENGINESKINURL", \ENGINEURL . "skin/");
 
 define("NONCESALTLENGTH", 10);
 
@@ -87,7 +89,7 @@ function buildchoices($choices=[])
     // $choices[] = ["name" => "socrates", "title" => "threaded forum", "url" => "https://socrates.zoidtechnologies.com/", "desc" => ""];
     $choices[] = ["name" => "www", "title" => "www site", "url" => "https://zoidtechnologies.com", "desc" => "www site"];
 //    $choices[] = ["name" => "repo", "title" => "download site", "url" => "https://repo.zoidtechnologies.com", "desc" => "repo site"];
-//    \bbsengine6\util\logentry("choices=".var_export($choices, true));
+    $choices[] = ["name" => "empyre", "title" => "the game empyre", "url" => "https://zoidtechnologies.com/empyre/", "desc" => ""];
     return \bbsengine6\buildchoices($choices);
 }
 
@@ -589,7 +591,7 @@ function accesssig($op, $sig)
 function getpage($title, $options=null)
 {
   $_options = array();
-  $_options["staticskinurl"] = STATICSKINURL;
+  $_options["staticskinurl"] = SHAREDSKINURL;
 //  $_options["sitecss"] = SITECSS;
 
   if (is_array($options))
@@ -617,22 +619,22 @@ function getpage($title, $options=null)
 // made small change in www/index.js, now migrate 1.4.1 is not needed
 //    $page->addScript("//code.jquery.com/jquery-migrate-1.4.1.js");
     $page->addScript("https://code.jquery.com/jquery-migrate-3.0.0.js");
-//    $page->addStyleSheet(STATICSKINURL."css/sidebar.css");
-//    $page->addStyleSheet(STATICSKINURL."css/zoidweb3.css");
-//    $page->addStyleSheet(STATICSKINURL."css/actions.css");
-//    $page->addStyleSheet(STATICSKINURL."css/breadcrumbs.css");
+//    $page->addStyleSheet(SHAREDSKINURL."css/sidebar.css");
+//    $page->addStyleSheet(SHAREDSKINURL."css/zoidweb3.css");
+//    $page->addStyleSheet(SHAREDSKINURL."css/actions.css");
+//    $page->addStyleSheet(SHAREDSKINURL."css/breadcrumbs.css");
 
     /**
      * @since 2016nov06
      */
-    $page->addStyleSheet(STATICSKINURL."css/bbsengine3badge.css");
+    $page->addStyleSheet(SHAREDSKINURL."css/bbsengine3badge.css");
    
-    $page->addStyleSheet(STATICSKINURL."css/panel.css");
+    $page->addStyleSheet(SHAREDSKINURL."css/panel.css");
 
    /**
     * @since 20160601
     */
-   $page->addStylesheet(STATICSKINURL."css/pagetransition.css");
+   $page->addStylesheet(SHAREDSKINURL."css/pagetransition.css");
    
    $page->setMetaData("google-site-verification", "-crBDeAJOq6aN0255NpBZKq9KiCFhIa7GVozMsjdb0Y");
    $page->setMetaData("viewport", "width=device-width, initial-scale=1");
@@ -644,30 +646,30 @@ function getpage($title, $options=null)
 //   $page->addScript(STATICJAVASCRIPTURL."tooltip.js", ["execute" => "defer"]);
   
    $page->addScript(STATICJAVASCRIPTURL."topbar.js", ["execute" => "defer"]);
-   $page->addStyleSheet(STATICSKINURL."css/topbar.css");
+   $page->addStyleSheet(SHAREDSKINURL."css/topbar.css");
   
    $page->addScript(STATICJAVASCRIPTURL."clock.js", ["execute" => "defer"]);
-   $page->addStylesheet(STATICSKINURL."css/clock.css");
+   $page->addStylesheet(SHAREDSKINURL."css/clock.css");
   
-   $page->addStyleSheet(STATICSKINURL."css/actions.css");
+   $page->addStyleSheet(SHAREDSKINURL."css/actions.css");
    
    // commented out 2016oct24, trying to fix the problem with get-notify-count
    //   $page->addScript(ENGINEURL."js/jquery.jsonp.js", ["execute" => "defer"]);
    //   $page->addScript(STATICJAVASCRIPTURL."page.js", ["execute" => "defer"]);
    
-   //   $page->addStyleSheet(STATICSKINURL."css/stickyfooter.css");
+   //   $page->addStyleSheet(SHAREDSKINURL."css/stickyfooter.css");
    
    if (defined("FONTAWESOMECSSURL") === True)
    {
      $page->addStyleSheet(FONTAWESOMECSSURL);
    }
-   $page->addStyleSheet(STATICSKINURL."css/noscript.css");
+   $page->addStyleSheet(SHAREDSKINURL."css/noscript.css");
    $page->addBodyContent($tmpl->fetch("noscript.tmpl"));
   
    if (getcurrentmemberid() > 0)
    {
      $page->addScript(ENGINEURL."js/notify.js", ["execute" => "async"]);
-     $page->addStyleSheet(STATICSKINURL."css/notify.css");
+     $page->addStyleSheet(SHAREDSKINURL."css/notify.css");
    }
    
    if (getsitevar("smoothstate") === True)
@@ -676,8 +678,8 @@ function getpage($title, $options=null)
      $page->addScript(\ENGINEURL."js/jquery.smoothState.js");
      $page->addScript(\ENGINEURL."js/initsmoothstate.js");
    }
-   $page->addStyleSheet(\STATICSKINURL."css/animate.css");
-   $page->addStyleSheet(\STATICSKINURL."css/page.css");
+   $page->addStyleSheet(\SHAREDSKINURL."css/animate.css");
+   $page->addStyleSheet(\SHAREDSKINURL."css/page.css");
     // @since 20170420
     $page->addStyleSheet("//fonts.googleapis.com/css?family=Montserrat|Open+Sans");
 }

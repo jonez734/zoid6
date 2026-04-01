@@ -4,7 +4,7 @@ all:
 	$(SCSS) $< $@
 
 stage:
-	$(SCSS) --update --watch .:$(STAGE)skin/css/
+	$(SCSS) --update --watch .:$(SHAREDSTAGE)skin/css/
 
 clean:
 	-rm *~ *.css *.css.map

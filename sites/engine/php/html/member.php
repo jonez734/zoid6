@@ -366,7 +366,7 @@ class member
     if ($pageprotocol === "standard")
     {
       $page = getpage("Edit Member");
-      $page->addStyleSheet(STATICSKINURL . "css/form.css");
+      $page->addStyleSheet(ENGINESKINURL . "css/form.css");
       $page->addScript(STATICJAVASCRIPTURL."form.js");
       $page->addBodyContent($bodycontent);
       $page->display();
@@ -639,7 +639,7 @@ class member
     if ($pageprotocol === "standard")
     {
       $page = getpage("Add Member");
-      $page->addStyleSheet(STATICSKINURL . "css/form.css");
+      $page->addStyleSheet(ENGINESKINURL . "css/form.css");
       $page->addScript(STATICJAVASCRIPTURL."form.js");
       foreach ($bodycontent as $fragment)
       {

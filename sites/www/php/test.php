@@ -171,7 +171,7 @@ $notify["actions"] = buildnotifyactions($notify);
 $page = getpage("test!");
 
 $page->addScript(STATICJAVASCRIPTURL."notify.js", ["execute" => "async"]);
-$page->addStyleSheet(STATICSKINURL."css/notify.css");
+$page->addStyleSheet(ENGINESKINURL."css/notify.css");
 
 $tmpl = getsmarty();
 $tmpl->assign("notify", $notify);
