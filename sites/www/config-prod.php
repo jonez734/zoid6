@@ -6,13 +6,14 @@ require_once('util.php');
 
 // Define configuration constants in config namespace (required by bbsengine6)
 // Using backslash prefix makes them accessible via defined('\config\CONSTANT')
-define("config\SITENAME", "zoid technologies");
+define("config\SITENAME", "www");
 define("config\VHOSTDIR", "/srv/www/vhosts/zoidtechnologies.com/html/");
 define("config\SITEURL", "https://zoidtechnologies.com/");
 define("config\DOCUMENTROOT", \config\VHOSTDIR);
 define("config\SKINDIR", \config\DOCUMENTROOT . "skin/");
 define("config\SKINURL", \config\SITEURL . "skin/");
 define("config\JSURL", "/engine/js/");
+define("config\ENGINESKINURL", "/engine/skin/");
 
 // Define SMARTY* constants before including zoid6config.php so it can create global aliases
 define("config\SMARTYCOMPILEDTEMPLATESDIR", \config\VHOSTDIR . "templates_c");
