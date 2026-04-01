@@ -60,8 +60,8 @@ $actions-color: lighten($blurb-header-backgroundcolor, 5%);
 $blurb-a-hover-color: white;
 $blurb-a-hover-backgroundcolor: gray;
 
-$blurb-border: 0.125em solid $blurb-textcolor;
-$blurb-border-color: darken($blurb-textcolor, 20%) !default;
+$blurb-border-color: #4a4a4a !default; // dark gray
+$blurb-border: 0.125em solid $blurb-border-color;
 
 $body-fontsize: 1.5em;
 

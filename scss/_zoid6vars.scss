@@ -50,7 +50,8 @@ $actions-color: lighten($blurb-header-backgroundcolor, 5%);
 $blurb-a-hover-color: white;
 $blurb-a-hover-backgroundcolor: gray;
 
-$blurb-border: 0.125em solid $blurb-textcolor;
+$blurb-border-color: #4a4a4a; // dark gray
+$blurb-border: 0.125em solid $blurb-border-color;
 
 $body-fontsize: 1.25em;
 
