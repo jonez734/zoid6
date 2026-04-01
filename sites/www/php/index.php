@@ -156,14 +156,17 @@ namespace {
         $needsapproval = null;
       }
   */    
-      $choices = \zoid6\buildchoices();
-//      \bbsengine6\util\logentry("www.100: choices=".var_export($choices, true));
+      $choices = [];
+      // Add site-specific choices here if SYSOP or admin features are needed
+      // Example: if (\bbsengine6\member\lib\checkflag("SYSOP")) {
+      //   $choices[] = ["name" => "add link", "title" => "...", "url" => "...", "desc" => "..."];
+      // }
       $data = [];
       $data["latestlinks"] = [];
       $data["needsapproval"] = [];
       $data["sitenews"] = [];
       $data["latestreleases"] = [];
-      $data["choices"] = $choices;
+      $data["choices"] = \zoid6\buildchoices($choices);
       \bbsengine6\displaypage($data, "index.tmpl");
 
       return;
