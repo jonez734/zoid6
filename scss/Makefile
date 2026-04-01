@@ -12,7 +12,7 @@ all: $(cssfiles)
 	$(SCSS) $< $@
 
 stage:
-	$(SCSS) --update --watch .:$(STAGE)skin/css/
+	$(SCSS) --update .:$(STAGE)skin/css/
 
 clean:
 	-rm *~ *.css *.css.map
