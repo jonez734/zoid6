@@ -4,8 +4,10 @@ export PROJECT = zoidtechnologies.com
 export PROD = $(HOST):/srv/www/vhosts/$(PROJECT)/
 export STAGE = /srv/www/vhosts/$(PROJECT)/
 
-export SCSSLOADPATH = --load-path /home/opencode/data/work/zoid6/skin/scss/ --load-path $(HOME)/projects/$(PROJECT)/skin/scss/ --load-path $(HOME)/projects/bbsengine6/skin/scss/
-export SCSS = sass --line-numbers --stop-on-error --trace --style expanded --sourcemap=none $(SCSSLOADPATH)
+export SCSSLOADPATH = --load-path /home/opencode/data/work/zoid6/shared/skin/scss/ \
+                      --load-path /home/opencode/data/work/zoid6/scss/ \
+                      --load-path /home/opencode/data/work/zoid6/sites/www/skin/scss/
+export SCSS = sass $(SCSSLOADPATH) --sourcemap=none --stop-on-error --trace --style expanded --update
 
 export RSYNC = rsync --chmod=Dg=rwxs,Fgu=rw,Fo=r --no-times --verbose \
 	--archive --update --backup --recursive \
