@@ -20,4 +20,9 @@ define("SMARTYTEMPLATESDIR", \config\SMARTYTEMPLATESDIR);
 define("SMARTYCOMPILEDTEMPLATESDIR", \config\SMARTYCOMPILEDTEMPLATESDIR);
 define("SMARTYPLUGINSDIR", \config\SMARTYPLUGINSDIR);
 
+// Shared URL constants - used by all zoid6 sites
+define("ENGINEURL", "/engine/");
+define("ENGINESKINURL", "/engine/skin/");
+define("SHAREDSKINURL", "/shared/skin/");
+
 ?>
