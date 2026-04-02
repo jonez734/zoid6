@@ -1,3 +1,5 @@
+export SHAREDSTAGE = /srv/www/zoid6/shared/
+
 all:
 
 .scss.css:
@@ -9,7 +11,7 @@ stage:
 	sass --load-path /home/opencode/data/work/zoid6/shared/skin/scss/ \
 	     --load-path /home/opencode/data/work/zoid6/scss/ \
 	     --sourcemap=none --stop-on-error --trace --style expanded \
-	     --update .:$(SHAREDSTAGE)skin/css/
+	     --update .:$(STAGE)skin/css/
 
 clean:
 	-rm *~ *.css *.css.map
