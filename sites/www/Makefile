@@ -10,7 +10,6 @@ export installfile = install --mode=0660
 
 export SCSSLOADPATH = --load-path /home/opencode/data/work/zoid6/shared/skin/scss/ \
                       --load-path /home/opencode/data/work/bbsengine6/skin/scss/ \
-                      --load-path /home/opencode/data/work/zoid6/scss/ \
                       --load-path /home/opencode/data/work/zoid6/sites/www/skin/scss/
 export SCSS = sass $(SCSSLOADPATH) --sourcemap=none --stop-on-error --trace --style expanded --update
 

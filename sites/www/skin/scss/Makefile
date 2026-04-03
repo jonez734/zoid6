@@ -10,20 +10,17 @@ all:
 
 # Explicit targets for main SCSS files (prevents compiling _vars.scss as standalone)
 $(patsubst %.scss,%.css,$(MAIN_SCSS_FILES)):
-	sass --load-path /home/opencode/data/work/zoid6/shared/skin/scss/ \
-	     --load-path /home/opencode/data/work/zoid6/scss/ \
+	sass 	--load-path /home/opencode/data/work/zoid6/shared/skin/scss/ \
 	     --load-path $(CURDIR) \
 	     --sourcemap=none --stop-on-error --trace --style expanded $< $@
 
 %.css: %.scss
-	sass --load-path /home/opencode/data/work/zoid6/shared/skin/scss/ \
-	     --load-path /home/opencode/data/work/zoid6/scss/ \
+	sass 	--load-path /home/opencode/data/work/zoid6/shared/skin/scss/ \
 	     --load-path $(CURDIR) \
 	     --sourcemap=none --stop-on-error --trace --style expanded $< $@
 
 stage:
-	sass --load-path /home/opencode/data/work/zoid6/shared/skin/scss/ \
-	     --load-path /home/opencode/data/work/zoid6/scss/ \
+	sass 	--load-path /home/opencode/data/work/zoid6/shared/skin/scss/ \
 	     --load-path $(CURDIR) \
 	     --sourcemap=none --stop-on-error --trace --style expanded \
 	     --update .:/srv/www/vhosts/zoidtechnologies.com/html/skin/css/
