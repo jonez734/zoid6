@@ -1,0 +1,655 @@
+body {
+  background-color: #3a5a40;
+  /*  font-family: Arial, Helvetica, sans-serif; */
+  font-family: 'Roboto Condensed', sans-serif;
+  font-size: 1.25em;
+  color: #dad7cd;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  background-image: url(https://zoidtechnologies.com/static/skin/art/free-seamless-metal-textures.jpg);
+  background-repeat: repeat;
+  background-attachment: fixed;
+}
+body main {
+  display: flex;
+}
+
+.strike {
+  text-decoration: line-through;
+}
+
+.scene {
+  -webkit-animation-duration: 1s;
+  /* 0.25s; */
+  animation-duration: 1s;
+  /* 0.25s; */
+  -webkit-transition-timing-function: ease-in;
+  transition-timing-function: ease-in;
+  -webkit-animation-fill-mode: both;
+  animation-fill-mode: both;
+  /** Reverse "exit" animations */
+}
+.scene.is-exiting .element {
+  animation-direction: alternate-reverse;
+}
+
+.noflex {
+  flex: 0;
+}
+
+.nomargin {
+  margin: 0;
+}
+
+.nopadding {
+  padding: 0;
+}
+
+.blurb {
+  background-color: #344e41;
+  color: #dad7cd;
+  margin: 0.5em;
+  border: 0.125em solid #4a4a4a;
+  overflow: hidden;
+  flex: 0;
+  box-shadow: 3px 3px 2px 0px rgba(0, 0, 0, 0.5);
+  text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.4);
+}
+.blurb .header h1, .blurb .header h2, .blurb .header h3 {
+  font-family: serif;
+  margin: 0px;
+  padding: 10px;
+  font-weight: bold;
+  font-size: 1.50em;
+  text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.4);
+  background-image: linear-gradient(to left top, #a3b18a, #9ead84);
+  color: #dad7cd;
+  background-color: #a3b18a;
+}
+.blurb .header h1 a:hover, .blurb .header h2 a:hover, .blurb .header h3 a:hover {
+  color: #a3b18a;
+  background-color: #dad7cd;
+}
+.blurb .header.warning h1 {
+  color: orange;
+}
+.blurb a {
+  color: #dad7cd;
+  text-decoration-color: yellowgreen;
+  text-decoration: underline;
+  transition: all 0.25s;
+}
+.blurb a:hover {
+  color: #3a5a40;
+  background-color: #c5a5bf;
+}
+.blurb .body {
+  color: #dad7cd;
+  background-color: #3a5a40;
+  border: 0;
+  border-top: 0.125em solid #4a4a4a;
+  margin: 0;
+  padding: 0.5em;
+}
+.blurb .body p {
+  font-family: sans-serif;
+  padding: 0.125em;
+  margin: 0.125em;
+}
+.blurb .body a:hover {
+  background-color: #dad7cd;
+  color: #3a5a40;
+}
+.blurb .metadata {
+  font-size: 0.75em;
+  padding: 0.50em;
+  color: #dad7cd;
+  background-color: #3a5a40;
+}
+.blurb .footer {
+  color: #dad7cd;
+  background-color: #3a5a40;
+  border: 0;
+  border-top: 0.125em solid #4a4a4a;
+}
+.blurb.vstretch {
+  flex: 1 0 auto;
+}
+
+body a {
+  color: #dad7cd;
+  background-color: #3a5a40;
+  margin: 0em;
+}
+body a:visited {
+  color: #c4c0b0;
+  background-color: #304a35;
+  transition: all 0.125s;
+}
+body a:hover {
+  color: #e5e3dc;
+  background-color: #3a5a40;
+  transition: all 0.125s;
+}
+
+header#pageheader {
+  flex: 0 1 auto;
+  border: 0;
+  background-color: #344e41;
+  overflow: hidden;
+  font-family: pageheaderfont;
+  font-size: large;
+  text-align: center;
+}
+header#pageheader .body {
+  -webkit-text-stroke-width: 1px;
+  -webkit-text-stroke-color: black;
+  color: #dad7cd;
+  text-shadow: 4px 3px 3px rgba(0, 0, 0, 0.4);
+}
+header#pageheader .body h1 {
+  font-size: 2.5em;
+}
+header#pageheader .body h2 {
+  font-size: 2.0em;
+}
+header#pageheader .body h2 a {
+  color: green;
+  text-decoration: underline;
+  text-decoration-color: greenyellow;
+}
+header#pageheader .body h2 a:hover {
+  text-decoration-color: #98fb00;
+  background-color: black;
+}
+header#pageheader a {
+  color: white;
+}
+
+@font-face {
+  font-family: pageheaderfont;
+  src: url("/skin/art/BFTinyHand-Regular.otf");
+}
+footer#pagefooter {
+  text-shadow: 4px 3px 3px rgba(0, 0, 0, 0.4);
+  margin: 0.5em;
+  padding: 0.50em;
+  text-align: center;
+  border: 0.125em solid #4a4a4a;
+  flex: 0 1 auto;
+  background-color: #344e41;
+}
+footer#pagefooter .copyright {
+  text-align: center;
+  font-size: 0.75em;
+}
+footer#pagefooter ul {
+  margin: 0;
+  padding: 0;
+}
+
+div#topbar {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  flex: 0 1 auto;
+  font-size: 1.0em;
+  color: #dad7cd;
+  background-color: #3a5a40;
+  border: 0;
+  border: 0.125em solid #4a4a4a;
+  margin: 0.5em;
+  padding: 0;
+  transition: all 0.5s ease;
+}
+div#topbar ul {
+  padding: 0;
+  margin: 0;
+}
+div#topbar p {
+  padding: 0.25em;
+  margin: 0;
+}
+div#topbar .start, div#topbar .end {
+  padding: 0.50em;
+}
+div#topbar .start {
+  border: 0;
+  border-right: 0.125em solid #4a4a4a;
+  justify-content: flex-start;
+  order: -1;
+}
+div#topbar .middle {
+  flex: 1;
+  flex-grow: 1;
+  padding: 0.50em;
+}
+div#topbar .end {
+  border: 0em;
+  border-left: 0.125em solid #4a4a4a;
+  justify-content: flex-end;
+  order: 1;
+}
+div#topbar #clock {
+  display: inline;
+}
+div#topbar a {
+  color: #dad7cd;
+  text-decoration-color: yellowgreen;
+  text-decoration: underline;
+  transition: all 0.25s;
+}
+div#topbar a:hover {
+  color: #dad7cd;
+  background-color: #252832;
+}
+div#topbar.fixed {
+  position: sticky;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 10;
+  opacity: 1.00;
+  margin-left: 0;
+  box-shadow: 0 0 1em rgba(0, 0, 0, 0.2);
+}
+
+/*
+.actions {
+  font-size: 95%;
+  color: $actions-color;
+  width: 50%;
+}
+
+.action a:hover {
+  background-color: #15F6BC;
+}
+*/
+form {
+  margin: 5px;
+  padding: 0;
+  /*
+    input, textarea {
+      @include transition(all 1.0s ease);
+      border: 2px solid $textcolor;
+      background-color: lighten($backgroundcolor, 5%); // #336699;
+      color: $textcolor;
+    }
+  */
+}
+form fieldset {
+  border: 0;
+  margin: 0;
+  padding: 5px;
+}
+form fieldset h1 {
+  background-color: #F0F0F0;
+  padding: 4px;
+  margin: 0;
+  color: #000000;
+  border: 0;
+  border-bottom: 2px solid #999999;
+}
+form fieldset label {
+  color: #dad7cd;
+}
+form fieldset label.error {
+  background-color: yellow;
+  color: #000;
+}
+form fieldset input:focus, form fieldset textarea:focus {
+  background-color: white;
+  border: 2px solid black;
+  color: #000000;
+}
+form .row .element.errorinput, form .row .element.errortextarea {
+  border: 2px solid red;
+}
+
+div.errors {
+  color: white;
+}
+div.errors h1 {
+  padding: 0.25em;
+  margin: 0;
+  color: #dad7cd;
+}
+
+.requiredstar {
+  color: red;
+}
+
+/**
+ * @since 2016nov03
+ * ripped from https://codepen.io/bbodine1/pen/novBm , decided not to use it
+ */
+/**
+ * @since 2016nov03
+ * https://codepen.io/jamesbarnett/pen/yILjk
+ */
+input[type=checkbox] + label:before {
+  font-family: FontAwesome;
+  display: inline-block;
+  content: "\f096";
+  /* icon-checked-empty */
+  letter-spacing: 0.50em;
+  transition: color 0.5s ease-in-out;
+  color: green;
+}
+
+input[type=checkbox]:checked + label:before {
+  content: "\f046";
+  /* icon-check */
+  letter-spacing: 0.38em;
+  color: red;
+}
+
+.captchaclass img {
+  margin-bottom: 0.25em;
+}
+
+.col-25 {
+  float: left;
+  width: 25%;
+  margin-top: 6px;
+}
+
+.col-75 {
+  float: left;
+  width: 75%;
+  margin-top: 6px;
+}
+
+form .row {
+  width: 100%;
+  color: purple;
+}
+
+div.sidebar {
+  text-align: left;
+  background: rgba(48, 48, 48, 0.8) none repeat scroll 0% 0%;
+  text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s;
+  overflow: hidden;
+  flex: 0 1 auto;
+}
+div.sidebar.open {
+  opacity: 1.0;
+  visibility: visible;
+}
+div.sidebar.closed {
+  opacity: 0.0;
+  visibility: hidden;
+}
+div.sidebar ul {
+  list-style: none;
+  margin: 0px;
+  padding: 0.25em;
+}
+div.sidebar ul li {
+  display: inline;
+  padding: 0;
+  margin: 0;
+}
+div.sidebar ul li a {
+  margin: 0;
+  padding: 0;
+  padding-right: 0.125em;
+}
+div.sidebar ul li .currentsite {
+  color: white;
+  font-weight: bold;
+  display: block;
+  background-size: 100%;
+  background-image: linear-gradient(to left top, #006633, #005c2e);
+  position: relative;
+}
+div.sidebar ul li .currentsite:before {
+  background-image: linear-gradient(to left top, #005c2e, #006633);
+  content: '';
+  display: block;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  width: 100%;
+  transition: opacity 0.3s;
+}
+div.sidebar ul li .currentsite:hover:before {
+  opacity: 1;
+}
+div.sidebar p {
+  padding: 5px;
+}
+
+.sidebaricon {
+  transition: all 0.3s;
+  cursor: pointer;
+  color: black;
+}
+.sidebaricon.open {
+  transform: rotate(-90deg);
+  color: rgba(0, 0, 0, 0.75);
+}
+
+.maturecontentwarning {
+  flex: 0 1 auto;
+}
+.maturecontentwarning .header h1 {
+  margin: 0px;
+  padding: 0.50em;
+  font-weight: bold;
+  font-size: 130%;
+  background-color: #E6B24C;
+  color: #000000;
+  background-image: linear-gradient(to left top, #ffb733, #cc8400);
+}
+.maturecontentwarning p {
+  margin: 2.0em;
+}
+.maturecontentwarning .body {
+  overflow: hidden;
+}
+
+ul.nobullets {
+  list-style-type: none;
+}
+ul.nobullets li ul {
+  list-style-type: none;
+}
+ul.commadelimited {
+  border: 0px solid red;
+  display: inline;
+  margin: 0;
+  padding: 0;
+}
+ul.commadelimited > li {
+  display: inline;
+  padding: 0.125em;
+  margin: 0;
+}
+ul.commadelimited > li:after {
+  content: ", ";
+}
+ul.commadelimited > li:last-child:after {
+  content: "";
+}
+ul.commadelimited > li:nth-last-child(2):after {
+  content: " and ";
+}
+ul.commadelimited > li:nth-last-child(3) + li:after {
+  content: ", and ";
+}
+ul.inlinelist {
+  margin: 0;
+  padding: 0.125em;
+}
+ul.inlinelist > li {
+  display: inline;
+}
+
+ul.breadcrumbs {
+  padding: 0.125em;
+  font-weight: bold;
+  margin: 0;
+  display: inline;
+}
+ul.breadcrumbs li {
+  display: inline;
+}
+
+#notifications {
+  list-style-type: none;
+  position: absolute;
+  top: 0;
+  right: 1.0em;
+  max-width: 25%;
+}
+
+#notifications li {
+  margin: 5px;
+}
+
+#notifications li div.notify {
+  background-color: #004F86;
+  border-radius: 6px 6px 6px 6px;
+  color: #FFFFFF;
+  margin: 0px;
+  padding: 1em;
+  width: 100%;
+  float: right;
+  clear: both;
+  margin: 5px;
+}
+
+/*
+#notifications li div.notify:hover {
+  opacity: 0.15;
+}
+*/
+#notifications li div.closebutton {
+  background: url(/images/notificationclosebutton.gif);
+  width: 22px;
+  height: 22px;
+  cursor: hand;
+  cursor: pointer;
+}
+
+#notifications li div.notify a:link {
+  color: #FFFFFF;
+}
+
+.blurb.notify.popup .footer {
+  background-color: #004F86;
+  border: 0;
+}
+.blurb.notify.popup .footer ul.actions {
+  background-color: #004F86;
+}
+.blurb.notify.popup .footer ul.actions li {
+  background-color: #000000;
+}
+
+.poweredby:hover .bolt {
+  background: rgba(0, 0, 0, 0);
+  background: -webkit-linear-gradient(top, rgba(0, 0, 0, 0) 0%, rgba(187, 187, 187, 0.25) 25%, rgba(119, 119, 119, 0.5) 50%, rgba(51, 51, 51, 0.75) 75%, black 100%);
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(187, 187, 187, 0.25) 25%, rgba(119, 119, 119, 0.5) 50%, rgba(51, 51, 51, 0.75) 75%, black 100%);
+  -webkit-animation: 1s ease 0s infinite alternate-reverse both running boltkeyframes;
+  -khtml-animation: 1s ease 0s infinite alternate-reverse both running boltkeyframes;
+  -moz-animation: 1s ease 0s infinite alternate-reverse both running boltkeyframes;
+  -ms-animation: 1s ease 0s infinite alternate-reverse both running boltkeyframes;
+  -o-animation: 1s ease 0s infinite alternate-reverse both running boltkeyframes;
+  animation: 1s ease 0s infinite alternate-reverse both running boltkeyframes;
+}
+
+@-webkit-keyframes boltkeyframes {
+  0% {
+    opacity: 0.5;
+    color: #000000;
+  }
+  100% {
+    opacity: 1.0;
+    color: #FFFFFF;
+  }
+}
+@-moz-keyframes boltkeyframes {
+  0% {
+    opacity: 0.5;
+    color: #000000;
+  }
+  100% {
+    opacity: 1.0;
+    color: #FFFFFF;
+  }
+}
+@-ms-keyframes boltkeyframes {
+  0% {
+    opacity: 0.5;
+    color: #000000;
+  }
+  100% {
+    opacity: 1.0;
+    color: #FFFFFF;
+  }
+}
+@-o-keyframes boltkeyframes {
+  0% {
+    opacity: 0.5;
+    color: #000000;
+  }
+  100% {
+    opacity: 1.0;
+    color: #FFFFFF;
+  }
+}
+@keyframes boltkeyframes {
+  0% {
+    opacity: 0.5;
+    color: #000000;
+  }
+  100% {
+    opacity: 1.0;
+    color: #FFFFFF;
+  }
+}
+.spoiler-btn {
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.spoiler-btn:hover {
+  color: #3a5a40;
+  background-color: #dad7cd;
+}
+
+.spoiler-body {
+  display: none;
+}
+
+.spoiler .show,
+.spoiler.expanded .hide {
+  display: inline;
+}
+
+.spoiler .hide,
+.spoiler.expanded .show {
+  display: none;
+}
+
+/* CSS Document */
+div.tooltip {
+  display: none;
+  z-index: 20;
+}
+
+body main ul {
+  margin: 0;
+  padding: 0;
+}

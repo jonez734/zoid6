@@ -1,2 +1,3 @@
+// Import canonical zoid6 variables from shared location
+// Mixins are imported via load path, no local _mixins.scss needed
 @import "zoid6vars";
-@import "mixins";

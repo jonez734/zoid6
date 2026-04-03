@@ -12,4 +12,4 @@ stage:
 
 prod:
 	$(MAKE) -C skin stage
-	$(RSYNC) $(SHAREDSTAGE) $(SHAREDPROD)
+	$(RSYNC) $(STAGE) $(PROD)

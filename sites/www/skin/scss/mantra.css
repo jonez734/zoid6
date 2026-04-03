@@ -1,0 +1,19 @@
+div.mantra {
+  color: black;
+}
+div.mantra ul {
+  list-style: none;
+  margin: 0px;
+  padding: 0px;
+}
+
+li.even {
+  margin: 2px;
+  padding: 5px;
+  background-color: #707070;
+}
+li.odd {
+  margin: 2px;
+  padding: 5px;
+  background-color: #606060;
+}

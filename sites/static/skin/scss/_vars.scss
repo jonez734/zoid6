@@ -1,4 +1,4 @@
-@import "zoid6vars";
+@import "../../shared/skin/scss/zoid6vars";
 
 $page-backgroundcolor: #3a5a40;
 $page-textcolor: #dad7cd; // lightest of the palette
@@ -24,12 +24,11 @@ $blurb-metadata-backgroundcolor: $blurb-body-backgroundcolor;
 $page-anchor-color: $page-textcolor;
 $page-anchor-backgroundcolor: $page-backgroundcolor;
 
-// $page-anchor-hover-color: $page-color; // darken($page-color, 5%);
-$page-anchor-hover-color: black;
-$page-anchor-hover-backgroundcolor: $page-backgroundcolor; // darken($page-backgroundcolor, 10%);
+$page-anchor-hover-color: lighten($blurb-body-textcolor, 5%);
+$page-anchor-hover-backgroundcolor: $page-backgroundcolor;
 
 $page-anchor-visited-color: darken($page-textcolor, 10%);
-$page-anchor-visited-backgroundcolor: white;
+$page-anchor-visited-backgroundcolor: darken($blurb-body-backgroundcolor, 5%);
 
 $form-color: $blurb-body-textcolor;
 $form-backgroundcolor: $blurb-body-backgroundcolor;

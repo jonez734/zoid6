@@ -1,0 +1,36 @@
+ul.nobullets {
+  list-style-type: none;
+}
+ul.nobullets li ul {
+  list-style-type: none;
+}
+ul.commadelimited {
+  border: 0px solid red;
+  display: inline;
+  margin: 0;
+  padding: 0;
+}
+ul.commadelimited > li {
+  display: inline;
+  padding: 0.125em;
+  margin: 0;
+}
+ul.commadelimited > li:after {
+  content: ", ";
+}
+ul.commadelimited > li:last-child:after {
+  content: "";
+}
+ul.commadelimited > li:nth-last-child(2):after {
+  content: " and ";
+}
+ul.commadelimited > li:nth-last-child(3) + li:after {
+  content: ", and ";
+}
+ul.inlinelist {
+  margin: 0;
+  padding: 0.125em;
+}
+ul.inlinelist > li {
+  display: inline;
+}

@@ -1,27 +1,35 @@
 #
-# $Id: htaccess,v 1.8 2006/06/25 01:36:56 jam Exp $
+# Zoid Technologies Website Rewrite Rules
+# Enables clean URLs and proper routing for dynamic pages
+# @since 20260401 (modernized with empyre patterns)
 #
-# php_flag register_globals off
 
 RewriteEngine On
 RewriteBase /
 RewriteOptions Inherit
 
-
+# Enforce HTTPS for all requests except .well-known (for SSL verification)
 RewriteCond %{HTTPS} off
 RewriteCond %{REQUEST_URI} !/.well-known [NC]
 RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
-RewriteRule ^about[/]?$ /about.php [last,qsappend]
+# Allow direct access to static files and directories
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
 
-#RewriteRule ^moneyday[/]?$ /moneyday.php [last]
+# Route clean URLs to appropriate handlers
+# Uncomment rules as needed to enable specific routes
 
-RewriteRule ^sitenewsarchive[/]?$ /sitenewsarchive.php [last]
+# RewriteRule ^about[/]?$ about.php [last]
+# RewriteRule ^sitenewsarchive[/]?$ sitenewsarchive.php [last]
 
-RewriteRule ^login[/]?$ /engine/login.php [last]
-RewriteRule ^logout[/]?$ /engine/logout.php [last]
-RewriteRule ^join[/]?$ /engine/join.php [last]
+# Engine routes
+# RewriteRule ^login[/]?$ /engine/login.php [last]
+# RewriteRule ^logout[/]?$ /engine/logout.php [last]
+# RewriteRule ^join[/]?$ /engine/join.php [last]
 
+# Require access control
 <RequireAll>
     Require all granted
 </RequireAll>

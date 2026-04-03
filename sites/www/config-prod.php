@@ -2,50 +2,71 @@
 
 require_once('/srv/www/bbsengine6/php/bootstrap.php');
 require_once('util.php');
-\bbsengine6\util\add_include_paths(['/srv/www/zoid6/php/', '/srv/www/bbsengine6/php/', '/srv/www/smarty/']);
+
+\bbsengine6\util\add_include_paths([
+    '/srv/www/zoid6/php/',
+    '/srv/www/bbsengine6/php/',
+    '/srv/www/smarty/'
+]);
 
 // Define configuration constants in config namespace (required by bbsengine6)
-// Using backslash prefix makes them accessible via defined('\config\CONSTANT')
+// Using config\ prefix makes them accessible via defined('\config\CONSTANT')
+
+// Site identification and metadata
 define("config\SITENAME", "www");
-define("config\VHOSTDIR", "/srv/www/vhosts/zoidtechnologies.com/html/");
+define("config\SITETITLE", "Zoid Technologies - Custom Information Systems");
 define("config\SITEURL", "https://zoidtechnologies.com/");
+define("config\SITEDESCRIPTION", "Design, build, operate, and maintain custom information systems for your intranet, extranet, or public website");
+
+// Paths and URLs
+define("config\VHOSTDIR", "/srv/www/vhosts/zoidtechnologies.com/html/");
 define("config\DOCUMENTROOT", \config\VHOSTDIR);
 define("config\SKINDIR", \config\DOCUMENTROOT . "skin/");
 define("config\SKINURL", \config\SITEURL . "skin/");
 define("config\JSURL", "/engine/js/");
+define("config\IMAGESURL", "https://zoidtechnologies.com/static/");
+
+// URL configuration for shared and engine resources
+define("config\ENGINEURL", "/engine/");
 define("config\ENGINESKINURL", "/engine/skin/");
+define("config\SHAREDSKINURL", "/shared/skin/");
 
-// Define SMARTY* constants before including zoid6config.php so it can create global aliases
+// Define SMARTY constants before including zoid6config.php so it can create global aliases
+// Path array allows fallback search: site-specific → shared → framework
 define("config\SMARTYCOMPILEDTEMPLATESDIR", \config\VHOSTDIR . "templates_c");
-define("config\SMARTYPLUGINSDIR", [ 0 => \config\VHOSTDIR . "smarty/", 1 => "/srv/www/zoid6/smarty/"]);
-define("config\SMARTYTEMPLATESDIR", [ 0 => \config\VHOSTDIR . "skin/tmpl/", 1 => "/srv/www/zoid6/shared/skin/tmpl/", 2 => "/srv/www/zoid6/skin/tmpl/", 3 => "/srv/www/bbsengine6/skin/tmpl/"]);
+define("config\SMARTYPLUGINSDIR", [
+    0 => \config\VHOSTDIR . "smarty/",
+    1 => "/srv/www/zoid6/smarty/"
+]);
+define("config\SMARTYTEMPLATESDIR", [
+    0 => \config\VHOSTDIR . "skin/tmpl/",           // www-specific templates (new structure)
+    1 => \config\VHOSTDIR . "tmpl/",                // www-specific templates (legacy structure)
+    2 => "/srv/www/zoid6/shared/skin/tmpl/",        // Shared zoid6 templates
+    3 => "/srv/www/zoid6/skin/tmpl/",               // zoid6 project templates
+    4 => "/srv/www/bbsengine6/skin/tmpl/"           // bbsengine6 framework templates (fallback)
+]);
 
-// Include zoid6config.php to create global aliases
-require_once("zoid6config.php");
+// Now include zoid6config.php to create global aliases
+require_once('zoid6config.php');
 
-define("config\LOGENTRYPREFIX", "zoid6www");
-define("config\SITECSS", \config\SKINURL . "css/www.css");
-
-require_once("zoid6.php");
+// Logging and analytics
+define("config\LOGENTRYPREFIX", "wwwprod");
+define("config\GOOGLEANALYTICSACCOUNT", "UA-23705021-1");
 
 // Create global aliases for non-SMARTY constants
 // (SMARTY* aliases are created by zoid6config.php)
 define("SITENAME", \config\SITENAME);
 define("SITEURL", \config\SITEURL);
+define("VHOSTDIR", \config\VHOSTDIR);
 define("DOCUMENTROOT", \config\DOCUMENTROOT);
 define("SKINDIR", \config\SKINDIR);
 define("SKINURL", \config\SKINURL);
 define("JSURL", \config\JSURL);
-define("SITECSS", \config\SITECSS);
+define("IMAGESURL", \config\IMAGESURL);
+define("ENGINEURL", \config\ENGINEURL);
+define("ENGINESKINURL", \config\ENGINESKINURL);
+define("SHAREDSKINURL", \config\SHAREDSKINURL);
+define("STATICSKINURL", \config\SHAREDSKINURL);
 define("LOGENTRYPREFIX", \config\LOGENTRYPREFIX);
-
-$PAGEMETADATA = [
-    ["tag" => "meta", "name" => "description", "content" => "custom information systems for your intranet, extranet, or public website" ],
-    ["tag" => "link", "rel" => "canonical", "href" => "https://zoidtechnologies.com/" ],
-    // <meta property="og:locale" content="en_US" />
-    ["tag" => "meta", "property" => "og:locale", "content" => "en_US" ],
-    // <meta property="og:type" content="website" />
-    ["tag" => "meta", "property" => "og:type", "content" => "website"],
-];
 
 ?>

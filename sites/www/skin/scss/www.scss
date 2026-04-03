@@ -1,9 +1,33 @@
+// Main stylesheet for Zoid Technologies website
+// Imports variables first, then includes all component stylesheets
+// Mixins come from canonical zoid6/scss/_mixins.scss via load path
+
 @import "vars";
 @import "mixins";
 
-// /* http://red-team-design.com/how-to-create-slick-effects-with-css3-box-shadow/ */
-// body:before
+// Framework base stylesheet (includes body styling with background-color)
+@import "zoid6";
 
+// Essential component imports for www site
+@import "blurb";       // Container styling (heavily used in templates)
+@import "page";        // Base page styling and anchor properties
+@import "pageheader";  // Header styling (pageheader.tmpl)
+@import "pagefooter";  // Footer styling (pagefooter.tmpl)
+@import "topbar";      // Top navigation bar (topbar.tmpl)
+@import "actions";     // Action buttons/links (actions.tmpl)
+@import "form";        // Form styling (form.tmpl)
+@import "sidebar";     // Sidebar styling (sidebar.tmpl)
+@import "maturecontentwarning";  // Content warning styling
+@import "lists";       // List styling
+
+// Additional framework components
+@import "breadcrumbs"; // Breadcrumb navigation
+@import "notify";      // Notification boxes
+@import "poweredby";   // Powered by footer
+@import "spoiler";     // Spoiler text styling
+@import "tooltip";     // Tooltip styling
+
+// www-specific overrides
 body main ul {
 	margin: 0;
 	padding: 0;

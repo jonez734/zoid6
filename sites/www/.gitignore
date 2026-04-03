@@ -1,0 +1,28 @@
+# Backup files from editors
+*~
+*.swp
+*.swo
+.DS_Store
+
+# Build artifacts
+.sass-cache/
+.sasscache
+
+# Compiled CSS (generated from SCSS)
+skin/css/*.css
+skin/css/*.css.map
+
+# SCSS build output directory
+skin/scss/skin/
+
+# Smarty template cache
+templates_c/
+
+# IDE/Editor directories
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+Thumbs.db

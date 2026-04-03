@@ -1,0 +1,28 @@
+/**
+ * @since 2016nov03
+ * ripped from https://codepen.io/bbodine1/pen/novBm , decided not to use it
+ */
+/**
+ * @since 2016nov03
+ * https://codepen.io/jamesbarnett/pen/yILjk
+ */
+input[type=checkbox] {
+  display: none;
+}
+input[type=checkbox] + label:before {
+  font-family: 'Font Awesome 5 Free';
+  display: inline-block;
+  content: "\f096";
+  /* icon-checked-empty */
+  letter-spacing: 0.50em;
+  transition: color 0.5s ease-in-out;
+  color: green;
+}
+
+input[type=checkbox]:checked + label:before {
+  font-family: 'Font Awesome 5 Free';
+  content: "\f046";
+  /* icon-check */
+  letter-spacing: 0.38em;
+  color: red;
+}

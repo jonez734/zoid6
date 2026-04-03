@@ -1,0 +1,199 @@
+/*
+.calendars {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: stretch; // flex-start;
+  align-content: stretch; // flex-start;
+  margin: 0;
+  padding: 0;
+  
+  .body {
+   margin: 0;
+   padding: 0;
+  }
+
+}
+
+.calContainer {
+	flex: 0 1 auto;
+
+//  width: 22vw; 
+
+  .calCell {
+    border: 1px solid #666666;
+    border-collapse: collapse;
+    background-color: #AAAAAA;
+    color: black;
+  }
+
+  .calCellEmpty {}
+
+  .calCellBusy {
+    background-color: green;
+    color: white;
+  }
+
+  table {
+    tr th {
+      border-width: 1px;
+      padding: 8px;
+      border-style: solid;
+      border-color: #666666;
+      background-color: #dedede;
+      color: black;
+    }
+  }
+}
+*/
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+}
+
+h1 {
+  text-align: center;
+  color: #0D8CB2;
+}
+
+.calendar {
+  width: 95%;
+  margin: 0 auto;
+}
+.calendar .days-of-week, .calendar .days-of-month {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+}
+.calendar .days-of-week .day-block, .calendar .days-of-month .day-block {
+  flex-basis: 100%;
+  text-align: center;
+  box-sizing: border-box;
+  margin-bottom: 4px;
+}
+.calendar .days-of-week {
+  margin-bottom: 1em;
+  display: none;
+}
+.calendar .days-of-week .day-block {
+  height: 30px;
+  background: #0D8CB2;
+  color: #ffffff;
+  text-transform: uppercase;
+  font-size: .8em;
+  letter-spacing: .1em;
+  line-height: 30px;
+}
+.calendar .days-of-month .day-block, .calendar .days-of-month .day-block-inner {
+  background: #eeeeee;
+  display: flex;
+  min-height: 50px;
+  flex-basis: 100%;
+}
+.calendar .days-of-month .day-block:nth-of-type(even), .calendar .days-of-month .day-block-inner:nth-of-type(even) {
+  background: #d5d5d5;
+}
+.calendar .days-of-month .day-block .number, .calendar .days-of-month .day-block-inner .number {
+  color: #ffffff;
+  background: #0D8CB2;
+  display: block;
+  height: 100%;
+  width: 50px;
+  font-size: 1em;
+  line-height: 50px;
+}
+@media (min-width: 960px) {
+  .calendar {
+    width: 80%;
+  }
+  .calendar .days-of-week, .calendar .days-of-month {
+    display: flex;
+  }
+  .calendar .days-of-week .day-block, .calendar .days-of-week .day-block-inner, .calendar .days-of-month .day-block, .calendar .days-of-month .day-block-inner {
+    justify-content: flex-end;
+    flex-basis: 14.2857142857%;
+    outline: 4px solid white;
+    outline-offset: -4px;
+    margin-bottom: 0;
+  }
+  .calendar .days-of-week .day-block .number, .calendar .days-of-week .day-block-inner .number, .calendar .days-of-month .day-block .number, .calendar .days-of-month .day-block-inner .number {
+    font-size: .8em;
+    margin: 4px;
+    width: 25px;
+    height: 25px;
+    line-height: 25px;
+  }
+  .calendar .days-of-week .calendar-span-1, .calendar .days-of-month .calendar-span-1 {
+    flex-basis: 14.2857142857%;
+    display: flex;
+    background: transparent !important;
+  }
+  .calendar .days-of-week .calendar-span-1 .day-block-inner, .calendar .days-of-month .calendar-span-1 .day-block-inner {
+    flex-basis: 100%;
+    outline: 4px solid white;
+    outline-offset: -4px;
+  }
+  .calendar .days-of-week .calendar-span-2, .calendar .days-of-month .calendar-span-2 {
+    flex-basis: 28.5714285714%;
+    display: flex;
+    background: transparent !important;
+  }
+  .calendar .days-of-week .calendar-span-2 .day-block-inner, .calendar .days-of-month .calendar-span-2 .day-block-inner {
+    flex-basis: 50%;
+    outline: 4px solid white;
+    outline-offset: -4px;
+  }
+  .calendar .days-of-week .calendar-span-3, .calendar .days-of-month .calendar-span-3 {
+    flex-basis: 42.8571428571%;
+    display: flex;
+    background: transparent !important;
+  }
+  .calendar .days-of-week .calendar-span-3 .day-block-inner, .calendar .days-of-month .calendar-span-3 .day-block-inner {
+    flex-basis: 33.3333333333%;
+    outline: 4px solid white;
+    outline-offset: -4px;
+  }
+  .calendar .days-of-week .calendar-span-4, .calendar .days-of-month .calendar-span-4 {
+    flex-basis: 57.1428571429%;
+    display: flex;
+    background: transparent !important;
+  }
+  .calendar .days-of-week .calendar-span-4 .day-block-inner, .calendar .days-of-month .calendar-span-4 .day-block-inner {
+    flex-basis: 25%;
+    outline: 4px solid white;
+    outline-offset: -4px;
+  }
+  .calendar .days-of-week .calendar-span-5, .calendar .days-of-month .calendar-span-5 {
+    flex-basis: 71.4285714286%;
+    display: flex;
+    background: transparent !important;
+  }
+  .calendar .days-of-week .calendar-span-5 .day-block-inner, .calendar .days-of-month .calendar-span-5 .day-block-inner {
+    flex-basis: 20%;
+    outline: 4px solid white;
+    outline-offset: -4px;
+  }
+  .calendar .days-of-week .calendar-span-6, .calendar .days-of-month .calendar-span-6 {
+    flex-basis: 85.7142857143%;
+    display: flex;
+    background: transparent !important;
+  }
+  .calendar .days-of-week .calendar-span-6 .day-block-inner, .calendar .days-of-month .calendar-span-6 .day-block-inner {
+    flex-basis: 16.6666666667%;
+    outline: 4px solid white;
+    outline-offset: -4px;
+  }
+  .calendar .days-of-week .calendar-span-7, .calendar .days-of-month .calendar-span-7 {
+    flex-basis: 100%;
+    display: flex;
+    background: transparent !important;
+  }
+  .calendar .days-of-week .calendar-span-7 .day-block-inner, .calendar .days-of-month .calendar-span-7 .day-block-inner {
+    flex-basis: 14.2857142857%;
+    outline: 4px solid white;
+    outline-offset: -4px;
+  }
+  .calendar .days-of-month .day-block:nth-of-type(even), .calendar .days-of-month .day-block-inner:nth-of-type(even) {
+    background: #eeeeee;
+  }
+}

@@ -4,4 +4,5 @@ clean:
 	-rm *~
 
 stage:
-	$(RSYNC) *.tmpl $(STAGE)skin/tmpl/
+
+.PHONY: all clean stage

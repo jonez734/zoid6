@@ -104,3 +104,17 @@ $blurb-body-text-color: $blurb-body-textcolor !default;          // BC: Use $blu
 $blurb-body-background-color: $blurb-body-backgroundcolor !default;  // BC: Use $blurb-body-backgroundcolor
 $blurb-header-color: $blurb-header-textcolor !default;           // BC: Use $blurb-header-textcolor
 $blurb-footer-textcolor: $blurb-footer-color !default;           // BC: Use $blurb-footer-color
+
+// =============================================================================
+// SMOOTHSTATE CONFIGURATION
+// Page transition animation settings for AJAX navigation
+// Sites can override these by redefining in their _vars.scss after importing zoid6vars
+// @see zoid6/handbook/SMOOTHSTATE.md
+// =============================================================================
+
+$smoothstate-animation: "fadeIn" !default;        // Animation type: "fadeIn", "slideLeft", "slideUp", etc.
+$smoothstate-duration: 250 !default;              // Page transition duration (milliseconds)
+$smoothstate-prefetch: true !default;             // Prefetch pages on hover/touchstart
+$smoothstate-cache-length: 2 !default;            // Number of pages to keep in memory cache
+$smoothstate-debug: true !default;                // Enable debug logging to browser console
+$smoothstate-exit-class: "is-exiting" !default;   // CSS class applied during exit animation
