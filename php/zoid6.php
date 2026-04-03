@@ -25,8 +25,6 @@ define("IMAGESURL", "//zoidtechnologies.com/static/");
 define("SYSTEMDSN", "pgsql:host=127.0.0.1;port=5432;dbname=zoid6");
 define("SESSIONNAME", "zoid6");
 
-define("TEOSURL", "https://teos.zoidtechnologies.com/");
-define("VULCANURL", "https://vulcan.zoidtechnologies.com/");
 //define("DATEFORMAT", "c"); // "%Y-%m-%d %H:%M"
 define("DATEFORMAT", "%Y-%b-%d %l:%M%p %Z (%a)"); // @see https://php.net/strftime
 
@@ -74,7 +72,6 @@ date_default_timezone_set("America/New_York");
 
 define("SITETYPE", "webpage");
 
-define("RECAPTCHASITEKEY", "6Leb_S0qAAAAABOm1eXSHRJn5YIqH_xAqyg7qvKl");
 define("config\TOPBARUPDATEINTERVAL", 15000);
 
 } /* config namespace */
