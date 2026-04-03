@@ -2,7 +2,6 @@ export SHAREDSTAGE = /srv/www/zoid6/shared/
 
 SCSS := sass --sourcemap=none --stop-on-error --trace --style expanded \
 	--load-path /home/opencode/data/work/zoid6/shared/skin/scss/ \
-	--load-path /home/opencode/data/work/zoid6/skin/scss/ \
 	--load-path /home/opencode/data/work/bbsengine6/skin/scss/ \
 	--load-path $(CURDIR)
 

@@ -1,17 +1,13 @@
 all:
 
 .scss.css:
-	sass --load-path ../../../../shared/skin/scss/ \
-	     --load-path ../../../../bbsengine6/skin/scss/ \
-	     --load-path /home/opencode/data/work/zoid6/shared/skin/scss/ \
+	sass --load-path /home/opencode/data/work/zoid6/shared/skin/scss/ \
 	     --load-path /home/opencode/data/work/bbsengine6/skin/scss/ \
 	     --load-path /home/opencode/data/work/zoid6/sites/static/skin/scss \
 	     --sourcemap=none --stop-on-error --trace --style expanded $< $@
 
 stage: 
-	sass --load-path ../../../../shared/skin/scss/ \
-	     --load-path ../../../../bbsengine6/skin/scss/ \
-	     --load-path /home/opencode/data/work/zoid6/shared/skin/scss/ \
+	sass --load-path /home/opencode/data/work/zoid6/shared/skin/scss/ \
 	     --load-path /home/opencode/data/work/bbsengine6/skin/scss/ \
 	     --load-path /home/opencode/data/work/zoid6/sites/static/skin/scss \
 	     --sourcemap=none --stop-on-error --trace --style expanded \

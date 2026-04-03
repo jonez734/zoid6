@@ -14,7 +14,6 @@ export STATICPROD = $(HOST):/srv/www/vhosts/static.zoidtechnologies.com/
 export STATICSTAGE = /srv/www/vhosts/static.zoidtechnologies.com/
 
 export SCSSLOADPATH = --load-path /home/opencode/data/work/zoid6/shared/skin/scss/ \
-	--load-path /home/opencode/data/work/zoid6/skin/scss/ \
 	--load-path /home/opencode/data/work/bbsengine6/skin/scss/
 export SCSS = sass --line-numbers --stop-on-error --trace --style expanded --sourcemap=none $(SCSSLOADPATH)
 
