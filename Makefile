@@ -13,7 +13,10 @@ export SHAREDPRODDOCROOT = $(HOST):/srv/www/vhosts/zoidtechnologies.com/html/sha
 export STATICPROD = $(HOST):/srv/www/vhosts/static.zoidtechnologies.com/
 export STATICSTAGE = /srv/www/vhosts/static.zoidtechnologies.com/
 
-export SCSSLOADPATH = --load-path $(HOME)/projects/$(PROJECT)/skin/scss/ --load-path /home/opencode/data/work/zoid6/shared/skin/scss/ --load-path /home/opencode/data/work/zoid6/skin/scss/ --load-path $(HOME)/projects/bbsengine6/skin/scss/
+export SCSSLOADPATH = --load-path /home/opencode/data/work/zoid6/shared/skin/scss/ \
+	--load-path /home/opencode/data/work/zoid6/skin/scss/ \
+	--load-path /home/opencode/data/work/zoid6/scss/ \
+	--load-path /home/opencode/data/work/bbsengine6/skin/scss/
 export SCSS = sass --line-numbers --stop-on-error --trace --style expanded --sourcemap=none $(SCSSLOADPATH)
 
 export RSYNC = rsync --chmod=Dg=rwxs,Fgu=rw,Fo=r --no-times --verbose \
