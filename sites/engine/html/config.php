@@ -39,6 +39,4 @@ if (set_include_path($includepath) === false)
 
 define("GOOGLEANALYTICSACCOUNT", "UA-23705021-1");
 
-define("TEOSURL", "/teos/");
-
 ?>
