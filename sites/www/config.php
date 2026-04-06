@@ -69,7 +69,4 @@ define("SHAREDSKINURL", \config\SHAREDSKINURL);
 define("STATICSKINURL", \config\SHAREDSKINURL);
 define("LOGENTRYPREFIX", \config\LOGENTRYPREFIX);
 
-// URL for TEOS (The Efficient Online Catalog)
-define("TEOSURL", "/teos/");
-
 ?>

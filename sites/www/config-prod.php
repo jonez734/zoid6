@@ -68,5 +68,6 @@ define("ENGINESKINURL", \config\ENGINESKINURL);
 define("SHAREDSKINURL", \config\SHAREDSKINURL);
 define("STATICSKINURL", \config\SHAREDSKINURL);
 define("LOGENTRYPREFIX", \config\LOGENTRYPREFIX);
+define("TEOSURL", "/teos/");
 
 ?>
