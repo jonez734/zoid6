@@ -45,7 +45,7 @@ prod:
 
 shared:
 	$(MAKE) -C shared stage
-	$(MAKE) -C scss stage
+#	$(MAKE) -C scss stage
 	$(RSYNC) $(SHAREDSTAGE) $(SHAREDPROD)
 	$(RSYNC) $(SHAREDSTAGEDOCROOT) $(SHAREDPRODDOCROOT)
 
