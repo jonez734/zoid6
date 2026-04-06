@@ -24,5 +24,6 @@ define("SMARTYPLUGINSDIR", \config\SMARTYPLUGINSDIR);
 define("ENGINEURL", "/engine/");
 define("ENGINESKINURL", "/engine/skin/");
 define("SHAREDSKINURL", "/shared/skin/");
+define("TEOSURL", "/teos/");
 
 ?>
