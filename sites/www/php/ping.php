@@ -95,3 +95,5 @@ echo json_encode([
     'message' => 'Ping received',
     'server_timestamp' => date('c')
 ]);
+
+?>
