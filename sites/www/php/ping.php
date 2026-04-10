@@ -5,7 +5,7 @@
  * AJAX endpoint for client-side ping requests (timezone/heartbeat)
  * Validates CSRF token in X-CSRF-TOKEN header
  *
- * @copyright (c) 2024 zoidtechnologies.com all rights reserved
+ * @copyright (c) 2026 zoidtechnologies.com all rights reserved
  * @package zoid6
  */
 
@@ -23,7 +23,7 @@ header('Content-Type: application/json; charset=UTF-8');
  */
 function validateCsrfToken()
 {
-    $token = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? null;
+    $token = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? $_SERVER['HTTP_X_CSRF-TOKEN'] ?? null;
     
     // If no token provided, reject the request
     if ($token === null)
@@ -95,5 +95,3 @@ echo json_encode([
     'message' => 'Ping received',
     'server_timestamp' => date('c')
 ]);
-
-?>
