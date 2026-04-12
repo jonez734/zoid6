@@ -176,22 +176,24 @@ namespace vulcan\lib {
       \bbsengine6\util\logentry("libvulcan.getlinkbyid.120: select returned null");
       return [];
     }
-    
+
     $link = [];
+    $link["id"] = $res["id"];
     $link["url"] = $res["url"];
     $link["title"] = $res["title"];
-    $link["sigs"] = getlinksigs($url); // postgres_to_php_array($res["sigs"]);
+    $link["sigs"] = getlinksigs($url);
     $link["postedby"] = $res["postedby"];
     $link["datepostedepoch"] = $res["datepostedepoch"];
-  //  $link["breadcrumbs"] = [];
-  //  $link["breadcrumbs"] = buildbreadcrumblist($link);
-  //  logentry("link.breadcrumbs=".var_export($link["breadcrumbs"], true));
     $flags = [];
-    $flags["eros"] = \bbsengine6\toboolean($link["eros"], "vulcan.link.eros");
-    $flags["magic"] = \bbsengine6\toboolean($link["magic"], "vulcan.link.magic");
-    $flags["approved"] = \bbsengine6\toboolean($link["approved"], "vulcan.link.approved");
-    $flags["broken"] = \bbsengine6\toboolean($link["broken"], "vulcan.link.broken");
+    $flags["eros"] = \bbsengine6\toboolean($res["eros"], "vulcan.link.eros");
+    $flags["magic"] = \bbsengine6\toboolean($res["magic"], "vulcan.link.magic");
+    $flags["approved"] = \bbsengine6\toboolean($res["approved"], "vulcan.link.approved");
+    $flags["broken"] = \bbsengine6\toboolean($res["broken"], "vulcan.link.broken");
     $link["flags"] = $flags;
+    $link["eros"] = $flags["eros"];
+    $link["magic"] = $flags["magic"];
+    $link["approved"] = $flags["approved"];
+    $link["broken"] = $flags["broken"];
 
     $actions = buildlinkactions($currentmemberid, ["linkid" => $res["id"], "link" => $link]);
     $link["actions"] = $actions;
@@ -203,7 +205,58 @@ namespace vulcan\lib {
     {
       $link["icon"] = "fa-link";
     }
-    \bbsengine6\util\logentry("---!> getlinkbyurl.140: link=".var_export($link, true));
+
+    return $link;
+  }
+
+  /**
+   * @since 20250412
+   */
+  function getlinkbyid($linkid)
+  {
+    $pdo = \bbsengine6\database\connect(\config\SYSTEMDSN);
+    $currentmemberid = \bbsengine6\member\lib\getcurrentid();
+
+    \bbsengine6\util\logentry("getlinkbyid.80: id=".var_export($linkid, true));
+    $sql = "select * from vulcan.link where id=:id";
+    $dat = ["id" => $linkid];
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($dat);
+    $res = $stmt->fetch();
+    if ($res === null)
+    {
+      \bbsengine6\util\logentry("getlinkbyid.120: select returned null");
+      return null;
+    }
+
+    $link = [];
+    $link["id"] = $res["id"];
+    $link["url"] = $res["url"];
+    $link["title"] = $res["title"];
+    $link["sigs"] = getlinksigs($res["url"]);
+    $link["postedby"] = $res["postedby"];
+    $link["datepostedepoch"] = $res["datepostedepoch"];
+    $flags = [];
+    $flags["eros"] = \bbsengine6\toboolean($res["eros"], "vulcan.link.eros");
+    $flags["magic"] = \bbsengine6\toboolean($res["magic"], "vulcan.link.magic");
+    $flags["approved"] = \bbsengine6\toboolean($res["approved"], "vulcan.link.approved");
+    $flags["broken"] = \bbsengine6\toboolean($res["broken"], "vulcan.link.broken");
+    $link["flags"] = $flags;
+    $link["eros"] = $flags["eros"];
+    $link["magic"] = $flags["magic"];
+    $link["approved"] = $flags["approved"];
+    $link["broken"] = $flags["broken"];
+
+    $actions = buildlinkactions($currentmemberid, ["linkid" => $res["id"], "link" => $link]);
+    $link["actions"] = $actions;
+    if ($link["broken"] === true)
+    {
+      $link["icon"] = "fa-chain-broken";
+    }
+    else
+    {
+      $link["icon"] = "fa-link";
+    }
 
     return $link;
   }
