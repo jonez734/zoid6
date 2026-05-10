@@ -1,0 +1,87 @@
+// zoid6/scss/_vars.scss
+// Base variables for all zoid6 sites
+// Site-specific overrides should be defined in site's _vars.scss
+
+$page-backgroundcolor: #3a5a40;
+$page-textcolor: #dad7cd;
+$page-margin: 0em;
+
+$blurb-margin: 0.25em;
+$blurb-backgroundcolor: #344e41;
+$blurb-textcolor: $page-textcolor;
+
+$blurb-body-backgroundcolor: $page-backgroundcolor;
+$blurb-body-textcolor: $page-textcolor;
+
+$blurb-header-backgroundcolor: #a3b18a;
+$blurb-header-textcolor: #dad7cd;
+
+$blurb-footer-backgroundcolor: $blurb-body-backgroundcolor;
+$blurb-footer-color: $blurb-body-textcolor;
+
+$blurb-metadata-color: $blurb-body-textcolor;
+$blurb-metadata-backgroundcolor: $blurb-body-backgroundcolor;
+
+$page-anchor-color: $page-textcolor;
+$page-anchor-backgroundcolor: $page-backgroundcolor;
+
+$page-anchor-hover-color: lighten($blurb-body-textcolor, 5%);
+$page-anchor-hover-backgroundcolor: $blurb-body-backgroundcolor;
+
+$page-anchor-visited-color: darken($blurb-body-textcolor, 10%);
+$page-anchor-visited-backgroundcolor: darken($blurb-body-backgroundcolor, 5%);
+
+$form-color: $blurb-body-textcolor;
+$form-backgroundcolor: $blurb-body-backgroundcolor;
+$form-errors-color: white;
+
+$notify-backgroundcolor: $blurb-backgroundcolor;
+$notify-color: $blurb-textcolor;
+$notify-footer-backgroundcolor: #ababab;
+
+$headerbackgroundstartcolor: #006633;
+$headerbackgroundendcolor: darken($headerbackgroundstartcolor, 2%);
+
+$topbarheight: 1.8em;
+$topbarlineheight: 1.8em;
+
+$actions-color: lighten($blurb-header-backgroundcolor, 5%);
+
+$blurb-a-hover-color: white;
+$blurb-a-hover-backgroundcolor: gray;
+
+$blurb-border-color: #4a4a4a; // dark gray
+$blurb-border: 0.125em solid $blurb-border-color;
+
+$body-fontsize: 1.25em;
+
+$pageheader-textcolor: $blurb-textcolor;
+$pageheader-backgroundcolor: $blurb-backgroundcolor;
+$pageheader-border: $blurb-border;
+
+$topbar-border: $blurb-border;
+$topbar-backgroundcolor: $blurb-body-backgroundcolor;
+$topbar-textcolor: $blurb-body-textcolor;
+$topbar-anchor-textcolor: $blurb-body-textcolor;
+$topbar-anchor-hovercolor: $blurb-body-backgroundcolor;
+$topbar-anchor-visitedcolor: #3A5A40;
+
+$pagefooter-margin: 0.50em;
+
+// BC: legacy variable from older sites
+$backgroundcolor: gray;
+
+// =============================================================================
+// BC ALIASES - remove in future migration
+// These allow older SCSS files using old naming to work with new variable names
+// =============================================================================
+
+$page-color: $page-textcolor !default;
+$blurb-color: $blurb-textcolor !default;
+$blurb-body-color: $blurb-body-textcolor !default;
+$blurb-header-color: $blurb-header-textcolor !default;
+$blurb-footer-textcolor: $blurb-footer-color !default;
+$blurb-body-background-color: $blurb-body-backgroundcolor !default;
+$blurb-body-text-color: $blurb-body-textcolor !default;
+$page-text-color: $page-textcolor !default;
+$page-background-color: $page-backgroundcolor !default;
