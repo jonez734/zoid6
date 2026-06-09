@@ -18,7 +18,7 @@
            #{$property}: #{$value};
 }
 
-@mixin boxshadow($spread: 0px, $color: rgba(black, 0.5), $blur: 2px, $horizontaloffset: 3px, $verticaloffset: 3px)
+@mixin boxshadow($spread: 0px, $color: $blurb-boxshadow-color, $blur: $blurb-boxshadow-blur, $horizontaloffset: $blurb-boxshadow-offset-horizontal, $verticaloffset: $blurb-boxshadow-offset-vertical)
 {
 	box-shadow: $horizontaloffset $verticaloffset $blur $spread $color;
 }

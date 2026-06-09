@@ -53,6 +53,11 @@ $blurb-a-hover-backgroundcolor: gray;
 $blurb-border-color: #4a4a4a; // dark gray
 $blurb-border: 0.125em solid $blurb-border-color;
 
+$blurb-boxshadow-color: rgba(black, 0.5) !default;
+$blurb-boxshadow-blur: 2px !default;
+$blurb-boxshadow-offset-horizontal: 3px !default;
+$blurb-boxshadow-offset-vertical: 3px !default;
+
 $body-fontsize: 1.25em;
 
 $pageheader-textcolor: $blurb-textcolor;
