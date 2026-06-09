@@ -1,22 +1,19 @@
-export SHAREDSTAGE = /srv/www/zoid6/shared/
+all:
 
-SCSS := sass --sourcemap=none --stop-on-error --trace --style expanded \
-	--load-path /home/opencode/data/work/zoid6/shared/skin/scss/ \
-	--load-path /home/opencode/data/work/bbsengine6/skin/scss/ \
-	--load-path $(CURDIR)
+.scss.css:
+	sass --load-path /home/opencode/data/work/zoid6/shared/skin/scss/ \
+	     --load-path /home/opencode/data/work/bbsengine6/skin/scss/ \
+	     --sourcemap=none --stop-on-error --trace --style expanded $< $@
 
-scssfiles := $(wildcard *.scss)
-cssfiles := $(scssfiles:.scss=.css)
-
-all: $(cssfiles)
-
-%.css: %.scss
-	$(SCSS) $< $@
-
-stage:
-	$(SCSS) --update .:$(SHAREDSTAGE)/skin/css/
+stage: 
+	sass --load-path /home/opencode/data/work/zoid6/shared/skin/scss/ \
+	     --load-path /home/opencode/data/work/bbsengine6/skin/scss/ \
+	     --sourcemap=none --stop-on-error --trace --style expanded \
+	     --update .:/srv/www/vhosts/zoidtechnologies.com/html/shared/skin/css/
 
 clean:
 	-rm *~ *.css *.css.map
 
-.PHONY: all clean stage
+.SUFFIXES: .scss .css
+
+.PHONY: clean stage

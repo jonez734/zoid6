@@ -1,3 +1,4 @@
+# DEPRECATED: Use shared/skin/Makefile instead. This file will be removed.
 export HOST = merlin
 export PROJECT = static
 export PROD = $(HOST):/srv/www/vhosts/zoidtechnologies.com/html/$(PROJECT)/

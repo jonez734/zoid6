@@ -1,58 +1,100 @@
-// initsmoothstate.js
-// Initializes smoothState.js for smooth AJAX page transitions
-//
-// Smoothstate intercepts internal navigation links and loads page content via AJAX,
-// creating smooth CSS animations instead of full page reloads.
-//
-// Configuration is set via the SmoothStateConfig object below.
-// Sites can customize by overriding SmoothStateConfig properties in their page.tmpl
-// before this script is loaded.
-//
-// Requirements:
-// - jQuery 3.7.1+
-// - jquery.smoothState.js plugin loaded
-// - CSS animations via animate.css (fadeIn, is-exiting classes)
-// - HTML: <body id="body" class="scene element fadeIn">
-//
-// Configuration variables defined in _zoid6vars.scss can be overridden per-site:
-// $smoothstate-animation, $smoothstate-duration, $smoothstate-prefetch,
-// $smoothstate-cache-length, $smoothstate-debug, $smoothstate-exit-class
-//
-// @see zoid6/handbook/SMOOTHSTATE.md for detailed documentation
-// @see https://github.com/miguel-perez/smoothState.js for plugin documentation
+// Contents of functions.js
 
-'use strict';
-
+// @see https://css-tricks.com/add-page-transitions-css-smoothstate-js/
 (function ($) {
-  // Initialize smoothState on page content containers (#head and #body)
-  // These are the primary elements that get replaced on AJAX navigation
-  var content = $('#head, #body').smoothState({
-    // Enable debug logging to browser console
+  'use strict';
+  var content  = $('#head, #body').smoothState({
     debug: true,
-    
-    // Prefetch page content on hover/touchstart for better perceived performance
     prefetch: true,
-    
-    // Number of pages to keep in memory cache for instant back/forward navigation
     cacheLength: 2,
     
-    // onStart: Animation fired when user clicks a navigation link
-    // Runs before AJAX request, triggers exit animation (fade out)
+    // onStart runs as soon as link has been activated
     onStart: {
-      // Duration of exit animation in milliseconds
+          
+      // Set the duration of our animation
       duration: 250,
-      
-      // Render function: applies CSS class to trigger fade-out animation
-      // Called by smoothState when navigation begins
+          
+      // Alterations to the page
       render: function () {
-        // toggleAnimationClass() is a public smoothState method
-        // Adds "is-exiting" class to #head and #body to trigger CSS fade-out
+        // Quickly toggles a class and restarts css animations
         content.toggleAnimationClass("is-exiting");
-        console.log("smoothState: page exit animation triggered (is-exiting class added)");
+        // smoothState.restartCSSAnimations(); // toggleanimationclass('is-exiting');
+        console.log("inside render function. added 'is-exiting'");
       }
     }
+    
+  /*
+    onReady: {
+      duration: 1000,
+      render: function($container, $newContent) {
+        $container.removeClass('is-exiting');
+        $container.html($newContent);
+        console.log("smoothState onReady fired");
+      }
+    }
+  */
   }).data("smoothState");
-  
-  console.log("smoothState initialized - smooth page transitions enabled");
-
+//      smoothState = $('#main').smoothState(options).data('smoothState');
+      // }).data('smoothState'); // makes public methods available
+  console.log("smoothState initialized");
 })(jQuery);
+
+/*
+;(function($) {
+  'use strict';
+  var $body = $('html, body'),
+      content = $('#smoothstatecontainer').smoothState({
+        // Runs when a link has been activated
+        onStart: {
+          duration: 250, // Duration of our animation
+          render: function (url, $container) {
+            // toggleAnimationClass() is a public method
+            // for restarting css animations with a class
+            content.toggleAnimationClass('is-exiting');
+            // Scroll user to the top
+            $body.animate({
+              scrollTop: 0
+            });
+          }
+        }
+      }).data('smoothState');
+      //.data('smoothState') makes public methods available
+})(jQuery);
+*/
+/*
+$(function(){
+  'use strict';
+  console.log("running smoothstate init");
+  var $page = $('#main'), // html, body
+      options = {
+        debug: true,
+        prefetch: true,
+        allowFormCaching: false,
+        repeatDelay: 750,
+        cacheLength: 2,
+        blacklist:  'form',
+        forms: 'form',
+        onStart: {
+          duration: 2000, // Duration of our animation
+          render: function ($container) {
+            console.log("called render onStart");
+            // Add your CSS animation reversing class
+            $container.addClass('is-exiting');
+            // Restart your animation
+            smoothState.restartCSSAnimations();
+          }
+        },
+        onReady: {
+          duration: 0,
+          render: function ($container, $newContent) {
+            console.log("called render onReady");
+            // Remove your CSS animation reversing class
+            $container.removeClass('is-exiting');
+            // Inject the new content
+            $container.html($newContent);
+          }
+        }
+      },
+      smoothState = $page.smoothState(options).data('smoothState');
+});
+*/

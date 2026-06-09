@@ -1,21 +1,16 @@
 export HOST = merlin
 export PROJECT = zoid6
 
-export PROD = $(HOST):/srv/www/$(PROJECT)/
-export STAGE = /srv/www/$(PROJECT)/
+export STAGE = /srv/www/zoid6/
+export PROD = $(HOST):$(STAGE)
 
-export SHAREDPROD = $(HOST):/srv/www/vhosts/zoidtechnologies.com/html/shared/
-export SHAREDSTAGE = /srv/www/zoid6/shared/
-
-export SHAREDSTAGEDOCROOT = /srv/www/zoid6/shared/skin/css/
-export SHAREDPRODDOCROOT = $(HOST):/srv/www/vhosts/zoidtechnologies.com/html/shared/skin/css/
-
-export STATICPROD = $(HOST):/srv/www/vhosts/static.zoidtechnologies.com/
-export STATICSTAGE = /srv/www/vhosts/static.zoidtechnologies.com/
+export STAGEDOCROOT = /srv/www/vhosts/zoidtechnologies.com/html/
+export PRODDOCROOT = $(HOST):$(STAGEDOCROOT)
 
 export SCSSLOADPATH = --load-path /home/opencode/data/work/zoid6/shared/skin/scss/ \
-	--load-path /home/opencode/data/work/bbsengine6/skin/scss/
-export SCSS = sass --line-numbers --stop-on-error --trace --style expanded --sourcemap=none $(SCSSLOADPATH)
+                      --load-path /home/opencode/data/work/bbsengine6/skin/scss/
+
+export SCSS = sass $(SCSSLOADPATH) --sourcemap=none --stop-on-error --trace --style expanded --update
 
 export RSYNC = rsync --chmod=Dg=rwxs,Fgu=rw,Fo=r --no-times --verbose \
 	--archive --update --backup --recursive \
@@ -27,28 +22,21 @@ all:
 clean:
 	-rm *~
 	$(MAKE) -C php clean
-	$(MAKE) -C skin clean
 	$(MAKE) -C shared clean
 
-prod:
+prod: shared
 #	python -m areyousure || (echo "aborted $$?"; exit 1)
 	mkdir -p $(STAGE)
 	$(MAKE) -C php stage
 	$(MAKE) -C smarty stage
-	$(MAKE) -C skin stage
-	$(MAKE) -C scss stage
-	$(MAKE) -C shared stage
-#	$(MAKE) -C js stage
-#	$(MAKE) -C sites/www/ stage
-#	$(RSYNC) htaccess-prod $(STATICSTAGE)html/.htaccess
 	$(RSYNC) $(STAGE) $(PROD)
 
 shared:
 	$(MAKE) -C shared stage
-	$(RSYNC) $(SHAREDSTAGE) $(SHAREDPROD)
-	$(RSYNC) $(SHAREDSTAGEDOCROOT) $(SHAREDPRODDOCROOT)
+	$(RSYNC) $(STAGEDOCROOT)shared/ $(PRODDOCROOT)shared/
 
 backup:
 	rsync --recursive --verbose --exclude=.venv . /run/media/jam/AEAB-CF37/projects/$(PROJECT)/
 
-.PHONY: shared
+.PHONY: shared backup
+

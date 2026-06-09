@@ -4,5 +4,4 @@ clean:
 	-rm *~
 
 stage:
-
-.PHONY: all clean stage
+	$(RSYNC) *.otf *.ttf $(STAGEDOCROOT)shared/skin/fonts/
