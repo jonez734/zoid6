@@ -272,6 +272,12 @@ namespace vulcan\lib {
    */
   function buildbreadcrumblist($link, $table="vulcan.link", $key="id")
   {
+    if (!\bbsengine6\database\validateTableName($table))
+    {
+      \bbsengine6\util\logentry("libvulcan.buildbreadcrumblist.050: invalid table name: " . var_export($table, true));
+      return [];
+    }
+
     $id = $link[$key];
     
     $pdo = \bbsengine6\database\connect(\config\SYSTEMDSN);

@@ -80,7 +80,7 @@ namespace zoid6 {
 
 function buildchoices($choices=[])
 {
-    $choices[] = ["name" => "teos", "title" => "teos", "url" => "/teos/", "desc" => ""];
+    $choices[] = ["name" => "teos", "title" => "teos", "url" => TEOSURL, "desc" => ""];
     $choices[] = ["name" => "achilles", "title" => "a study of sodium glutamates", "url" => "https://zoidtechnologies.com/achilles/", "desc" => ""];
     $choices[] = ["name" => "asimov", "title" => "asimov: robotics, ai, and augmented reality", "url" => "/asimov/", "desc" => ""];
     // $choices[] = ["name" => "socrates", "title" => "threaded forum", "url" => "https://socrates.zoidtechnologies.com/", "desc" => ""];
@@ -153,6 +153,12 @@ function buildcaptchafieldset($form, $options=null)
  */
 function buildbreadcrumblist($link, $table, $key="id")
 {
+  if (!\bbsengine6\database\validateTableName($table))
+  {
+    logentry("buildbreadcrumblist.050: invalid table name: " . var_export($table, true));
+    return [];
+  }
+
   $id = $link[$key];
   
   $dbh = dbconnect(\SYSTEMDSN);
@@ -183,6 +189,12 @@ function buildbreadcrumblist($link, $table, $key="id")
 /*
 function buildbreadcrumblist($id, $maptable="vulcan.map_link_sig", $idfield="linkid")
 {
+  if (!\bbsengine6\database\validateTableName($maptable))
+  {
+    logentry("buildbreadcrumblist.050: invalid table name: " . var_export($maptable, true));
+    return [];
+  }
+
   $dbh = dbconnect(SYSTEMDSN);
   if (PEAR::isError($dbh))
   {

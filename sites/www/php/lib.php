@@ -119,6 +119,12 @@ function buildcaptchafieldset($form, $options=null)
  */
 function buildbreadcrumblist($link, $table, $key="id")
 {
+  if (!preg_match('/^[a-zA-Z_][a-zA-Z0-9_.]*$/', $table))
+  {
+    logentry("buildbreadcrumblist.050: invalid table name: " . var_export($table, true));
+    return [];
+  }
+
   $id = $link[$key];
   
   $dbh = dbconnect(\config\SYSTEMDSN);
