@@ -24,6 +24,24 @@ define("SMARTYPLUGINSDIR", \config\SMARTYPLUGINSDIR);
 define("ENGINEURL", "/engine/");
 define("ENGINESKINURL", "/engine/skin/");
 define("SHAREDSKINURL", "/shared/skin/");
-define("TEOSURL", "/teos/");
+define("TEOSURL", "");
+
+// CAPTCHA configuration - can be overridden in site config-prod.php
+define("config\CAPTCHA_PROVIDER", getenv('CAPTCHA_PROVIDER') ?: 'none');
+define("config\TURNSTILE_SITE_KEY", getenv('TURNSTILE_SITE_KEY') ?: '');
+define("config\TURNSTILE_SECRET_KEY", getenv('TURNSTILE_SECRET_KEY') ?: '');
+define("config\HCAPTCHA_SITE_KEY", getenv('HCAPTCHA_SITE_KEY') ?: '');
+define("config\HCAPTCHA_SECRET_KEY", getenv('HCAPTCHA_SECRET_KEY') ?: '');
+define("config\RECAPTCHA_SITE_KEY", getenv('RECAPTCHA_SITE_KEY') ?: '');
+define("config\RECAPTCHA_SECRET_KEY", getenv('RECAPTCHA_SECRET_KEY') ?: '');
+
+// Global aliases for CAPTCHA config
+define("CAPTCHA_PROVIDER", \config\CAPTCHA_PROVIDER);
+define("TURNSTILE_SITE_KEY", \config\TURNSTILE_SITE_KEY);
+define("TURNSTILE_SECRET_KEY", \config\TURNSTILE_SECRET_KEY);
+define("HCAPTCHA_SITE_KEY", \config\HCAPTCHA_SITE_KEY);
+define("HCAPTCHA_SECRET_KEY", \config\HCAPTCHA_SECRET_KEY);
+define("RECAPTCHA_SITE_KEY", \config\RECAPTCHA_SITE_KEY);
+define("RECAPTCHA_SECRET_KEY", \config\RECAPTCHA_SECRET_KEY);
 
 ?>
