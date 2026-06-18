@@ -40,3 +40,8 @@ backup:
 
 .PHONY: shared backup
 
+
+markdown:
+	$(RSYNC) markdown/ $(HOST):/srv/www/zoid6/markdown/
+
+.PHONY: markdown
