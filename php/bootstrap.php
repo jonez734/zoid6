@@ -1,5 +1,7 @@
 <?php
 
+require_once("/srv/www/bbsengine6/php/bootstrap.php");
+
 namespace zoid6 {
 
 /**
@@ -13,13 +15,28 @@ function bootstrap(array $paths = []): bool
 {
     $defaults = [
         "/srv/www/zoid6/php/",
-        "/srv/www/bbsengine6/php/",
-        "/srv/www/smarty/",
-        "/srv/www/markdown/",
     ];
 
-    $allPaths = array_merge($paths, $defaults);
-    $pathString = implode(PATH_SEPARATOR, $allPaths);
+    $current = array_filter(
+        explode(PATH_SEPARATOR, get_include_path()),
+        'strlen'
+    );
+
+    $current = array_map(
+        static fn($p) => rtrim($p, DIRECTORY_SEPARATOR),
+        $current
+    );
+
+    $newPaths = array_merge($paths, $defaults);
+
+    foreach ($newPaths as $path) {
+        $normalized = rtrim($path, DIRECTORY_SEPARATOR);
+        if (!in_array($normalized, $current, true)) {
+            $current[] = $normalized;
+        }
+    }
+
+    $pathString = implode(PATH_SEPARATOR, $current);
 
     return set_include_path($pathString) !== false;
 }
