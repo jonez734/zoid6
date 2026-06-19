@@ -186,40 +186,6 @@ function buildbreadcrumblist($link, $table, $key="id")
   return $breadcrumbs;
 }
 
-/*
-function buildbreadcrumblist($id, $maptable="vulcan.map_link_sig", $idfield="linkid")
-{
-  if (!\bbsengine6\database\validateTableName($maptable))
-  {
-    logentry("buildbreadcrumblist.050: invalid table name: " . var_export($maptable, true));
-    return [];
-  }
-
-  $dbh = \bbsengine6\database\connect(SYSTEMDSN);
-  if (($dbh === false))
-  {
-    logentry("buildbreadcrumblist.10: " . $dbh->toString());
-    return $dbh;
-  }
-  
-  $breadcrumbs = [];
-  $sql = "select * from {$maptable} where {$idfield}=?";
-  $dat = array($id);
-  $res = $dbh->getAll($sql, null, $dat, array("integer"));
-  if (($res === false))
-  {
-    logentry("breadcrumblist.142: " . $res->toString());
-    return $res;
-  }
-  foreach ($res as $rec)
-  {
-    $siglabelpath = $rec["siglabelpath"];
-    $breadcrumbs[] = buildbreadcrumbs($siglabelpath);
-  }
-//  logentry("buildbreadcrumblist.100: breadcrumbs=".var_export($breadcrumbs, True));
-  return $breadcrumbs;
-}
-*/
 /**
  * @since 20150925
  */
@@ -257,64 +223,6 @@ function getlinksigmap($linkid)
 
 }
 
-/**
- * moved from vulcan.php
- * @since 20111205
- */
-/*
-function getlinkbyid($linkid)
-{
-  $currentmemberid = getcurrentmemberid();
-  
-  $dbh = \bbsengine6\database\connect(SYSTEMDSN);
-  if (($dbh === false))
-  {
-    logentry("getlinkbyid.10: " .$dbh->toString());
-    return $dbh;
-  }
-  $sql = "select * from vulcan.link where id=?";
-  $dat = [$linkid];
-  $res = $dbh->getRow($sql, null, $dat, array("integer"));
-  if (($res === false))
-  {
-    logentry("getlinkbyid.15: " . $res->toString());
-    return PEAR::raiseError($res);
-  }
-  
-  if ($res === null)
-  {
-    logentry("getlinkbyid.20: request for id=".var_export($linkid, True)." returned null");
-    return null;
-  }
-  
-//  logentry("getlinkbyid.120: res=".var_export($res, True));
-//  logentry("getlinkbyid.100: id=".var_export($linkid, True));
-//  logentry("getlinkbyid.110: magic=".var_export($res["magic"], True));
-
-  $link = $res;
-  $link["eros"] = toboolean($link["eros"], "vulcan.link.eros");
-  $link["magic"] = toboolean($link["magic"], "vulcan.link.magic");
-  $link["approved"] = toboolean($link["approved"], "vulcan.link.approved");
-  $link["broken"] = toboolean($link["broken"], "vulcan.link.broken");
-//  $link["breadcrumbs"] = buildbreadcrumblist($link["id"]);
-  $link["breadcrumbs"] = buildbreadcrumblist($link, "vulcan.link");
-  
-//  logentry("getlinkbyid.130: magic=".var_export($link["magic"], True));
-
-  $actions = buildlinkactions($currentmemberid, array("linkid" => $linkid, "link" => $link));
-  $link["actions"] = $actions;
-
-/*
-  $sigmap = getsigmap("vulcan.map_link_sig", "linkid", $linkid);
-  if (($sigmap === false))
-  {
-    logentry("getlinkbyid.30: " . $sigmap->toString());
-    return $sigmap;
-  }
-  $link["sigs"] = $sigmap;
-  return $link;
-}
-*/
 /**
  * return a list of dictionaries with keys 'title' and 'uri' for each part of $sigpath (ltree)
  *
@@ -475,41 +383,6 @@ function sortsidebaritems($a, $b)
   if ($foo > $bar) return 1;
 }
 
-/**
- * copied from zoidweb1
- * 
- * @since 20131014
- */
-/*
-function buildsidebar($menu=[])
-{
-//  $currentpage = getcurrentpage();
-//  $menu = array();
-
-  if (flag("ADMIN"))
-  {
-      $menu[] = array("name" => "mantra-add", "title" => "add mantra", "url" => "//engine.zoidtechnologies.com/mantra-add", "desc" => "add mantra");
-      $menu[] = array("name" => "sitenews-add", "title" => "add site news", "url" => \TEOSURL."sitenews/add-post", "desc" => "add a post to the 'site news' sig to be displayed on the www site");
-  }
-
-  $menu[] = array("name" => "about", "title" => "about", "url" => "/about", "desc" => "about this site");
-  $menu[] = array("name" => "teos", "title" => "teos", "url" => \TEOSURL, "desc" => "catalog view");
-  $menu[] = array("name" => "vulcan", "title" => "vulcan", "url" => VULCANURL, "desc" => "links database", "icon" => SKINURL . "art/new2.png");
-  $menu[] = array("name" => "www", "title" => "www site", "url" => WWWURL, "desc" => "main www site");
-  $menu[] = array("name" => "repo", "title" => "software repo", "url" => REPOURL, "desc" => "download software");
-  $menu[] = array("name" => "projects", "title" => "projects", "url" => "//projects.zoidtechnologies.com/", "desc" => "Projects Site");
-  $menu[] = array("name" => "sophia", "title" => "sophia", "url" => SOPHIAURL, "desc" => "forum/blog");
-  $menu[] = array("name" => "achilles", "title" => "achilles", "url" => ACHILLESURL, "desc" => "project achilles");
-  $menu[] = array("name" => "jamhacks", "title" => "jamhacks", "url" => WWWURL."jamhacks", "desc" => "combination resum&eacute;, biography, and portfolio");
-  $menu[] = array("name" => "sitenewsarchive", "title" => "site news archive", "url" => WWWURL."sitenewsarchive/", "desc" => "site news older than a month or two");
-  $menu[] = array("name" => "casino", "title" => "casino", "url" => CASINOURL, "desc" => "gaming for entertainment purposes only");
-  $menu[] = array("name" => "agora", "title" => "agora marketplace", "url" => "//agora.zoidtechnologies.com/", "desc" => "a bazaar");
-  
-  uasort($menu, "sortsidebaritems");
-//  logentry("zoidweb3.buildsidebar.100: menu=".var_export($menu, True));
-  return $menu;
-}
-*/
 /**
  * @since 20131028
  * @param string op operation like 'browse', 'add', 'edit', etc
@@ -2014,33 +1887,6 @@ function postgres_to_php_array($text)
   }
   return $res;
 }
-/*
-function getamznitem($nodeid)
-{
-  $sql = "select * from agora.amznitem where id=?";
-  $dat = [$nodeid];
-  $dbh = \bbsengine6\database\connect(SYSTEMDSN);
-  if (($dbh === false))
-  {
-    logentry("getamznitem.100: " . $dbh->toString());
-    return PEAR::raiseError($dbh);
-  }
-  $res = $dbh->getRow($sql, null, $dat, ["integer"]);
-  if (($res === false))
-  {
-    logentry("getamznitem.110: " . $res->toString());
-    return PEAR::raiseError($res);
-  }
-  
-  if ($res === null)
-  {
-    logentry("getamznitem.120: invalid nodeid ".var_export($nodeid, true));
-    return null;
-  }
-  
-  return buildamznitem($res);
-}
-*/
 
 }
 
