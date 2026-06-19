@@ -798,10 +798,6 @@ function getsmarty($options=null)
 /** 
  * @since 20140726
  */
-
-/*
-function getlabelpathfromsigid($sigid) */
-
 /**
  * @since 20140807
  */
@@ -818,20 +814,6 @@ function fetchpagefooter($options=null)
   $tmpl->assign("mantra", $mantra);
   return $tmpl->fetch("pagefooter.tmpl");
 }
-
-/**
- * escapes and json encodes given data parameter
- *
- * @since 20140730
- */
-/* function encodejson($data) */
-
-/**
- * decodes given json data into a dictionary (associative array)
- * 
- * @since 20140730
- */
-/* function decodejson($data) */
 
 /**
  * @since 20140911
