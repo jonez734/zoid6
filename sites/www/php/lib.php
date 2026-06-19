@@ -129,17 +129,6 @@ function buildbreadcrumblist($link, $table, $key="id")
  * @since 20131014
  */
 /*
-function sortsidebaritems($a, $b)
-{
-  $foo = isset($a["title"]) ? $a["title"] : null;
-  $bar = isset($b["title"]) ? $b["title"] : null;
-
-  if ($foo < $bar) return -1;
-  if ($foo == $bar) return 0;
-  if ($foo > $bar) return 1;
-}
-*/
-/*
 function accesssig($op, $sig)
 {
   $path = $sig["path"];
@@ -194,13 +183,6 @@ function accesssig($op, $sig)
   }
 //  logentry("zoidwebaccesssig.10: op=".var_export($op, true)." res=".var_export($res, True)); // ." uid=".var_export($uid, true)); // . " data=".var_export($data, True));
   return $res;
-}
-*/
-/*
-function buildpathfromuri($uri)
-{
-  logentry("buildpathfromuri.100: !! renamed to buildlabelpath");
-  return buildlabelpath($uri);
 }
 */
 /** 
@@ -678,82 +660,6 @@ function getsiglinkmap($linkid)
  * function buildpagerinfo($sql, $params) 
 */
 
-/**
- * @since 20150722
- */
-/*
-function gettotalposts()
-{
-  $dbh = \bbsengine6\database\connect(\config\SYSTEMDSN);
-  if ($dbh === false)
-  {
-    logentry("gettotalpostcount.100: " . $dbh->toString());
-    return $dbh;
-  }
-  $sql = "select count(id) from sophia.post";
-  $res = $dbh->getOne($sql);
-  return $res;
-}
-*/
-/**
- * @since 20150722
- */
-/*
-function getmemberposts($memberid)
-{
-  $dbh = \bbsengine6\database\connect(\config\SYSTEMDSN);
-  if ($dbh === false)
-  {
-    logentry("getmemberpostcount.100: " . $dbh->toString());
-    return $dbh;
-  }
-  $sql = "select count(id) from sophia.post where postedbyid=?";
-  $dat = array($memberid);
-  $res = $dbh->getOne($sql, array("integer"), $dat, array("integer"));
-  return $res;
-}
-*/
-/**
- * @since 20150722
- */
-/*
-function getmemberlinks($memberid)
-{
-  $dbh = \bbsengine6\database\connect(\config\SYSTEMDSN);
-  if ($dbh === false)
-  {
-    logentry("getmemberlinkcount.100: " . $dbh->toString());
-    return $dbh;
-  }
-  $sql = "select count(id) from vulcan.link where postedby=?";
-  $dat = array($memberid);
-  $res = $dbh->getOne($sql, array("integer"), $dat, array("integer"));
-  return $res;
-}
-*/
-/*
-function getpostreplycount($postid)
-{
-  static $count = 0;
-  
-  $dbh = \bbsengine6\database\connect(\config\SYSTEMDSN);
-  if ($dbh === false)
-  {
-    logentry("getpostreplycount.100: ".$dbh->toString());
-    return $dbh;
-  }
-  $sql = "select count(id) from sophia.post where parentid=?";
-  $dat = [$postid];
-  $res = $dbh->getOne($sql, ["integer"], $dat, ["integer"]);
-  if ($res === false)
-  {
-    logentry("getpostreplycount.110: " . $res->toString());
-    
-  }
-  $count += $res["count"];
-  return $count;
-}
-*/
 /**
  * function to build up a generic page (like "about") and call
  * displaypage().  this function elimintates a lot of duplicate code.  it is
