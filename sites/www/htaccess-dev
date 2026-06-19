@@ -7,10 +7,6 @@ RewriteEngine On
 RewriteBase /
 RewriteOptions Inherit
 
-RewriteRule     ^gfile/add/([0-9]+)$ gfile.php?mode=add&sigid=$1 [last]
-RewriteRule     ^gfile/([a-z]+)/([0-9]+)$  gfile.php?mode=$1&id=$2 [last]
-RewriteRule     ^gfile/summary[/]?$ gfile.php?mode=summary [last]
-
 RewriteRule     ^article/add/([0-9]+)$ article.php?mode=add&sigid=$1 [last]
 RewriteRule     ^article/summary/([0-9]+)[/]?$ article.php?mode=summary&pageID=$1 [last]
 RewriteRule     ^article/summary[/]?$ article.php?mode=summary [last]
@@ -56,10 +52,6 @@ RewriteRule	 ^mantra-summary$ mantra.php?mode=summary [last]
 RewriteRule	 ^mantra-summary-([0-9]+)$ mantra.php?mode=summary&pageID=$1 [last]
 RewriteRule	 ^mantra-add$ mantra.php?mode=add [last]
 RewriteRule      ^mantra-([a-z]+)-([0-9]+)$ mantra.php?mode=$1&id=$2 [last,qsappend]
-
-RewriteRule     ^gfile/add[/]?$  gfile.php?mode=add [last]
-RewriteRule     ^gfile/summary[/]?$  gfile.php?mode=summary [last]
-RewriteRule     ^gfile/([a-z]+)/([0-9]+)$    gfile.php?mode=$1&id=$2 [last]
 
 RewriteRule     ^aolbonics/(.*)$  http://aolbonics.zoidtechnologies.com/$1 [R=301,L]
 

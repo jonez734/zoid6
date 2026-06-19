@@ -93,17 +93,6 @@ function buildchoices($choices=[])
 require_once("HTML/QuickForm2/Element/Captcha/Image.php");
 //require_once("libagora.php");
 
-/*
-function accessgfile($op, $data=null, $memberid=null)
-{
-  if ($op === "view")
-  {
-    return True;
-  }
-  return False;
-}
-*/
-
 function buildcaptchafieldset($form, $options=null)
 {
   $_options = array(
