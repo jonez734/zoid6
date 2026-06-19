@@ -1,15 +1,8 @@
 <?php
 
 namespace {
-  /*
-   * @since 20190817
-   * @since 20221104
-   */
-  $includepath = get_include_path().":/srv/www/zoid6/php/:/srv/www/bbsengine6/php/:/srv/www/smarty/:/srv/www/markdown/";
-  if (set_include_path($includepath) === false)
-  {
-      print("include path fail");
-  }
+  require_once(__DIR__ . "/bootstrap.php");
+  \zoid6\bootstrap();
 }
 
 namespace config {
