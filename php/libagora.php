@@ -11,10 +11,10 @@ require_once("InputUrl.php");
  */
 function getamznitemcount()
 {
-    $dbh = dbconnect(SYSTEMDSN);
+    $dbh = \bbsengine6\database\connect(SYSTEMDSN);
     $sql = "select asin from agora.amznitem";
     $res = $dbh->getAll($sql);
-    if (PEAR::isError($res))
+    if (($res === false))
     {
         logentry("agora.index.getamznitemcount.100: " . $res->toString());
         return $res;
@@ -111,8 +111,8 @@ function buildamznitemcommentfieldset($form)
 
 function getamznitemcomments($parentid)
 {
-    $dbh = dbconnect(SYSTEMDSN);
-    if (PEAR::isError($dbh))
+    $dbh = \bbsengine6\database\connect(SYSTEMDSN);
+    if (($dbh === false))
     {
       logentry("libagora.getamznitemcomments.100: " . $dbh->toString());
       return $dbh;
@@ -123,7 +123,7 @@ function getamznitemcomments($parentid)
     $comments = [];
 
     $res = $dbh->getAll($sql);
-    if (PEAR::isError($res))
+    if (($res === false))
     {
         logentry("agora.index.100: " . var_export($res->toString(), true));
         return $res;
@@ -368,11 +368,11 @@ function buildamznitem($rec)
  */
 function getamznitembynodeid($nodeid)
 {
-  $dbh = dbconnect(SYSTEMDSN);
+  $dbh = \bbsengine6\database\connect(SYSTEMDSN);
   $sql = "select asin from agora.amznitem where id=?";
   $dat = [$nodeid];
   $asin = $dbh->getOne($sql, ["text"], $dat, ["integer"]);
-  if (PEAR::isError($asin))
+  if (($asin === false))
   {
     logentry("getamznitembynodeid.100: " . $res->toString());
     return $res;
@@ -388,8 +388,8 @@ function getamznitembynodeid($nodeid)
  */
 function getamznitem($asin)
 {
-    $dbh = dbconnect(SYSTEMDSN);
-    if (PEAR::isError($dbh))
+    $dbh = \bbsengine6\database\connect(SYSTEMDSN);
+    if (($dbh === false))
     {
         logentry("getamznitem.100: " . var_export($dbh, true));
         return $dbh;
@@ -398,7 +398,7 @@ function getamznitem($asin)
     $sql = "select * from agora.amznitem where asin=?";
     $dat = [$asin];
     $amznitem = $dbh->getRow($sql, null, $dat, ["text"]);
-    if (PEAR::isError($amznitem))
+    if (($amznitem === false))
     {
         logentry("getamznitem.120: " . var_export($amznitem, true));
         return $amznitem;

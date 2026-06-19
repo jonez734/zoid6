@@ -67,7 +67,7 @@ class login
 
     \bbsengine6\util\logentry("login.100: login=".var_export($login, true)." password=".var_export($password, true));
     $dbh = \bbsengine6\database\connect(\SYSTEMDSN);
-    if (PEAR::isError($dbh))
+    if ($dbh === false)
     {
       displayerrorpage("database error (code: login.102)");
       \bbsengine6\util\logentry("login.102: " . $dbh->toString());
@@ -100,7 +100,7 @@ class login
 //    \bbsengine6\member\lib\update($pdo, $memberid, $member);
 /*
     $res = $dbh->autoExecute("engine.__member", $member, MDB2_AUTOQUERY_UPDATE, "id=" . $dbh->quote($memberid, "integer"));
-    if (PEAR::isError($res))
+    if ($res === false)
     {
       displayerrorpage("database error (login.108)");
       logentry("login.108: " . $res->toString());
@@ -155,7 +155,7 @@ class login
     $form->addDataSource(new \HTML_QuickForm2_DataSource_Array($const));
 
     $res = \bbsengine6\handleform($form, [$this, "validate"], "follow the white rabbit...");
-    if (\PEAR::isError($res))
+    if ($res === false)
     {
       \bbsengine6\util\logentry("login.300: " . $res->toString());
       return \PEAR::raiseError("login form handling error (code: login.300)");
@@ -173,7 +173,7 @@ class login
 //    $options["stylesheets"] = [STATICSKINURL."css/login.css"];
 
     $res = \bbsengine6\displayform($renderer, "knock, knock, neo...", $options);
-    if (\PEAR::isError($res))
+    if ($res === false)
     {
       \bbsengine6\util\logentry("login.320: " . $res->toString());
       return \PEAR::raiseError("error displaying form (code: login.320)");
@@ -205,7 +205,7 @@ class login
 
 $a = new login();
 $b = $a->main();
-if (PEAR::isError($b))
+if ($b === false)
 {
   \bbsengine6\util\logentry("login.400: " . $b->toString());
 }

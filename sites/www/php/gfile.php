@@ -18,7 +18,9 @@
 
 require_once("config.php");
 require_once("zoidweb4.php");
+require_once("/srv/www/bbsengine6/php/database.php");
 require_once("bbsengine4.php");
+require_once("/srv/www/bbsengine6/php/database.php");
 
 require_once("Pager/Pager.php");
 
@@ -29,7 +31,7 @@ class gfile
     function &getform($submitmode, $id=0)
     {
         $form = getquickform("bbsengine-gfile");
-        if (PEAR::isError($form))
+        if ($form === false)
         {
           logentry("gfile.getform.0: " . $form->toString());
           return $form;
@@ -58,8 +60,8 @@ class gfile
         $e->setSize(80);
         $e->setMaxLength(255);
         
-        $dbh = &dbconnect(SYSTEMDSN);
-        if (PEAR::isError($dbh))
+        $dbh = \bbsengine6\database\connect(SYSTEMDSN);
+        if ($dbh === false)
         {
             logentry("www: gfile: getform: " . $dbh->toString());
         }
@@ -109,7 +111,7 @@ where www.gfile.id=?
 limit 1;
 SQL;
         $res = $this->dbh->getRow($sql, null, array($id));
-        if (PEAR::isError($res))
+        if ($res === false)
         {
             logentry("www: gfile: get: select returned error " . $res->toString());
             return False;
@@ -142,7 +144,7 @@ SQL;
     {
 		$sql = "select count(*) from www.gfile";
 		$res = $this->dbh->getOne($sql);
-		if (PEAR::isError($res))
+		if ($res === false)
 		{
 		    logentry("gfile: getcount: " . $res->toString());
 		    return False;
@@ -161,7 +163,7 @@ SQL;
         }
 
         $gfile = $this->get($id);
-        if (PEAR::isError($gfile))
+        if ($gfile === false)
         {
             logentry("gfile.10: " . $gfile->toString());
             return PEAR::raiseError("input error (code: gfile.10)");
@@ -207,7 +209,7 @@ SQL;
         $sql = "select *, extract(epoch from dateposted) as datepostedepoch, extract(epoch from lastmodified) as lastmodifiedepoch from www.gfile order by dateposted desc";
         list($page["from"], $page["to"]) = $pager->getOffsetByPageId();
         $res = $this->dbh->limitQuery($sql, $page["from"]-1, $params["perPage"]);
-        if (PEAR::isError($res))
+        if ($res === false)
         {
           logentry("zoid: gfile: " . $res->toString());
           return False;
@@ -323,7 +325,7 @@ SQL;
         $gfile["viewpermission"] = $values["viewpermission"];
         
         $res = $this->dbh->autoExecute("www.gfile", $gfile, DB_AUTOQUERY_INSERT);
-        if (PEAR::isError($res))
+        if ($res === false)
         {
             displayerrormessage("www: gfile: insert: execute returned error");
             logentry("www: gfile: insert: " . $res->toString());
@@ -422,7 +424,7 @@ SQL;
         $gfile["viewpermission"] = $values["viewpermission"];
         
         $res = $this->dbh->autoExecute("www.gfile", $gfile, DB_AUTOQUERY_UPDATE, "id={$id}");
-        if (PEAR::isError($res))
+        if ($res === false)
         {
             displayerrormessage("www: gfile: update: execute returned error");
             logentry("www: gfile: update: " . $res->toString());
@@ -457,7 +459,7 @@ SQL;
              return False;
          }
          
-         if (PEAR::isError($res))
+         if ($res === false)
          {
              displayerrormessage("www: gfile: delete: execute returned error");
              logentry("www: gfile: delete: " . $res->toString());
@@ -498,7 +500,7 @@ SQL;
              return False;
          }
          
-         if (PEAR::isError($res))
+         if ($res === false)
          {
              displayerrormessage("www: gfile: delete: execute returned error");
              logentry("www: gfile: delete: " . $res->toString());
@@ -522,8 +524,8 @@ SQL;
 //        $mode = preparestring($mode);
         if (empty($mode)) $mode = "summary";
         
-        $this->dbh = &dbconnect(SYSTEMDSN);
-        if (PEAR::isError($this->dbh))
+        $this->dbh = \bbsengine6\database\connect(SYSTEMDSN);
+        if ($this->dbh === false)
         {
             displayerrormessage("gfile: error connecting to database");
             logentry("www: gfile: main: " . $this->dbh->toString());

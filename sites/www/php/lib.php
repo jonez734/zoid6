@@ -127,8 +127,8 @@ function buildbreadcrumblist($link, $table, $key="id")
 
   $id = $link[$key];
   
-  $dbh = dbconnect(\config\SYSTEMDSN);
-  if (PEAR::isError($dbh))
+  $dbh = \bbsengine6\database\connect(\config\SYSTEMDSN);
+  if ($dbh === false)
   {
     logentry("buildbreadcrumblist.10: " . $dbh->toString());
     return $dbh;
@@ -136,7 +136,7 @@ function buildbreadcrumblist($link, $table, $key="id")
   $sql = "select unnest(sigs) as siglabelpath from {$table} where id=?";
   $dat = array($id);
   $res = $dbh->getAll($sql, null, $dat, array("integer"));
-  if (PEAR::isError($res))
+  if ($res === false)
   {
     logentry("buildbreadcrumblist.42: " . $res->toString());
     return $res;
@@ -263,7 +263,7 @@ function fetchpagefooter($options=null)
 {
   $tmpl = getsmarty();
   $mantra = getrandommantra();
-  if (PEAR::isError($mantra))
+  if ($mantra === false)
   {
     logentry("fetchpagefooter.100: " . $mantra->toString());
     $mantra = null;
@@ -360,7 +360,7 @@ function accesspost($op, $data=null, $memberid=null)
      $siglabelpath = buildlabelpath($siguri);
 
      $sig = getsig($siglabelpath);
-     if (PEAR::isError($sig))
+     if ($sig === false)
      {
       logentry("accesspost.110: ".$sig->toString());
       $res = False;
@@ -528,7 +528,7 @@ function buildnotifyrecord($key, $notify)
     }
   }
 
-  if (PEAR::isError($record))
+  if ($record === false)
   {
     logentry("buildrecord.100: " . $record->toString());
     $record = null;
@@ -573,7 +573,7 @@ function buildnotifydata($notifytype, $data)
     {
       $linkid = isset($data["linkid"]) ? $data["linkid"] : null;
       $link = getlinkbyid($linkid);
-      if (PEAR::isError($link))
+      if ($link === false)
       {
         logentry("buildnotifydata.100: " .$link->toString());
         return null;
@@ -631,7 +631,7 @@ function processform($form, $validatedcallback)
       logentry("processform.480: values=".var_export($values, True));
       
       $res = call_user_func($validatedcallback, $values); // $this->update($values);
-      if (PEAR::isError($res))
+      if ($res === false)
       {
         logentry("processform.101: " . $res->toString());
         return $res;
@@ -663,7 +663,7 @@ function implodesiglabelpaths($siglabelpaths)
 function getsigpostmap($postid)
 {
   $res = getsigmap("sophia.map_sig_post", "postid", $postid);
-  if (PEAR::isError($res))
+  if ($res === false)
   {
     logentry("getsigpostmap.100: " . $res->toString());
     return $res;
@@ -694,7 +694,7 @@ function getsigpostmap($postid)
 function getsiglinkmap($linkid)
 {
   $res = getsigmap("vulcan.map_link_sig", "linkid", $linkid);
-  if (PEAR::isError($res))
+  if ($res === false)
   {
     logentry("getsiglinkmap.100: " . $res->toString());
   }
@@ -713,8 +713,8 @@ function getsiglinkmap($linkid)
 /*
 function gettotalposts()
 {
-  $dbh = dbconnect(\config\SYSTEMDSN);
-  if (PEAR::isError($dbh))
+  $dbh = \bbsengine6\database\connect(\config\SYSTEMDSN);
+  if ($dbh === false)
   {
     logentry("gettotalpostcount.100: " . $dbh->toString());
     return $dbh;
@@ -730,8 +730,8 @@ function gettotalposts()
 /*
 function getmemberposts($memberid)
 {
-  $dbh = dbconnect(\config\SYSTEMDSN);
-  if (PEAR::isError($dbh))
+  $dbh = \bbsengine6\database\connect(\config\SYSTEMDSN);
+  if ($dbh === false)
   {
     logentry("getmemberpostcount.100: " . $dbh->toString());
     return $dbh;
@@ -748,8 +748,8 @@ function getmemberposts($memberid)
 /*
 function getmemberlinks($memberid)
 {
-  $dbh = dbconnect(\config\SYSTEMDSN);
-  if (PEAR::isError($dbh))
+  $dbh = \bbsengine6\database\connect(\config\SYSTEMDSN);
+  if ($dbh === false)
   {
     logentry("getmemberlinkcount.100: " . $dbh->toString());
     return $dbh;
@@ -765,8 +765,8 @@ function getpostreplycount($postid)
 {
   static $count = 0;
   
-  $dbh = dbconnect(\config\SYSTEMDSN);
-  if (PEAR::isError($dbh))
+  $dbh = \bbsengine6\database\connect(\config\SYSTEMDSN);
+  if ($dbh === false)
   {
     logentry("getpostreplycount.100: ".$dbh->toString());
     return $dbh;
@@ -774,7 +774,7 @@ function getpostreplycount($postid)
   $sql = "select count(id) from sophia.post where parentid=?";
   $dat = [$postid];
   $res = $dbh->getOne($sql, ["integer"], $dat, ["integer"]);
-  if (PEAR::isError($res))
+  if ($res === false)
   {
     logentry("getpostreplycount.110: " . $res->toString());
     
@@ -809,7 +809,7 @@ function displaygenericpage($pagename)
       $page->addStyleSheet(SKINURL."css/{$pagename}");
     }
     $res = displaypage($page, $options);
-    if (PEAR::isError($res))
+    if ($res === false)
     {
       logentry("displaygenericpage.100: ". $res->toString());
     }
@@ -824,11 +824,11 @@ function displaygenericpage($pagename)
 /*
 function getreplycount($postid)
 {
-  $dbh = dbconnect(\config\SYSTEMDSN);
+  $dbh = \bbsengine6\database\connect(\config\SYSTEMDSN);
   $sql = "with recursive t as (select id from sophia.post where parentid=? union all select post.id from sophia.post join t on (sophia.post.parentid=t.id)) select count(*) from t";
   $dat = [$postid];
   $res = $dbh->getOne($sql, null, $dat, null);
-  if (PEAR::isError($res))
+  if ($res === false)
   {
     logentry("getreplycount.100: " . $res->toString());
   }
@@ -918,23 +918,6 @@ function buildsidebarmenu($menu=[])
   $menu[] = ["name" => "mantrasummary", "title" => "mantra summary", "url" => ENGINEURL."mantra-summary", "desc" => "mantra summary pages"];
   uasort($menu, "sortsidebarmenu");
   return $menu;
-}
-*/
-/**
- * function which returns the sidebar. if the param is null, builds standard menu options, else passes direct to _fetchnavbar
- * 
- * @since 20150309
- */
-/*
-function fetchsidebar($menu=null)
-{
-//  logentry("fetchsidebar.zoidweb.100: called. menu=".var_export($menu, True));
-  $options = [];
-//  $foo = buildsidebarmenu($menu);
-//  logentry("fetchsidebar.zoidweb.110: foo=".var_export($foo, True));
-  $options["sidebardata"] = buildsidebarmenu($menu);
-  $options["template"] = "sidebar.tmpl";
-  return _fetchnavbar($options);
 }
 */
 /**

@@ -47,11 +47,11 @@ define("JOINURL", "/join");
 define("CAPTCHAFONTFILE", "cour.ttf");
 
 define("SHAREDURL", "/shared/");
-define("SHAREDSKINURL", \SHAREDURL."skin/");
+if (!defined("SHAREDSKINURL")) define("SHAREDSKINURL", \SHAREDURL."skin/");
 // @since 20220103
-define("SHAREDARTURL", \SHAREDSKINURL."art/");
+if (!defined("SHAREDARTURL")) define("SHAREDARTURL", \SHAREDSKINURL."art/");
 
-define("ENGINESKINURL", \ENGINEURL . "skin/");
+if (!defined("ENGINESKINURL")) define("ENGINESKINURL", \ENGINEURL . "skin/");
 
 define("NONCESALTLENGTH", 10);
 
@@ -80,7 +80,7 @@ namespace zoid6 {
 
 function buildchoices($choices=[])
 {
-    $choices[] = ["name" => "teos", "title" => "teos", "url" => TEOSURL, "desc" => ""];
+    $choices[] = ["name" => "teos", "title" => "teos", "url" => \TEOSURL, "desc" => ""];
     $choices[] = ["name" => "achilles", "title" => "a study of sodium glutamates", "url" => "https://zoidtechnologies.com/achilles/", "desc" => ""];
     $choices[] = ["name" => "asimov", "title" => "asimov: robotics, ai, and augmented reality", "url" => "/asimov/", "desc" => ""];
     // $choices[] = ["name" => "socrates", "title" => "threaded forum", "url" => "https://socrates.zoidtechnologies.com/", "desc" => ""];
@@ -161,8 +161,8 @@ function buildbreadcrumblist($link, $table, $key="id")
 
   $id = $link[$key];
   
-  $dbh = dbconnect(\SYSTEMDSN);
-  if (PEAR::isError($dbh))
+  $dbh = \bbsengine6\database\connect(\SYSTEMDSN);
+  if (($dbh === false))
   {
     logentry("buildbreadcrumblist.10: " . $dbh->toString());
     return $dbh;
@@ -170,7 +170,7 @@ function buildbreadcrumblist($link, $table, $key="id")
   $sql = "select unnest(sigs) as siglabelpath from {$table} where id=?";
   $dat = array($id);
   $res = $dbh->getAll($sql, null, $dat, array("integer"));
-  if (PEAR::isError($res))
+  if (($res === false))
   {
     logentry("buildbreadcrumblist.42: " . $res->toString());
     return $res;
@@ -195,8 +195,8 @@ function buildbreadcrumblist($id, $maptable="vulcan.map_link_sig", $idfield="lin
     return [];
   }
 
-  $dbh = dbconnect(SYSTEMDSN);
-  if (PEAR::isError($dbh))
+  $dbh = \bbsengine6\database\connect(SYSTEMDSN);
+  if (($dbh === false))
   {
     logentry("buildbreadcrumblist.10: " . $dbh->toString());
     return $dbh;
@@ -206,7 +206,7 @@ function buildbreadcrumblist($id, $maptable="vulcan.map_link_sig", $idfield="lin
   $sql = "select * from {$maptable} where {$idfield}=?";
   $dat = array($id);
   $res = $dbh->getAll($sql, null, $dat, array("integer"));
-  if (PEAR::isError($res))
+  if (($res === false))
   {
     logentry("breadcrumblist.142: " . $res->toString());
     return $res;
@@ -226,11 +226,11 @@ function buildbreadcrumblist($id, $maptable="vulcan.map_link_sig", $idfield="lin
 function getlinksigmap($linkid)
 {
 /*
-  $dbh = dbconnect(SYSTEMDSN);
+  $dbh = \bbsengine6\database\connect(SYSTEMDSN);
   $sql = "select siglabelpath from vulcan.map_link_sig where linkid=?";
   $dat = array($linkid);
   $res = $dbh->getAll($sql, null, $dat, array("integer"));
-  if (PEAR::isError($res))
+  if (($res === false))
   {
     logentry("getlinksigmap.102: " . $res->toString());
     return $res;
@@ -248,7 +248,7 @@ function getlinksigmap($linkid)
   return $sigs;
 */
   $res = getsigmap("vulcan.map_link_sig", "linkid", $linkid);
-  if (PEAR::isError($res))
+  if (($res === false))
   {
     logentry("getlinksigmap.100: " . $res->toString());
   }
@@ -266,8 +266,8 @@ function getlinkbyid($linkid)
 {
   $currentmemberid = getcurrentmemberid();
   
-  $dbh = dbconnect(SYSTEMDSN);
-  if (PEAR::isError($dbh))
+  $dbh = \bbsengine6\database\connect(SYSTEMDSN);
+  if (($dbh === false))
   {
     logentry("getlinkbyid.10: " .$dbh->toString());
     return $dbh;
@@ -275,7 +275,7 @@ function getlinkbyid($linkid)
   $sql = "select * from vulcan.link where id=?";
   $dat = [$linkid];
   $res = $dbh->getRow($sql, null, $dat, array("integer"));
-  if (PEAR::isError($res))
+  if (($res === false))
   {
     logentry("getlinkbyid.15: " . $res->toString());
     return PEAR::raiseError($res);
@@ -306,7 +306,7 @@ function getlinkbyid($linkid)
 
 /*
   $sigmap = getsigmap("vulcan.map_link_sig", "linkid", $linkid);
-  if (PEAR::isError($sigmap))
+  if (($sigmap === false))
   {
     logentry("getlinkbyid.30: " . $sigmap->toString());
     return $sigmap;
@@ -489,11 +489,11 @@ function buildsidebar($menu=[])
   if (flag("ADMIN"))
   {
       $menu[] = array("name" => "mantra-add", "title" => "add mantra", "url" => "//engine.zoidtechnologies.com/mantra-add", "desc" => "add mantra");
-      $menu[] = array("name" => "sitenews-add", "title" => "add site news", "url" => TEOSURL."sitenews/add-post", "desc" => "add a post to the 'site news' sig to be displayed on the www site");
+      $menu[] = array("name" => "sitenews-add", "title" => "add site news", "url" => \TEOSURL."sitenews/add-post", "desc" => "add a post to the 'site news' sig to be displayed on the www site");
   }
 
   $menu[] = array("name" => "about", "title" => "about", "url" => "/about", "desc" => "about this site");
-  $menu[] = array("name" => "teos", "title" => "teos", "url" => TEOSURL, "desc" => "catalog view");
+  $menu[] = array("name" => "teos", "title" => "teos", "url" => \TEOSURL, "desc" => "catalog view");
   $menu[] = array("name" => "vulcan", "title" => "vulcan", "url" => VULCANURL, "desc" => "links database", "icon" => SKINURL . "art/new2.png");
   $menu[] = array("name" => "www", "title" => "www site", "url" => WWWURL, "desc" => "main www site");
   $menu[] = array("name" => "repo", "title" => "software repo", "url" => REPOURL, "desc" => "download software");
@@ -508,20 +508,6 @@ function buildsidebar($menu=[])
   uasort($menu, "sortsidebaritems");
 //  logentry("zoidweb3.buildsidebar.100: menu=".var_export($menu, True));
   return $menu;
-}
-*/
-/**
- * function which returns the sidebar. if the param is null, builds standard menu options, else passes direct to _fetchsidebar
- * 
- * @since 20150309
- */
-/*
-function fetchsidebar($sidebar=null)
-{
-  $options = [];
-  $options["sidebar"] = buildsidebar($sidebar);
-  $options["template"] = "sidebar.tmpl";
-  return _fetchsidebar($options);
 }
 */
 /**
@@ -700,11 +686,11 @@ function uniqueurl($url)
 {
  logentry("uniqueurl.100: url=".var_export($url, True));
  
- $dbh = dbconnect(\SYSTEMDSN);
+ $dbh = \bbsengine6\database\connect(\SYSTEMDSN);
  $sql = "select 1 from vulcan.link where url=? or url=?||'/'";
  $dat = array($url, $url);
  $res = $dbh->getOne($sql, ["integer"], $dat, ["text", "text"]);
- if (PEAR::isError($res))
+ if (($res === false))
  {
   logentry("uniqueurl.100: " . $res->toString());
   return null;
@@ -950,7 +936,7 @@ function fetchpagefooter($options=null)
 {
   $tmpl = getsmarty();
   $mantra = getrandommantra();
-  if (PEAR::isError($mantra))
+  if (($mantra === false))
   {
     logentry("fetchpagefooter.100: " . $mantra->toString());
     $mantra = null;
@@ -979,8 +965,8 @@ function fetchpagefooter($options=null)
  */
 function getprojectid($projectname)
 {
- $dbh = dbconnect(\SYSTEMDSN);
- if (PEAR::isError($dbh))
+ $dbh = \bbsengine6\database\connect(\SYSTEMDSN);
+ if (($dbh === false))
  {
   logentry("getprojectid.100: " . $dbh->toString());
   return $dbh;
@@ -988,7 +974,7 @@ function getprojectid($projectname)
  $sql = "select id from repo.project where name=?";
  $dat = array($projectname);
  $res = $dbh->getOne($sql, array("integer"), $dat, array("text"));
- if (PEAR::isError($res))
+ if (($res === false))
  {
   logentry("getprojectid.102: ".$res->toString());
   return $res;
@@ -1069,7 +1055,7 @@ function accesspost($op, $data=null, $memberid=null)
      $siglabelpath = buildlabelpath($siguri);
 
      $sig = getsig($siglabelpath);
-     if (PEAR::isError($sig))
+     if (($sig === false))
      {
       logentry("accesspost.110: ".$sig->toString());
       $res = False;
@@ -1313,7 +1299,7 @@ function buildnotifyrecord($key, $notify)
     }
   }
 
-  if (PEAR::isError($record))
+  if (($record === false))
   {
     logentry("buildrecord.100: " . $record->toString());
     $record = null;
@@ -1356,7 +1342,7 @@ function buildnotifydata($notifytype, $data)
     {
       $linkid = isset($data["linkid"]) ? $data["linkid"] : null;
       $link = getlinkbyid($linkid);
-      if (PEAR::isError($link))
+      if (($link === false))
       {
         logentry("buildnotifydata.100: " .$link->toString());
         return null;
@@ -1413,7 +1399,7 @@ function processform($form, $validatedcallback)
       logentry("processform.480: values=".var_export($values, True));
       
       $res = call_user_func($validatedcallback, $values); // $this->update($values);
-      if (PEAR::isError($res))
+      if (($res === false))
       {
         logentry("processform.101: " . $res->toString());
         return $res;
@@ -1439,9 +1425,9 @@ function getpost($id, $maxdepth=0, $currentdepth=0)
 //  $sql = "select * from sophia.post where id=?";
   $sql = "select * from sophia.post where id=?";
   $dat = [$id];
-  $dbh = dbconnect(\SYSTEMDSN);
+  $dbh = \bbsengine6\database\connect(\SYSTEMDSN);
   $post = $dbh->getRow($sql, null, $dat, array("integer"));
-  if (PEAR::isError($post))
+  if (($post === false))
   {
     logentry("getpost.100: " . $post->toString());
     return $post;
@@ -1457,7 +1443,7 @@ function getpost($id, $maxdepth=0, $currentdepth=0)
   $post["postedbyid"] = intval($post["postedbyid"]);
 
   $sigmap = getsigmap("sophia.map_post_sig", "postid", $id);
-  if (PEAR::isError($sigmap))
+  if (($sigmap === false))
   {
     logentry("getpost.105: " . $sigmap->toString());
     $sigmap = null;
@@ -1568,7 +1554,7 @@ function implodesiglabelpaths($siglabelpaths)
 function getsigpostmap($postid)
 {
   $res = getsigmap("sophia.map_sig_post", "postid", $postid);
-  if (PEAR::isError($res))
+  if (($res === false))
   {
     logentry("getsigpostmap.100: " . $res->toString());
     return $res;
@@ -1598,7 +1584,7 @@ function getsigpostmap($postid)
 function getsiglinkmap($linkid)
 {
   $res = getsigmap("vulcan.map_link_sig", "linkid", $linkid);
-  if (PEAR::isError($res))
+  if (($res === false))
   {
     logentry("getsiglinkmap.100: " . $res->toString());
   }
@@ -1616,8 +1602,8 @@ function getsiglinkmap($linkid)
  */
 function gettotalposts()
 {
-  $dbh = dbconnect(\SYSTEMDSN);
-  if (PEAR::isError($dbh))
+  $dbh = \bbsengine6\database\connect(\SYSTEMDSN);
+  if (($dbh === false))
   {
     logentry("gettotalpostcount.100: " . $dbh->toString());
     return $dbh;
@@ -1632,8 +1618,8 @@ function gettotalposts()
  */
 function gettotallinks()
 {
-  $dbh = dbconnect(\SYSTEMDSN);
-  if (PEAR::isError($dbh))
+  $dbh = \bbsengine6\database\connect(\SYSTEMDSN);
+  if (($dbh === false))
   {
     logentry("gettotallinkcount.100: " . $dbh->toString());
     return $dbh;
@@ -1648,8 +1634,8 @@ function gettotallinks()
  */
 function getmemberposts($memberid)
 {
-  $dbh = dbconnect(\SYSTEMDSN);
-  if (PEAR::isError($dbh))
+  $dbh = \bbsengine6\database\connect(\SYSTEMDSN);
+  if (($dbh === false))
   {
     logentry("getmemberpostcount.100: " . $dbh->toString());
     return $dbh;
@@ -1665,8 +1651,8 @@ function getmemberposts($memberid)
  */
 function getmemberlinks($memberid)
 {
-  $dbh = dbconnect(\SYSTEMDSN);
-  if (PEAR::isError($dbh))
+  $dbh = \bbsengine6\database\connect(\SYSTEMDSN);
+  if (($dbh === false))
   {
     logentry("getmemberlinkcount.100: " . $dbh->toString());
     return $dbh;
@@ -1681,8 +1667,8 @@ function getpostreplycount($postid)
 {
   static $count = 0;
   
-  $dbh = dbconnect(\SYSTEMDSN);
-  if (PEAR::isError($dbh))
+  $dbh = \bbsengine6\database\connect(\SYSTEMDSN);
+  if (($dbh === false))
   {
     logentry("getpostreplycount.100: ".$dbh->toString());
     return $dbh;
@@ -1690,7 +1676,7 @@ function getpostreplycount($postid)
   $sql = "select count(id) from sophia.post where parentid=?";
   $dat = [$postid];
   $res = $dbh->getOne($sql, ["integer"], $dat, ["integer"]);
-  if (PEAR::isError($res))
+  if (($res === false))
   {
     logentry("getpostreplycount.110: " . $res->toString());
     
@@ -1724,7 +1710,7 @@ function displaygenericpage($pagename)
       $page->addStyleSheet(SKINURL."css/{$pagename}");
     }
     $res = displaypage($page, $options);
-    if (PEAR::isError($res))
+    if (($res === false))
     {
       logentry("displaygenericpage.100: ". $res->toString());
     }
@@ -1738,11 +1724,11 @@ function displaygenericpage($pagename)
 
 function getreplycount($postid)
 {
-  $dbh = dbconnect(\SYSTEMDSN);
+  $dbh = \bbsengine6\database\connect(\SYSTEMDSN);
   $sql = "with recursive t as (select id from sophia.post where parentid=? union all select post.id from sophia.post join t on (sophia.post.parentid=t.id)) select count(*) from t";
   $dat = [$postid];
   $res = $dbh->getOne($sql, null, $dat, null);
-  if (PEAR::isError($res))
+  if (($res === false))
   {
     logentry("getreplycount.100: " . $res->toString());
   }
@@ -1757,15 +1743,15 @@ function getreplycount($postid)
 function getrandommantra()
 {
   $sql = "select id from engine.mantra order by random() limit 1";
-  $dbh = dbconnect(SYSTEMDSN);
-  if (PEAR::isError($dbh))
+  $dbh = \bbsengine6\database\connect(SYSTEMDSN);
+  if (($dbh === false))
   {
     logentry("getrandommantra.100: " . $dbh->toString());
     return $dbh;
   }
 
   $mantraid = $dbh->getOne($sql);
-  if (PEAR::isError($mantraid))
+  if (($mantraid === false))
   {
     logentry("getrandommantra.110: " . $mantraid->toString());
     return $mantraid;
@@ -1853,11 +1839,11 @@ function displaypage($page, $data=[])
 
 function vulcangetneedsapproval()
 {
-  $dbh = dbconnect(\SYSTEMDSN);
+  $dbh = \bbsengine6\database\connect(\SYSTEMDSN);
   $sql = "select * from vulcan.link where approved='f' and eros='f'";
   $dat = [];
   $res = $dbh->getAll($sql, null, $dat, null);
-  if (PEAR::isError($res))
+  if (($res === false))
   {
       logentry("vulcanneedsapproval.100: " . $res->toString());
       return PEAR::raiseError("database error (code: vulcanneedsapproval.100)");
@@ -1871,7 +1857,7 @@ function vulcangetneedsapproval()
   {
     $id = $rec["id"];
     $link = getlinkbyid($id);
-    if (PEAR::isError($link))
+    if (($link === false))
     {
       logentry("vulcanneedsapproval.120: " . $res->toString());
       continue;
@@ -1886,8 +1872,8 @@ function vulcangetneedsapproval()
 
 function vulcangetrecentlyadded()
 {
-  $dbh = dbconnect(\SYSTEMDSN);
-  if (PEAR::isError($dbh))
+  $dbh = \bbsengine6\database\connect(\SYSTEMDSN);
+  if (($dbh === false))
   {
     logentry("vulcangetrecentlyadded.100: " . $dbh->toString());
     return PEAR::raiseError("Database Error (code: vulcangetrecentlyadded.100)");
@@ -1902,7 +1888,7 @@ limit 10
 eos;
 
   $res = $dbh->getAll($sql);
-  if (PEAR::isError($res))
+  if (($res === false))
   {
     logentry("vulcangetrecentlyadded.110: " . $res->toString());
     return PEAR::raiseError("Database Error (code: vulcangetrecentlyadded.110)");
@@ -1915,7 +1901,7 @@ eos;
   {
     $id = $rec["id"];
     $link = getlinkbyid($id);
-    if (PEAR::isError($link))
+    if (($link === false))
     {
       logentry("vulcangetrecentlyadded.120: " . $link->toString());
       continue;
@@ -1958,13 +1944,13 @@ function buildsidebarmenu($menu=[])
   {
       $menu[] = array("name" => "addflag", "title" => "add system flag", "url" => ENGINEURL."flag-add", "desc" => "add system flag to the database");
       $menu[] = array("name" => "addmantra", "title" => "add mantra", "url" => ENGINEURL."mantra-add", "desc" => "add mantra");
-      $menu[] = array("name" => "addsitenews", "title" => "add site news", "url" => TEOSURL."sitenews/add-post", "desc" => "add a post to the 'site news' sig to be displayed on the www site");
+      $menu[] = array("name" => "addsitenews", "title" => "add site news", "url" => \TEOSURL."sitenews/add-post", "desc" => "add a post to the 'site news' sig to be displayed on the www site");
 //      $menu[] = array("name" => "addlink", "title" => "add link", "url" => VULCANURL . "add");
 //      $menu[] = array("name" => "addfeed", "title" => "add feed", "url" => DEMETERURL . "add");
   }
 
   $menu[] = array("name" => "about", "title" => "about", "url" => "/about", "desc" => "about this site");
-  $menu[] = array("name" => "teos", "title" => "teos", "url" => TEOSURL, "desc" => "catalog view");
+  $menu[] = array("name" => "teos", "title" => "teos", "url" => \TEOSURL, "desc" => "catalog view");
 //  $menu[] = array("name" => "bbsengine", "title" => "BBSEngine", "url" => "http://bbsengine.org/", "desc" => "Simple But Elegant Web Application Framework");
   $menu[] = array("name" => "vulcan", "title" => "vulcan", "url" => VULCANURL, "desc" => "links database", "icon" => SKINURL . "art/new2.png");
   $menu[] = array("name" => "www", "title" => "www site", "url" => WWWURL, "desc" => "main www site");
@@ -2033,14 +2019,14 @@ function getamznitem($nodeid)
 {
   $sql = "select * from agora.amznitem where id=?";
   $dat = [$nodeid];
-  $dbh = dbconnect(SYSTEMDSN);
-  if (PEAR::isError($dbh))
+  $dbh = \bbsengine6\database\connect(SYSTEMDSN);
+  if (($dbh === false))
   {
     logentry("getamznitem.100: " . $dbh->toString());
     return PEAR::raiseError($dbh);
   }
   $res = $dbh->getRow($sql, null, $dat, ["integer"]);
-  if (PEAR::isError($res))
+  if (($res === false))
   {
     logentry("getamznitem.110: " . $res->toString());
     return PEAR::raiseError($res);

@@ -117,7 +117,7 @@ class index
     $this->dbh = \bbsengine6\database\connect(SYSTEMDSN);
 /*
     $projects = $this->getlatestreleases(5);
-    if (PEAR::isError($projects))
+    if ($projects === false)
     {
       logentry("index.110: ".$projects->toString());
       $projects = null;
@@ -128,14 +128,14 @@ class index
 
 /*
     $sitenews = $this->getsitenews();
-    if (PEAR::isError($sitenews))
+    if ($sitenews === false)
     {
       logentry("index.121: " . $sitenews->toString());
       $sitenews = null;
     }
 
     $needsapproval = $this->getneedsapproval();
-    if (PEAR::isError($needsapproval))
+    if ($needsapproval === false)
     {
       logentry("index.124: " . $needsapproval->toString());
       $needsapproval = null;

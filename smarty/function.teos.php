@@ -37,7 +37,7 @@ function smarty_function_teos($options, Smarty_Internal_Template $template)
 
   $dbh = \bbsengine6\database\connect(\config\SYSTEMDSN);
 /*
-  if (PEAR::isError($dbh))
+  if (($dbh === false))
   {
     logentry("function.teos.100: ". $dbh->toString());
     return "TEOS.100";

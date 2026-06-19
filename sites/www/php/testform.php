@@ -64,7 +64,7 @@ if ($res === True)
   exit;
 //  displayredirectpage("OK -- form tested", "/", 5);
 }
-elseif (PEAR::isError($res))
+elseif ($res === false)
 {
   logentry("testform.100: " . $res->toString());
   displayerrorpage($res->getMessage());

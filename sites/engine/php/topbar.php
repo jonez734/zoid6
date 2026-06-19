@@ -25,7 +25,7 @@ class topbar
   function notifycount()
   {
     $currentmember = getcurrentmember();
-    if (PEAR::isError($currentmember))
+    if ($currentmember === false)
     {
       logentry("topbar.notifycount.110: " . $currentmember->toString());
     }
@@ -129,7 +129,7 @@ class topbar
 
 $a = new topbar();
 $b = $a->main();
-if (PEAR::isError($b))
+if ($b === false)
 {
     logentry("topbar.999: " . $b->toString());
     displayerrorpage($b->getMessage());

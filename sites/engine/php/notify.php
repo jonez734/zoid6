@@ -3,6 +3,7 @@
 require_once("config.php");
 require_once("zoidweb3.php");
 require_once("bbsengine4.php");
+require_once("/srv/www/bbsengine6/php/database.php");
 
 require_once("Pager.php");
 
@@ -15,7 +16,7 @@ class notify
     $data = array();
     
     $currentmember = getcurrentmember();
-    if (PEAR::isError($currentmember))
+    if ($currentmember === false)
     {
       logentry("notify.getcount.110: " . $res->toString());
       $res = -1;
@@ -63,7 +64,7 @@ class notify
       }
     }
 
-    if (PEAR::isError($record))
+    if ($record === false)
     {
       logentry("buildrecord.100: " . $record->toString());
       $record = null;
@@ -133,7 +134,7 @@ class notify
     $notify["read"] = True;
     $notify["dateread"] = "now()";
     $res = $this->dbh->autoExecute("__notify", $notify, MDB2_AUTOQUERY_UPDATE, "id=".$this->dbh->quote($notifyid, "integer"));
-    if (PEAR::isError($res))
+    if ($res === false)
     {
       logentry("notify.200: " . $res->toString());
       return $res;
@@ -146,7 +147,7 @@ class notify
   {
     $notifyid = isset($_REQUEST["notifyid"]) ? intval($_REQUEST["notifyid"]) : null;
     $notify = getnotify($notifyid);
-    if (PEAR::isError($notify))
+    if ($notify === false)
     {
       logentry("notify.300: " . $notify->toString());
       return PEAR::raiseError("Database Error (code: notify.300)");
@@ -167,7 +168,7 @@ class notify
       return;
     }
     $res = $this->dbh->autoExecute("__notify", null, MDB2_AUTOQUERY_DELETE, "id=".$this->dbh->quote($notifyid, "integer"));
-    if (PEAR::isError($res))
+    if ($res === false)
     {
       logentry("notify.330: " . $res->toString());
       return PEAR::raiseError("Database Error (code: notify.330)");
@@ -181,14 +182,14 @@ class notify
     $currentmemberid = getcurrentmemberid();
     
     $total = gettotalnotifications($currentmemberid);
-    if (PEAR::isError($total))
+    if ($total === false)
     {
       logentry("notify.400: " . $total->toString());
       print encodejson("ERROR (notify.400)");
       return;
     }
     $unread = gettotalunreadnotifications($currentmemberid);
-    if (PEAR::isError($unread))
+    if ($unread === false)
     {
       logentry("notify.402: " . $unread->toString());
       print encodejson("ERROR (notify.402)");
@@ -225,7 +226,7 @@ class notify
 
     $dat = array($currentmemberid);
     $res = $this->dbh->getAll($sql, null, $dat);
-    if (PEAR::isError($res))
+    if ($res === false)
     {
       print encodejson(array()); // "ERROR (poll.24)");
       logentry("notify.500: " . $res->toString());
@@ -242,7 +243,7 @@ class notify
       {
         $notifyid = $rec["id"];
         $notify = getnotify($notifyid);
-        if (PEAR::isError($notify))
+        if ($notify === false)
         {
           logentry("notify.600: ".$notify->toString());
           return;
@@ -259,7 +260,7 @@ class notify
 
 /*
         $dat = buildnotifydata($type, $notify);
-        if (PEAR::isError($dat))
+        if ($dat === false)
         {
           logentry("notify.800: " . $dat->toString());
           print encodejson("null");
@@ -277,7 +278,7 @@ class notify
         $notify["displayed"] = True;
         $notify["datedisplayed"] = "now()";
         $res = $this->dbh->autoExecute("engine.__notify", $notify, MDB2_AUTOQUERY_UPDATE, "id=".$this->dbh->quote($notifyid, "integer"));
-        if (PEAR::isError($res))
+        if ($res === false)
         {
           logentry("notify.528: " . $res->toString());
         }
@@ -315,7 +316,7 @@ class notify
     }
 
     $totalnotifications = gettotalnotifications($memberid);
-    if (PEAR::isError($totalnotifications))
+    if ($totalnotifications === false)
     {
       logentry("notify.602: " . $totalnotifications->toString());
       $totalnotifications = 0;
@@ -344,7 +345,7 @@ class notify
     $sql = "select id from notify where memberid=".$this->dbh->quote($memberid, "integer")." order by datecreated desc";
     list($pageinfo["from"], $pageinfo["to"]) = $pager->getOffsetByPageId();
     $qry = $this->dbh->limitQuery($sql, null, $params["perPage"], $pageinfo["from"]-1);
-    if (PEAR::isError($qry))
+    if ($qry === false)
     {
       logentry("notify.604: " . $qry->toString());
       displayerrormessage("Database Error (code: notify.604)");
@@ -357,7 +358,7 @@ class notify
       $notifyid = $row["id"];
       
       $notify = getnotify($notifyid);
-      if (PEAR::isError($notify))
+      if ($notify === false)
       {
         logentry("notify.608: " . $notify->toString());
         continue;
@@ -413,7 +414,7 @@ class notify
   {
     $notifyid = isset($_REQUEST["notifyid"]) ? intval($_REQUEST["notifyid"]) : null;
     $notify = getnotify($notifyid);
-    if (PEAR::isError($notify))
+    if ($notify === false)
     {
       logentry("notify.200: ". $notify->toString());
       return PEAR::raiseError("Database Error (code: notify.200)");
@@ -452,7 +453,7 @@ class notify
     $data = $notify["data"];
 
     $res = $this->markread($notifyid);
-    if (PEAR::isError($res))
+    if ($res === false)
     {
       logentry("notify.220: " . $res->toString());
       return $res;
@@ -483,8 +484,8 @@ class notify
   {
     startsession();
     
-    $this->dbh = dbconnect(SYSTEMDSN);
-    if (PEAR::isError($this->dbh))
+    $this->dbh = \bbsengine6\database\connect(SYSTEMDSN);
+    if ($this->dbh === false)
     {
       displayerrorpage("Database Error (code: notify.10)");
       logentry("notify.10: " . $this->dbh->toString());
@@ -531,7 +532,7 @@ class notify
 
 $a = new notify();
 $b = $a->main();
-if (PEAR::isError($b))
+if ($b === false)
 {
   displayerrorpage($b->getMessage());
   logentry("notify.100: " . $b->toString());

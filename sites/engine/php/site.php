@@ -37,7 +37,7 @@ class site
             return PEAR::raiseError("togglesitevar passed invalid varname");
         }
         $value = getsitevar($var);
-        if (PEAR::isError($value))
+        if ($value === false)
         {
             logentry("togglesitevar.100: " . $value->toString());
             return $value;
@@ -54,7 +54,7 @@ class site
         $value = ($value == True) ? False: True;
         logentry("togglesitevar.130: name=".var_export($var, True)." value after toggle=".var_export($value, True));
         $res = setsitevar($var, $value);
-        if (PEAR::isError($res))
+        if ($res === false)
         {
             logentry("togglesitevar.130: error setting sitevar ".$res->toString());
             return $res;
@@ -87,7 +87,7 @@ class site
 
 $a = new site();
 $b = $a->main();
-if (PEAR::isError($b))
+if ($b === false)
 {
     displayerrorpage($b->getMessage());
     exit;

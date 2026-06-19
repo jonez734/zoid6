@@ -62,7 +62,7 @@ class member
     $currentmemberid = getcurrentmemberid();
     
     $form = getquickform("bbsengine4-member");
-    if (PEAR::isError($form))
+    if ($form === false)
     {
       logentry("member.100: " . $form->toString());
       return $form;
@@ -100,7 +100,7 @@ class member
     }
 
     $member = \bbsengine6\member\lib\getbyid($id);
-    if (PEAR::isError($member))
+    if ($member === false)
     {
       displayerrorpage("Database error (code: member.view.1)");
       logentry("member.view.1: " . $member->toString());
@@ -129,7 +129,7 @@ class member
 //    $totalposts = gettotalposts();
 //    $totallinks = gettotallinks();
 //    $memberposts= getmemberposts($id);
-    if (PEAR::isError($memberposts))
+    if ($memberposts === false)
     {
       logentry("member.100: " . $memberposts->toString());
       $memberposts = null;
@@ -201,7 +201,7 @@ class member
     $sql = "select upper(flag.name) as name, coalesce(mmf.value, flag.defaultvalue) as value, flag.description from engine.flag left outer join engine.map_member_flag as mmf on flag.name = mmf.name and mmf.memberid=?";
     $dat = array($memberid);
     $res = $this->dbh->getAll($sql, null, $dat, array("integer"));
-    if (PEAR::isError($res))
+    if ($res === false)
     {
       logentry("_buildflagarray.10: " . $res->toString());
       return;
@@ -250,7 +250,7 @@ class member
     }
 
     $member = getmember($memberid);
-    if (PEAR::isError($member))
+    if ($member === false)
     {
       displayerrorpage("Database Error (code: member.200)");
       logentry("member.200: " . $member->toString());
@@ -274,7 +274,7 @@ class member
       $this->addmemberflagfieldset($form, $memberid);
       logentry("memberedit.100: -- calling buildallflags");
       $allflags = $this->buildallflags($memberid);
-      if (PEAR::isError($allflags))
+      if ($allflags === false)
       {
         logentry("memberedit.110: " . $allflags->toString());
         displayerrorpage("Database Error (memberedit.110)");
@@ -312,7 +312,7 @@ class member
     $form->render($renderer);
 
     $res = displayform($renderer, "edit member");
-    if (PEAR::isError($res))
+    if ($res === false)
     {
       logentry("editmember.101: " . $res->toString());
     }
@@ -339,7 +339,7 @@ class member
       $form->addRecursiveFilter("strip_tags");
       $values = $form->getValue();
       $res = $this->update($values);
-      if (PEAR::isError($res))
+      if ($res === false)
       {
         logentry("editmember.10: " . $res->toString());
         return $res;
@@ -397,7 +397,7 @@ class member
     $member = buildmemberrecord($values);
     
     $res = $this->dbh->beginTransaction();
-    if (PEAR::isError($res))
+    if ($res === false)
     {
       displayerrorpage("Database Error. (code: updatemember.100)");
       logentry("updatemember.100: " . $res->toString());
@@ -409,7 +409,7 @@ class member
     if (accessmember("edit", array("id" => $memberid)) === true)
     {
       $res = $this->dbh->autoExecute("engine.__member", $member, MDB2_AUTOQUERY_UPDATE, "id=" . $this->dbh->quote($memberid, "integer"));
-      if (PEAR::isError($res))
+      if ($res === false)
       {
         logentry("updatemember.110: " . $res->toString());
         displayerrorpage("Database Error (code: updatemember.110)");
@@ -421,7 +421,7 @@ class member
     if (accessmember("editflags", array("id" => $memberid)) === true)
     {
       $allflags = $this->buildallflags($memberid);
-      if (PEAR::isError($allflags))
+      if ($allflags === false)
       {
         logentry("updatemember.120: " . $allflags->toString());
         return;
@@ -434,7 +434,7 @@ class member
         $value = isset($values["flags"][$name]) ? true : false;
 //        logentry("calling setflag...");
         $res = setflag($name, $value, $memberid);
-        if (PEAR::isError($res))
+        if ($res === false)
         {
           logentry("updatemember.122: " . $res->toString());
           $this->dbh->rollback();
@@ -467,7 +467,7 @@ class member
     
     $memberid = isset($_REQUEST["id"]) ? intval($_REQUEST["id"]) : null;
     $res = $this->dbh->autoExecute("member", null, MDB2_AUTOQUERY_DELETE, "id=" . $this->dbh->quote($memberid, "integer"));
-    if (PEAR::isError($res))
+    if ($res === false)
     {
       displayerrorpage("Database error during delete operation");
       logentry("member.delete: " . $res->toString());
@@ -508,7 +508,7 @@ class member
     $sql = "select member.* from engine.member order by fullname asc";
     list($pageinfo["from"], $pageinfo["to"]) = $pager->getOffsetByPageId();
     $qry = $this->dbh->limitQuery($sql, null, $params["perPage"], $pageinfo["from"]-1);
-    if (PEAR::isError($qry))
+    if ($qry === false)
     {
       logentry("member.summary.0: " . $qry->toString());
       displayerrorpage("Database Error (code: member.summary.0)");
@@ -565,7 +565,7 @@ class member
 
     logentry("memberadd.100: -- calling buildallflags");
     $allflags = $this->buildallflags($memberid);
-    if (PEAR::isError($allflags))
+    if ($allflags === false)
     {
       logentry("memberadd.110: " . $allflags->toString());
       displayerrorpage("Database Error (memberadd.110)");
@@ -613,7 +613,7 @@ class member
       $form->addRecursiveFilter("strip_tags");
       $values = $form->getValue();
       $res = $this->insert($values);
-      if (PEAR::isError($res))
+      if ($res === false)
       {
         logentry("addmember.10: " . $res->toString());
         return $res;
@@ -668,7 +668,7 @@ class member
   function main()
   {
     $this->dbh = \bbsengine6\database\connect(\config\SYSTEMDSN);
-    if (PEAR::isError($this->dbh))
+    if ($this->dbh === false)
     {
       logentry("member: " . $this->dbh->toString());
       displayerrorpage("Database Connect Error");

@@ -109,7 +109,7 @@ class page
 
 $a = new page();
 $b = $a->main();
-if (PEAR::isError($b))
+if ($b === false)
 {
   displayerrorpage($b->getMessage());
   exit;

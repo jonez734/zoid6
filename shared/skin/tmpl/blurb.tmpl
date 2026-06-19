@@ -1,0 +1,107 @@
+{extends file="page.tmpl"}
+<!-- zoid6-shared-blurb.tmpl -->
+{block name="head" append}
+<link rel="stylesheet" type="text/css" href="{$smarty.const.SHAREDSKINURL}css/blurb.css" media="screen" />
+{/block}
+{block name="content"}
+<main>
+{if isset($blurb)}
+  {* View mode - single blurb *}
+  <article class="blurb-view">
+    <header>
+      <h1>Blurb #{$blurb.id}</h1>
+      <div class="meta">
+        <span class="kind">Kind: {$blurb.kind|default:"(none)"}</span>
+        <span class="datecreated">Created: {$blurb.datecreated}</span>
+        <span class="createdbymoniker">By: {$blurb.createdbymoniker|default:"(unknown)"}</span>
+      </div>
+      {if is_array($blurb.sigs) && count($blurb.sigs) > 0}
+      <div class="sigs">
+        <span class="label">Sigs:</span>
+        {foreach from=$blurb.sigs item=sig}
+        <span class="sig">{$sig}</span>
+        {/foreach}
+      </div>
+      {/if}
+    </header>
+    <div class="content">
+      {if isset($blurb.content) && $blurb.content !== ""}
+      {$blurb.content|escape:nl2br}
+      {else}
+      <p class="no-content">(no content)</p>
+      {/if}
+    </div>
+    <footer>
+      {if isset($blurb.dateupdated)}
+      <span class="dateupdated">Updated: {$blurb.dateupdated}</span>
+      {/if}
+      {if isset($blurb.updatedbymoniker)}
+      <span class="updatedbymoniker">By: {$blurb.updatedbymoniker}</span>
+      {/if}
+    </footer>
+  </article>
+{else}
+  {* List mode - list of blurbs *}
+  <div class="blurb-list">
+    <header>
+      <h1>Blurbs</h1>
+      <p class="count">Total: {$total}</p>
+    </header>
+    {if count($blurbs) > 0}
+    <table class="blurb-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Kind</th>
+          <th>Created</th>
+          <th>By</th>
+          <th>Sigs</th>
+        </tr>
+      </thead>
+      <tbody>
+        {foreach from=$blurbs item=blurb}
+        <tr>
+          <td><a href="blurb.php?mode=view&id={$blurb.id}">{$blurb.id}</a></td>
+          <td>{$blurb.kind|default:"(none)"}</td>
+          <td>{$blurb.datecreated}</td>
+          <td>{$blurb.createdbymoniker|default:"(unknown)"}</td>
+          <td>
+            {if is_array($blurb.sigs) && count($blurb.sigs) > 0}
+              {foreach from=$blurb.sigs item=sig name=sigloop}
+                {$sig}{if not $smarty.foreach.sigloop.last}, {/if}
+              {/foreach}
+            {else}
+              -
+            {/if}
+          </td>
+        </tr>
+        {/foreach}
+      </tbody>
+    </table>
+    {else}
+    <p class="no-blurbs">No blurbs found.</p>
+    {/if}
+    {if $totalpages > 1}
+    <nav class="pagination">
+      <span class="page-info">Page {$page} of {$totalpages}</span>
+      <span class="page-links">
+        {if $page > 1}
+        <a href="blurb.php?page={$page-1}">&laquo; Previous</a>
+        {/if}
+        {if $page < $totalpages}
+        <a href="blurb.php?page={$page+1}">Next &raquo;</a>
+        {/if}
+      </span>
+    </nav>
+    {/if}
+  </div>
+{/if}
+</main>
+{/block}
+{block name="title"}
+{if isset($blurb)}
+  Blurb #{$blurb.id} - {$smarty.block.parent}
+{else}
+  Blurbs - {$smarty.block.parent}
+{/if}
+{/block}

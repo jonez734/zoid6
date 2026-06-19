@@ -27,7 +27,7 @@ class sitenewsarchive
 
 $a = new sitenewsarchive();
 $b = $a->main();
-if (PEAR::isError($b))
+if ($b === false)
 {
   displayerrorpage($b->getMessage());
   exit;

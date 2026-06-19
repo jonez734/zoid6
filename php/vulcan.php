@@ -54,7 +54,7 @@ namespace \zoid6\vulcan
       
       $dbh = \bbsengine6\database\connect(SYSTEMDSN);
 /*
-      if (PEAR::isError($dbh))
+      if (($dbh === false))
       {
         logentry("getlinkbyid.10: " .$dbh->toString());
         return $dbh;
@@ -83,7 +83,7 @@ namespace \zoid6\vulcan
 
     /*
       $sigmap = getsigmap("vulcan.map_link_sig", "linkid", $linkid);
-      if (PEAR::isError($sigmap))
+      if (($sigmap === false))
       {
         logentry("getlinkbyid.30: " . $sigmap->toString());
         return $sigmap;

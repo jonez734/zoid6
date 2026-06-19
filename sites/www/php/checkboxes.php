@@ -2,7 +2,9 @@
 
 require_once("config.php");
 require_once("zoidweb2.php");
+require_once("/srv/www/bbsengine6/php/database.php");
 require_once("bbsengine3.php");
+require_once("/srv/www/bbsengine6/php/database.php");
 
 require_once("HTML/QuickForm2.php");
 require_once("HTML/QuickForm2/Renderer.php");
@@ -12,12 +14,12 @@ startsession();
 
 $memberid = 403;
 
-$dbh = dbconnect(SYSTEMDSN);
+$dbh = \bbsengine6\database\connect(SYSTEMDSN);
 
 $sql = "select upper(flag.name) as name, coalesce(mmf.value, flag.defaultvalue) as value, flag.description from engine.flag left outer join engine.map_member_flag as mmf on flag.name = mmf.name and mmf.memberid=?";
 $dat = array($memberid);
 $res = $dbh->getAll($sql, null, $dat, array("integer"));
-if (PEAR::isError($res))
+if ($res === false)
 {
   logentry("_buildflagarray.10: " . $res->toString());
   exit;
@@ -71,7 +73,7 @@ if ($form->isSubmitted())
     $value = isset($formflags[$name]) ? True : False;
     print "name=".var_export($name, True)." value=".var_export($value, True)."<br />";//." flag=".var_export($flag, True)."<br />";
     $res = setflag($name, $value, $memberid);
-    if (PEAR::isError($res))
+    if ($res === false)
     {
       logentry("checkboxes.100: " . $res->toString());
       break;

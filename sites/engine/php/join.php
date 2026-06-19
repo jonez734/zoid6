@@ -30,13 +30,13 @@ class join
       $member["updatedbyid"] = getcurrentmemberid();
 
       $res = $this->pdo->beginTransaction();
-      if (PEAR::isError($res))
+      if ($res === false)
       {
         logentry("join.15: " . $res->toString());
         return PEAR::raiseError("Unable to start transaction (code: join.15)");
       }
       $res = $this->pdo->autoExecute("engine.__member", $member, MDB2_AUTOQUERY_INSERT);
-      if (PEAR::isError($res))
+      if ($res === false)
       {
           logentry("join.20: " . $res->toString());
           $this->pdo->rollback();
@@ -45,7 +45,7 @@ class join
 
       $memberid = $this->pdo->lastInsertID();
       $res = \bbsengine6\setpassword($memberid, $values["password"]);
-      if (PEAR::isError($res))
+      if ($res === false)
       {
           logentry("join.22: " . $res->toString());
           return $res;
@@ -94,7 +94,7 @@ class join
         $form->addDataSource(new HTML_QuickForm2_DataSource_Array($defaults));
         
         $res = \bbsengine6\handleform($form, [$this, "insert"], "new user");
-        if (PEAR::isError($res))
+        if ($res === false)
         {
             logentry("join.100: " . $res->toString());
             return PEAR::raiseError("displayform error (code: join.100)");
@@ -107,7 +107,7 @@ class join
         $renderer = \bbsengine6\getquickformrenderer();
         $form->render($renderer);
         $res = \bbsengine6\displayform($renderer, "knock, knock neo...");
-        if (PEAR::isError($res))
+        if ($res === false)
         {
           logentry("join.302: " . $res->toString());
           return PEAR::raiseError("error displaying form (code: join.302)");
@@ -119,7 +119,7 @@ class join
 
 $j = new join();
 $r = $j->main();
-if (PEAR::isError($r))
+if ($r === false)
 {
     logentry("join.100: " . $r->toString());
     displayerrormessage($r->getMessage());

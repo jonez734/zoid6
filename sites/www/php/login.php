@@ -2,7 +2,9 @@
 
 require_once("config.php");
 require_once("zoidweb2.php");
+require_once("/srv/www/bbsengine6/php/database.php");
 require_once("bbsengine3.php");
+require_once("/srv/www/bbsengine6/php/database.php");
 
 /**
  * this module accepts a username and password and validates it against the postgresql database.
@@ -23,7 +25,7 @@ class login
           $email = $args["email"];
           $password = $args["password"];
           $id = getmemberidfromemail($email);
-          if (PEAR::isError($id))
+          if ($id === false)
           {
                   logentry("checklogin.60: ".$id->toString());
                   return False;
@@ -53,8 +55,8 @@ class login
   function _validate($username, $password)
   {
     logentry("login.100: username=".var_export($username, true)." password=".var_export($password, true));
-    $dbh = dbconnect(SYSTEMDSN);
-    if (PEAR::isError($dbh))
+    $dbh = \bbsengine6\database\connect(SYSTEMDSN);
+    if ($dbh === false)
     {
       displayerrorpage("database error (code: login.102)");
       logentry("login.102: " . $dbh->toString());
@@ -62,7 +64,7 @@ class login
     }
 
     $memberid = getmemberid($username);
-    if (PEAR::isError($memberid))
+    if ($memberid === false)
     {
       logentry("login.104: " . $memberid->toString());
       return PEAR::raiseError("Invalid Login (code: login.104)");
@@ -77,7 +79,7 @@ class login
 
     // @since 20141223
     $member = getmember($memberid);
-    if (PEAR::isError($member))
+    if ($member === false)
     {
       logentry("login.200: " . $member->toString());
       return $member;
@@ -90,7 +92,7 @@ class login
     $member["lastlogin"] = "now()";
     $member["lastloginfrom"] = $_SERVER["REMOTE_ADDR"];
     $res = $dbh->autoExecute("engine.__member", $member, MDB2_AUTOQUERY_UPDATE, "id=" . $dbh->quote($memberid, "integer"));
-    if (PEAR::isError($res))
+    if ($res === false)
     {
       displayerrorpage("database error (login.108)");
       logentry("login.108: " . $res->toString());
@@ -151,7 +153,7 @@ class login
     // recursive filters "trim" and "strip_tags" added to getquickform() in bbsengine3.php
 
     $res = handleform($form, [$this, "validate"], "follow the white rabbit... or you will 'die like the rest'");
-    if (PEAR::isError($res))
+    if ($res === false)
     {
       logentry("login.300: " . $res->toString());
       return PEAR::raiseError("login form handling error (code: login.300)");
@@ -166,7 +168,7 @@ class login
     $options = [];
     $options["stylesheets"] = [SHAREDSKINURL."css/login.css"];
     $res = displayform($renderer, "knock, knock, neo...", $options);
-    if (PEAR::isError($res))
+    if ($res === false)
     {
       logentry("login.302: " . $res->toString());
       return PEAR::raiseError("error displaying form (code: login.302)");

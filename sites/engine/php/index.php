@@ -11,7 +11,7 @@ $data["pagetemplate"] = "index.tmpl";
 
 $res = \bbsengine6\displaypage($data);
 /*
-if (PEAR::isError($res))
+if ($res === false)
 {
     print "hello, world";
     logentry("engine.index.100: " . $res->toString());

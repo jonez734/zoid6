@@ -2,7 +2,9 @@
 
 require_once("config.php");
 require_once("zoidweb4.php");
+require_once("/srv/www/bbsengine6/php/database.php");
 require_once("bbsengine4.php");
+require_once("/srv/www/bbsengine6/php/database.php");
 
 class flag
 {
@@ -10,7 +12,7 @@ class flag
     function __edit($flag)
     {
         $form = getquickform("bbsengine4-flag");
-        if (PEAR::isError($form))
+        if ($form === false)
         {
             logentry("engine.flag.100: " . $form->toString());
             return $form;
@@ -61,7 +63,7 @@ class flag
         $form->addDataSource(new HTML_QuickForm2_DataSource_Array($constants));
 
         $res = handleform($form, [$this, "insert"], "add flag");
-        if (PEAR::isError($res))
+        if ($res === false)
         {
             logentry("engine.flag.108: " . $res->toString());
             return $res;
@@ -77,7 +79,7 @@ class flag
         $form->render($renderer);
 
         $res = displayform($renderer, "add flag");
-        if (PEAR::isError($res))
+        if ($res === false)
         {
           logentry("engine.flag.120: " . $res->toString());
           return $res;
@@ -91,14 +93,14 @@ class flag
       $currentmemberid = getcurrentmemberid();
       $flag = buildflagrecord($values);
       $res = $this->dbh->beginTransaction();
-      if (PEAR::isError($res))
+      if ($res === false)
       {
         logentry("engine.flag.insert.100: unable to begin transaction");
         return PEAR::raiseError("unable to add link to database (code: engine.flag.insert.100)");
       }
 
       $res = $this->dbh->autoExecute("engine.flag", $flag, MDB2_AUTOQUERY_INSERT);
-      if (PEAR::isError($res))
+      if ($res === false)
       {
         $this->dbh->rollback();
         logentry("engine.flag.insert.140: " . $res->toString());
@@ -120,8 +122,8 @@ class flag
         startsession();
 
         setcurrentsite("engine");
-        $this->dbh = dbconnect(SYSTEMDSN);
-        if (PEAR::isError($this->dbh))
+        $this->dbh = \bbsengine6\database\connect(SYSTEMDSN);
+        if ($this->dbh === false)
         {
             logentry("engine.flag.100: " . $this->dbh->toString());
             return $dbh;
@@ -158,7 +160,7 @@ class flag
 
 $a = new flag();
 $b = $a->main();
-if (PEAR::isError($b))
+if ($b === false)
 {
     logentry("engine.flag.900: " . $b->getMessage());
     displayerrorpage($b->getMessage());

@@ -19,7 +19,7 @@ function main()
         return PEAR::raiseError("not logged in");
     }
     $res = sendnotify($type, $memberid, $data);
-    if (PEAR::isError($res))
+    if ($res === false)
     {
         logentry("testnofity.50: " . $res->toString());
         return $res;
@@ -31,7 +31,7 @@ function main()
 }
 
 $a = main();
-if (PEAR::isError($a))
+if ($a === false)
 {
     logentry("testnotify.100: " . $a->toString());
     displayerrorpage($a->getMessage());

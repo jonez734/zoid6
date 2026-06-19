@@ -3,6 +3,7 @@
 require_once("config.php");
 require_once("zoidweb3.php");
 require_once("bbsengine4.php");
+require_once("/srv/www/bbsengine6/php/database.php");
 
 class credits
 {
@@ -13,7 +14,7 @@ class credits
     $data = array();
     
     $currentmember = getcurrentmember();
-    if (PEAR::isError($currentmember))
+    if ($currentmember === false)
     {
       logentry("credits.getcount.110: " . $res->toString());
       $res = -1;
@@ -41,8 +42,8 @@ class credits
   {
     startsession();
     
-    $this->dbh = dbconnect(SYSTEMDSN);
-    if (PEAR::isError($this->dbh))
+    $this->dbh = \bbsengine6\database\connect(SYSTEMDSN);
+    if ($this->dbh === false)
     {
       displayerrorpage("Database Error (code: credits.10)");
       logentry("credits.10: " . $this->dbh->toString());
@@ -72,7 +73,7 @@ class credits
 
 $a = new credits();
 $b = $a->main();
-if (PEAR::isError($b))
+if ($b === false)
 {
   displayerrorpage($b->getMessage());
   logentry("credits.100: " . $b->toString());

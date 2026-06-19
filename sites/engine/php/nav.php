@@ -44,7 +44,7 @@ class nav
 
 $a = new nav();
 $b = $a->main();
-if (PEAR::isError($b))
+if ($b === false)
 {
     logentry("nav.999: " . $b->toString());
     displayerrorpage($b->getMessage());

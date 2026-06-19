@@ -87,7 +87,7 @@ class mantra
     $sql = "select mantra.* from engine.mantra order by dateposted desc";
     list($pageinfo["from"], $pageinfo["to"]) = $pager->getOffsetByPageId();
     $qry = $this->dbh->limitQuery($sql, null, $params["perPage"], $pageinfo["from"]-1);
-    if (PEAR::isError($qry))
+    if ($qry === false)
     {
       logentry("mantra.100: " . $qry->toString());
       displayerrorpage("Database Error (code: mantra.100)");
@@ -120,7 +120,7 @@ class mantra
 
 //    $page->addBodyContent(fetchpagefooter());
     $res = \bbsengine6\displaypage(null, $data);
-    if (PEAR::isError($res))
+    if ($res === false)
     {
       \bbsengine6\util\logentry("mantra.200: " .$res->toString());
     }
@@ -151,7 +151,7 @@ class mantra
       return \PEAR::raiseError("mantra not found (code: mantra.100)");
     }
 
-    if (PEAR::isError($mantra))
+    if ($mantra === false)
     {
       \bbsengine6\util\logentry("mantra.110: " . $mantra->toString());
       return \PEAR::raiseError("mantra database error (code: mantra.110)");
@@ -191,7 +191,7 @@ class mantra
     $data["mantra"] = $mantra;
 
     $res = bbsengine6\displaypage(null, $data);
-    if (\PEAR::isError($res))
+    if ($res === false)
     {
       \bbsengine6\util\logentry("mantra.700: " . $res->toString());
       return PEAR::raiseError("unable to display mantra detail page (code: mantra.700)");
@@ -217,7 +217,7 @@ class mantra
     $this->dbh->beginTransaction();
 
     $res = $this->dbh->autoExecute("engine.__mantra", $mantra, MDB2_AUTOQUERY_INSERT);
-    if (PEAR::isError($res))
+    if ($res === false)
     {
       logentry("mantra.200: " . $res->toString());
       return $res;
@@ -261,7 +261,7 @@ class mantra
     $form->addDataSource(new HTML_QuickForm2_DataSource_Array($const));
 
     $res = handleform($form, array($this, "insert"));
-    if (PEAR::isError($res))
+    if ($res === false)
     {
       logentry("mantra.500: " . $res->toString());
       return PEAR::raiseError("could not handle mantra form (code: mantra.500)");
@@ -276,7 +276,7 @@ class mantra
     $form->render($renderer);
   
     $res = displayform($renderer, "add mantra");
-    if (PEAR::isError($res))
+    if ($res === false)
     {
       logentry("mantra.504: " . $res->toString());
       return PEAR::raiseError("unable to display form (code: mantra.504)");
@@ -293,7 +293,7 @@ class mantra
     $mantra["lastmodified"] = "now()";
     $mantra["lastmodifiedbyid"] = getcurrentmemberid();
     $res = $this->dbh->autoExecute("engine.__mantra", $mantra, MDB2_AUTOQUERY_UPDATE, "id=".$this->dbh->quote($id, "integer"));
-    if (PEAR::isError($res))
+    if ($res === false)
     {
       logentry("mantra.400: ". $res->toString());
       return PEAR::raiseError("Database Error (code: mantra.400)");
@@ -309,7 +309,7 @@ class mantra
     $id = isset($_REQUEST["id"]) ? intval($_REQUEST["id"]) : null;
 
     $mantra = getmantra($id);
-    if (PEAR::isError($mantra))
+    if ($mantra === false)
     {
       logentry("mantra.500: " . $mantra->toString());
       return PEAR::raiseError("Database Error (code: mantra.500)");
@@ -345,7 +345,7 @@ class mantra
     $form->addDataSource(new HTML_QuickForm2_DataSource_Array($const));
 
     $res = handleform($form, array($this, "update"));
-    if (PEAR::isError($res))
+    if ($res === false)
     {
       logentry("mantra.400: " . $res->toString());
       return PEAR::raiseError("unable to handle form (code: mantra.400)");
@@ -359,7 +359,7 @@ class mantra
     $form->render($renderer);
     $rendered = $renderer->toArray();
     $res =  displayform($renderer, "edit mantra");
-    if (PEAR::isError($res))
+    if ($res === false)
     {
       logentry("mantra.402: " . $res->toString());
       return PEAR::raiseError("unable to display form (code: mantra.402)");
@@ -421,7 +421,7 @@ class mantra
 
 $a = new mantra();
 $b = $a->main();
-if (PEAR::isError($b))
+if ($b === false)
 {
   \bbsengine6\util\logentry("mantra.999: " . $b->toString());
   \bbsengine6\displayerrorpage($b->getMessage());

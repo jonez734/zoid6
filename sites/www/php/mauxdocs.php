@@ -21,7 +21,7 @@ class mauxdocs
 
 $foo = new mauxdocs();
 $bar = $foo->main();
-if (PEAR::isError($bar))
+if ($bar === false)
 {
   logentry("mauxdocs.9000: " . $bar->toString());
   displayerrorpage($bar->getMessage());

@@ -18,7 +18,7 @@ function loginlogout()
 function notifycount()
 {
   $currentmember = getcurrentmember();
-  if (PEAR::isError($currentmember))
+  if ($currentmember === false)
   {
     logentry("topbar.notifycount.110: " . $currentmember->toString());
     return;
@@ -122,7 +122,7 @@ function getvar($var)
           break;
         }
     }
-    if (PEAR::isError($res))
+    if ($res === false)
     {
       logentry("bed.300: " . $res->toString());
       return null;
@@ -136,7 +136,7 @@ function getvar($var)
 $var = isset($_REQUEST["var"]) ? $_REQUEST["var"] : null;
 $res = getvar($var);
 //logentry("bed.120: var=".var_export($var, true)." res=".var_export($res, true));
-if (PEAR::isError($res))
+if ($res === false)
 {
     logentry("engine.bed.100: var=".var_export($var, true)." ". $res->toString());
     $res = ["fragment" => "<b>error</b>"];
