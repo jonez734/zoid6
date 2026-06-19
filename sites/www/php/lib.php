@@ -2,27 +2,9 @@
 
 namespace config {
 
-/*
-define("config\SYSTEMDSN", "pgsql:host=127.0.0.1;port=5432;dbname=rgs");
-define("config\SESSIONNAME", "rgs");
-*/
 /**
  * http://pear.php.net/manual/en/package.database.db.intro-dsn.php
  */
-//define("SYSTEMDSN", "pgsql://apache@127.0.0.1:5433/zoid6");
-// define("OLDSYSTEMDSN", "pgsql://apache@127.0.0.1/zoidweb3");
-// define("SYSTEMDSN", "pgsql://apache@localhost/zoidweb2");
-
-/*
-define("DATEFORMAT", "%Y-%b-%d %l:%M%p %Z (%a)"); // @see https://php.net/strftime
-
-define("CAPTCHAFONTPATH", "");
-if (defined("lib\SESSIONCOOKIEDOMAIN") === False)
-{
-  define('config\SESSIONCOOKIEEXPIRE', 60*60*12);
-  define('config\SESSIONCOOKIEDOMAIN', ".theaiconsensus.com");
-  define('config\SESSIONCOOKIEPATH', "/");
-}
 
 // @since 20181111
 define("ENGINEVHOSTDIR", "/srv/www/vhosts/engine.theaiconsensus.com/");
@@ -31,26 +13,15 @@ define("ENGINESKINDIR", ENGINEDOCUMENTROOT . "skin/");
 define("ENGINEFONTSDIR", ENGINESKINDIR. "fonts/");
 define("CAPTCHAFONTFILE", "cour.ttf");
 
-// @since 20150727, changed to https @since 20180502
-//define("ENGINEURL", "/");
-
 // @since 20140803
 define("STATICJAVASCRIPTURL", ENGINEURL. "js/");
 
 define("LOGOUTURL", ENGINEURL."logout");
 define("LOGINURL", ENGINEURL."login");
 
-// define("CRYPTSALT", '$2a$07$ChorErjIv9oteff');
-
-// @since 20141203
-// removed 2018aug15
-//define("FONTAWESOMECSSURL", "//maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css");
-//define("FONTAWESOMECSSURL", "//static.zoidtechnologies.com/font-awesome-4.2.0/css/font-awesome.min.css");
-
 \date_default_timezone_set("America/New_York");
 
 define("SITETYPE", "webpage");
-*/
 } /* namespace config */
 
 namespace lib {
