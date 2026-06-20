@@ -1,3 +1,4 @@
+export HOST = merlin
 export PROD = $(HOST):/srv/www/zoid6/shared/
 export STAGE = /srv/www/zoid6/shared/
 export STAGEDOCROOT = /srv/www/vhosts/zoidtechnologies.com/html/
