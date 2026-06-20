@@ -14,3 +14,5 @@ stage:
 	$(MAKE) -C fonts stage
 	$(MAKE) -C art stage
 	$(MAKE) -C js stage
+
+.PHONY: all clean stage
