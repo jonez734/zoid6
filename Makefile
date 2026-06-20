@@ -12,10 +12,9 @@ export SCSSLOADPATH = --load-path /home/opencode/data/work/zoid6/shared/skin/scs
 
 export SCSS = sass $(SCSSLOADPATH) --sourcemap=none --stop-on-error --trace --style expanded --update
 
-export RSYNC = rsync --chmod=Dg=rwxs,Fgu=rw,Fo=r --no-times --verbose \
-	--archive --update --backup --recursive \
-	--human-readable --checksum --rsh=ssh \
-	--delete-after --mkpath
+export RSYNC = rsync --chmod=Dg=rwxs,Fgu=rw,Fo=r --no-times --verbose --archive --update --backup --recursive --human-readable --checksum --rsh=ssh --delete-after --mkpath
+
+export
 
 all:
 
