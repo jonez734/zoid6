@@ -1,6 +1,8 @@
 <?php
 
-require_once("/srv/www/bbsengine6/php/bootstrap.php");
+namespace {
+    require_once("/srv/www/bbsengine6/php/bootstrap.php");
+}
 
 namespace zoid6 {
 
@@ -37,7 +39,7 @@ function bootstrap(array $paths = []): bool
     }
 
     $pathString = implode(PATH_SEPARATOR, $current);
-
+    \bbsengine6\util\logentry("zoid6/php/bootstrap.php: pathString=".var_export($pathString, true));
     return set_include_path($pathString) !== false;
 }
 
