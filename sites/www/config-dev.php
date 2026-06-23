@@ -41,8 +41,8 @@ define("config\SMARTYPLUGINSDIR", [
 define("config\SMARTYTEMPLATESDIR", [
     0 => \config\VHOSTDIR . "skin/tmpl/",           // www-specific templates (new structure)
     1 => \config\VHOSTDIR . "tmpl/",                // www-specific templates (legacy structure)
-    2 => "/srv/www/zoid6/shared/skin/tmpl/",        // Shared zoid6 templates
-    3 => "/srv/www/zoid6/skin/tmpl/",               // zoid6 project templates
+    2 => "/srv/www/vhosts/zoidtechnologies.com/html/shared/skin/tmpl/",        // Shared zoid6 templates
+    3 => "/srv/www/vhosts/zoidtechnologies.com/html/shared/skin/tmpl/",        // zoid6 project templates
     4 => "/srv/www/bbsengine6/skin/tmpl/"           // bbsengine6 framework templates (fallback)
 ]);
 
