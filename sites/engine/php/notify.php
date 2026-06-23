@@ -130,6 +130,13 @@ class notify
   // @since 20130516
   function markread($notifyid)
   {
+    $token = isset($_REQUEST["csrf_token"]) ? $_REQUEST["csrf_token"] : (isset($_SERVER["HTTP_X_CSRF_TOKEN"]) ? $_SERVER["HTTP_X_CSRF_TOKEN"] : null);
+    if ($token === null || !\bbsengine6\util\csrfValidateToken($token))
+    {
+      logentry("notify.csrf.100: CSRF validation failed for markread. token=" . var_export($token, true));
+      return PEAR::raiseError("Security Error: Invalid CSRF token");
+    }
+
     $notify = array();
     $notify["read"] = True;
     $notify["dateread"] = "now()";
@@ -145,6 +152,13 @@ class notify
   // @since 20130516
   function delete()
   {
+    $token = isset($_REQUEST["csrf_token"]) ? $_REQUEST["csrf_token"] : (isset($_SERVER["HTTP_X_CSRF_TOKEN"]) ? $_SERVER["HTTP_X_CSRF_TOKEN"] : null);
+    if ($token === null || !\bbsengine6\util\csrfValidateToken($token))
+    {
+      logentry("notify.csrf.200: CSRF validation failed for delete. token=" . var_export($token, true));
+      return PEAR::raiseError("Security Error: Invalid CSRF token");
+    }
+
     $notifyid = isset($_REQUEST["notifyid"]) ? intval($_REQUEST["notifyid"]) : null;
     $notify = getnotify($notifyid);
     if ($notify === false)
