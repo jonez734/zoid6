@@ -73,13 +73,13 @@ namespace zoid6 {
 
 function buildchoices($choices=[])
 {
-    $choices[] = ["name" => "teos", "title" => "teos", "url" => \TEOSURL, "desc" => ""];
-    $choices[] = ["name" => "achilles", "title" => "a study of sodium glutamates", "url" => "https://zoidtechnologies.com/achilles/", "desc" => ""];
+    $choices[] = ["name" => "teos", "title" => "teos", "url" => "/teos/", "desc" => ""];
+    $choices[] = ["name" => "achilles", "title" => "a study of sodium glutamates", "url" => "/achilles/", "desc" => ""];
     $choices[] = ["name" => "asimov", "title" => "asimov: robotics, ai, and augmented reality", "url" => "/asimov/", "desc" => ""];
     // $choices[] = ["name" => "socrates", "title" => "threaded forum", "url" => "https://socrates.zoidtechnologies.com/", "desc" => ""];
-    $choices[] = ["name" => "www", "title" => "www site", "url" => "https://zoidtechnologies.com", "desc" => "www site"];
+    $choices[] = ["name" => "www", "title" => "www site", "url" => "/", "desc" => "www site"];
 //    $choices[] = ["name" => "repo", "title" => "download site", "url" => "https://repo.zoidtechnologies.com", "desc" => "repo site"];
-    $choices[] = ["name" => "empyre", "title" => "the game empyre", "url" => "https://zoidtechnologies.com/empyre/", "desc" => ""];
+    $choices[] = ["name" => "empyre", "title" => "the game empyre", "url" => "/empyre/", "desc" => ""];
     return \bbsengine6\buildchoices($choices);
 }
 
@@ -142,7 +142,7 @@ function buildbreadcrumblist($link, $table, $key="id")
   }
 
   $id = $link[$key];
-  
+
   $dbh = \bbsengine6\database\connect(\SYSTEMDSN);
   if (($dbh === false))
   {
@@ -190,7 +190,7 @@ function getlinksigmap($linkid)
   $sigs = array();
   foreach ($res as $rec)
   {
-    $sigs[] = $rec["siglabelpath"];    
+    $sigs[] = $rec["siglabelpath"];
   }
   logentry("getlinksigmap.104: sigs=".var_export($sigs, True));
   return $sigs;
@@ -234,13 +234,13 @@ function accesslink($op, $data=null, $memberid=null)
   $approved = isset($data["approved"]) ? $data["approved"] : null;
 
   $magic = isset($data["magic"]) ? $data["magic"] : null;
-  
+
   $siglabelpath = isset($data["sigpath"]) ? $data["sigpath"] : null;
   $sub = substr($siglabelpath, 0, strlen("top.eros"));
 
   $currentpage = getcurrentpage();
   $currentaction = getcurrentaction();
-  
+
   $res = True;
   switch ($op)
   {
@@ -262,19 +262,19 @@ function accesslink($op, $data=null, $memberid=null)
           $res = False;
           break;
       }
-      
+
       if ($approved === false && $adminflag === false)
       {
         $res = False;
         break;
       }
-      
+
       if ($magic === True && $magicflag === False)
       {
         $res = False;
         break;
       }
-      
+
 /*
       if ($eros === true && $currentsite === "vulcan" && $currentpage === "summary")
       {
@@ -294,7 +294,7 @@ function accesslink($op, $data=null, $memberid=null)
         $res = True;
         break;
       }
-      
+
 //      logentry("accesslink.21: siglabelpath=".var_export($siglabelpath, True)." sub=".var_export($sub, True)." flag=".var_export($erosflag, True));
       if ($sub === "top.eros" && $erosflag === True)
       {
@@ -319,7 +319,7 @@ function accesslink($op, $data=null, $memberid=null)
         $res = True;
         break;
       }
-      
+
       if ($data["postedby"] === $memberid)
       {
        $res = True;
@@ -329,7 +329,7 @@ function accesslink($op, $data=null, $memberid=null)
       $res = False;
       break;
     }
-    
+
     case "broken":
     case "flag":
     {
@@ -352,7 +352,7 @@ function accesslink($op, $data=null, $memberid=null)
 
 /**
  * copied from zoidweb1
- * 
+ *
  * @since 20131014
  */
 function sortsidebaritems($a, $b)
@@ -428,7 +428,7 @@ function accesssig($op, $sig)
      $res = ($adminflag === True) ? True : False;
      break;
     }
-    default: 
+    default:
     {
       $res = null;
       break;
@@ -478,14 +478,14 @@ function getpage($title, $options=null)
      * @since 2016nov06
      */
     $page->addStyleSheet(SHAREDSKINURL."css/bbsengine3badge.css");
-   
+
     $page->addStyleSheet(SHAREDSKINURL."css/panel.css");
 
    /**
     * @since 20160601
     */
    $page->addStylesheet(SHAREDSKINURL."css/pagetransition.css");
-   
+
    $page->setMetaData("google-site-verification", "-crBDeAJOq6aN0255NpBZKq9KiCFhIa7GVozMsjdb0Y");
    $page->setMetaData("viewport", "width=device-width, initial-scale=1");
 
@@ -494,34 +494,34 @@ function getpage($title, $options=null)
    $page->addScript(STATICJAVASCRIPTURL."bbsengine4.js", ["execute" => "defer"]);
 
 //   $page->addScript(STATICJAVASCRIPTURL."tooltip.js", ["execute" => "defer"]);
-  
+
    $page->addScript(STATICJAVASCRIPTURL."topbar.js", ["execute" => "defer"]);
    $page->addStyleSheet(SHAREDSKINURL."css/topbar.css");
-  
+
    $page->addScript(STATICJAVASCRIPTURL."clock.js", ["execute" => "defer"]);
    $page->addStylesheet(SHAREDSKINURL."css/clock.css");
-  
+
    $page->addStyleSheet(SHAREDSKINURL."css/actions.css");
-   
+
    // commented out 2016oct24, trying to fix the problem with get-notify-count
    //   $page->addScript(ENGINEURL."js/jquery.jsonp.js", ["execute" => "defer"]);
    //   $page->addScript(STATICJAVASCRIPTURL."page.js", ["execute" => "defer"]);
-   
+
    //   $page->addStyleSheet(SHAREDSKINURL."css/stickyfooter.css");
-   
+
    if (defined("FONTAWESOMECSSURL") === True)
    {
      $page->addStyleSheet(FONTAWESOMECSSURL);
    }
    $page->addStyleSheet(SHAREDSKINURL."css/noscript.css");
    $page->addBodyContent($tmpl->fetch("noscript.tmpl"));
-  
+
    if (getcurrentmemberid() > 0)
    {
      $page->addScript(ENGINEURL."js/notify.js", ["execute" => "async"]);
      $page->addStyleSheet(SHAREDSKINURL."css/notify.css");
    }
-   
+
    if (getsitevar("smoothstate") === True)
    {
      // @FIX local copy because I had to make a small patch so that forms would work properly (confirmed?)
@@ -548,14 +548,14 @@ function accessproject($op, $data=null, $memberid=null)
   }
 
   $project = isset($data["project"]) ? $data["project"] : null;
-  
+
 //  logentry("accessproject.98: project.hidden=".var_export($project["hidden"], True));
-  
+
   $hidden = isset($project["hidden"]) && $project["hidden"] === True ? True : False;
 //  logentry("accessproject.99: hidden=".var_export($hidden, True));
-  
+
   $adminflag = flag("ADMIN", $memberid);
-  
+
 //  logentry("accessproject.100: name=".var_export($project["name"], True)." hidden=".var_export($hidden, True)." adminflag=".var_export($adminflag, True)." op=".var_export($op, True));
 
   switch ($op)
@@ -631,7 +631,7 @@ function buildlinkactions($memberid, $data)
   $eros = $link["eros"];
 
 //  logentry("buildlinkactions.200: broken=".var_export($broken, True));
-  
+
   $actions = array();
   if (getcurrentaction() !== "detail")
   {
@@ -658,7 +658,7 @@ function buildlinkactions($memberid, $data)
   return $actions;
 }
 
-/** 
+/**
  * local version of getsmarty() that sets up plugin dirs, template dirs, etc
  *
  * @since 20140710
@@ -674,7 +674,7 @@ function getsmarty($options=null)
 }
 
 
-/** 
+/**
  * @since 20140726
  */
 /**
@@ -724,7 +724,7 @@ function accesspost($op, $data=null, $memberid=null)
   $siguri = isset($data["siguri"]) ? $data["siguri"] : null;
   $post = isset($data["post"]) ? $data["post"] : null;
   $id = isset($data["id"]) ? intval($data["id"]) : null;
-  
+
   if ($memberid === null)
   {
     $memberid = getcurrentmemberid();
@@ -740,7 +740,7 @@ function accesspost($op, $data=null, $memberid=null)
   $junk = toboolean($post["junk"], "zoid6.accesspost.junk");
 
 //  logentry("accesspost.200: op=".var_export($op, True)." memberid=".var_export($memberid, True)." frozen=".var_export($frozen, True)." draft=".var_export($draft, True));
- 
+
   switch ($op)
   {
     case "markasjunk":
@@ -806,7 +806,7 @@ function accesspost($op, $data=null, $memberid=null)
      $res = False;
      break;
    }
-  
+
    case "freeze":
    {
      if ($frozen === True)
@@ -856,7 +856,7 @@ function accesspost($op, $data=null, $memberid=null)
    case "view":
    {
 //     logentry("accesspost.149: draft=".var_export($draft, True)." adminflag=".var_export($adminflag, True)." postedbyid=".var_export($postedbyid, True)." memberid=".var_export($memberid, True));
-     
+
      if ($draft === True)
      {
        if ($admin === True or $postedbyid === $memberid)
@@ -872,7 +872,7 @@ function accesspost($op, $data=null, $memberid=null)
        $res = False;
        break;
      }
-     
+
      $res = True;
      break;
    }
@@ -911,12 +911,12 @@ function buildprojectactions($data)
  {
   $actions[] = array("name" => "detail", "title" => "project detail", "href" => "//projects.zoidtechnologies.com/{$projectname}", "class" => "fa fa-angle-double-down fa-fw");
  }
- 
+
  if (accessproject("edit", $data) === True)
  {
   $actions[] = array("name" => "edit", "title" => "edit", "href" => REPOURL . "project-edit/{$projectname}", "class" => "fa fa-edit fa-fw");
  }
- 
+
  if (accessproject("hide", $data) === True)
  {
   if ($project["hidden"] === False)
@@ -928,12 +928,12 @@ function buildprojectactions($data)
    $actions[] = array("name" => "unhide", "title" => "unhide", "href" => REPOURL . "project-unhide/{$projectname}", "class" => "fa fa-eye fa-fw");
   }
  }
- 
+
  if (accessproject("delete", $data) === True)
  {
   $actions[] = array("name" => "delete", "title" => "delete", "href" => REPOURL . "project-delete/{$projectname}", "class" => "fa fa-trash fa-fw");
  }
- 
+
 /*
  if (accessproject("download", $project) === True)
  {
@@ -969,8 +969,8 @@ function buildaccountfieldset($form, $flags=array())
 
   $realname = $fieldset->addText("realname");
   $realname->setLabel("Real Name");
- 
- return; 
+
+ return;
 }
 
 function buildnotifyrecord($key, $notify)
@@ -983,7 +983,7 @@ function buildnotifyrecord($key, $notify)
     logentry("buildrecord.210: ".var_export($key, True)." is null.");
     return null;
   }
-  
+
   logentry("buildrecord.212: key=".var_export($key, True)." data=".var_export($data, True)." val=".var_export($val, True));
 
   switch ($key)
@@ -1066,7 +1066,7 @@ function buildnotifydata($notifytype, $data)
 function processform($form, $validatedcallback)
 {
     logentry("processform.100: enter");
-    
+
     $issubmitted = $form->isSubmitted();
     $validate = $form->validate();
 
@@ -1085,7 +1085,7 @@ function processform($form, $validatedcallback)
     if ($issubmitted === True && $validate === True)
     {
       logentry("processform.210: form validated");
-      
+
       if (is_callable($validatedcallback) === False)
       {
         logentry("processform.220: callback is not valid");
@@ -1099,14 +1099,14 @@ function processform($form, $validatedcallback)
       $values = $form->getValue();
 
       logentry("processform.480: values=".var_export($values, True));
-      
+
       $res = call_user_func($validatedcallback, $values); // $this->update($values);
       if (($res === false))
       {
         logentry("processform.101: " . $res->toString());
         return $res;
       }
-  
+
       logentry("processform.500: exit");
       return $res;
     }
@@ -1122,7 +1122,7 @@ function processform($form, $validatedcallback)
 function getpost($id, $maxdepth=0, $currentdepth=0)
 {
   $memberid = getcurrentmemberid();
-  
+
 //  logentry("getpost.99: id=".var_export($id, True)." depth=".var_export($depth, True));
 //  $sql = "select * from sophia.post where id=?";
   $sql = "select * from sophia.post where id=?";
@@ -1155,11 +1155,11 @@ function getpost($id, $maxdepth=0, $currentdepth=0)
 //  logentry("getpost.110: siglist=".var_export($siglist, True));
   $post["sigs"] = $sigmap;
   $post["actions"] = buildpostactions($post);
-  
+
   $post["replies"] = [];
-  
+
 //  logentry("getpost.108: postid=".var_export($id, True)." currentdepth=".var_export($currentdepth, True)." maxdepth=".var_export($maxdepth, True));
-  
+
   if ($maxdepth > 0 && $currentdepth <= $maxdepth)
   {
 //    logentry("getpost.110: gathering replies for post id #{$id}...");
@@ -1195,7 +1195,7 @@ function buildpostactions($post)
 //  logentry("buildpostactions.100: frozen=".var_export($frozen, True)." draft=".var_export($draft, True)." id=".var_export($id, True));
 
   $actions = array();
-  
+
   $data = [];
   $data["post"] = $post;
   if (accesspost("reply", $data))
@@ -1234,7 +1234,7 @@ function buildpostactions($post)
   {
     $actions[] = ["href" => SOPHIAURL."post-markasjunk-{$id}", "title" => "junk", "desc" => "mark this post as junk", "class" => "fa fa-trash-alt fa-fw"];
   }
-  
+
   return $actions;
 }
 
@@ -1296,7 +1296,7 @@ function getsiglinkmap($linkid)
 /**
  * @since 20150404
  * moved to bbsengine3.php
- * function buildpagerinfo($sql, $params) 
+ * function buildpagerinfo($sql, $params)
 */
 
 /**
@@ -1368,7 +1368,7 @@ function getmemberlinks($memberid)
 function getpostreplycount($postid)
 {
   static $count = 0;
-  
+
   $dbh = \bbsengine6\database\connect(\SYSTEMDSN);
   if (($dbh === false))
   {
@@ -1381,7 +1381,7 @@ function getpostreplycount($postid)
   if (($res === false))
   {
     logentry("getpostreplycount.110: " . $res->toString());
-    
+
   }
   $count += $res["count"];
   return $count;
@@ -1402,10 +1402,10 @@ function displaygenericpage($pagename)
     $pagedata = [];
     $pagedata["body"] = $tmpl->fetch("{$pagename}.tmpl");
 //    $pagedata["sidebardata"] = buildsidebarmenu();
-    
+
     $options = [];
     $options["pagedata"] = $pagedata;
-    
+
     $page = getpage($name, $options);
     if (is_readable(SKINURL."css/{$pagename}"))
     {
@@ -1478,10 +1478,10 @@ function displaypage($page, $data=[])
 /*
   $metadata = isset($options["metadata"]) ? $options["metadata"] : [];
   $tags = [
-    "SITEURL" => "og:url", 
-    "SITETITLE" => "og:title", 
-    "SITEKEYWORDS" => "keywords", 
-    "SITETITLE" => "og:title", 
+    "SITEURL" => "og:url",
+    "SITETITLE" => "og:title",
+    "SITEKEYWORDS" => "keywords",
+    "SITETITLE" => "og:title",
     "SITEDESCRIPTION" => "og:description",
     "SITETYPE" => "og:type",
     "FACEBOOKAPPID" => "fb:app_id",
@@ -1523,7 +1523,7 @@ function displaypage($page, $data=[])
 
 //  $pagedata = isset($options["pagedata"]) ? $options["pagedata"] : null;
 //  $template = isset($pagedata["template"]) ? $pagedata["template"] : "intentional404.tmpl";
-*/  
+*/
 //  logentry("zoidweb3.displaypage.100: data=".var_export($data, True));
   if ($page === null)
   {
@@ -1580,7 +1580,7 @@ function vulcangetrecentlyadded()
     logentry("vulcangetrecentlyadded.100: " . $dbh->toString());
     return PEAR::raiseError("Database Error (code: vulcangetrecentlyadded.100)");
   }
-  
+
   $sql = <<<eos
 select link.id from vulcan.link
 where approved='t' and eros='f'
@@ -1619,7 +1619,7 @@ eos;
 
 /**
  * copied from zoidweb2
- * 
+ *
  * @since 20180223
  */
 function sortsidebarmenu($a, $b)
@@ -1634,7 +1634,7 @@ function sortsidebarmenu($a, $b)
 
 /**
  * copied from zoidweb2
- * 
+ *
  * @since 20131014
  */
 function buildsidebarmenu($menu=[])
@@ -1660,7 +1660,7 @@ function buildsidebarmenu($menu=[])
 //  $menu[] = array("name" => "aolbonics", "title" => "Urban Dictionary", "url" => AOLBONICSURL, "desc" => "Urban Dictionary");
   $menu[] = array("name" => "projects", "title" => "projects", "url" => "http://projects.zoidtechnologies.com/", "desc" => "Projects Site");
   $menu[] = array("name" => "sophia", "title" => "sophia", "url" => SOPHIAURL, "desc" => "forum/blog");
-  
+
   $menu[] = array("name" => "achilles", "title" => "achilles", "url" => ACHILLESURL, "desc" => "");
   $menu[] = array("name" => "psyche", "title" => "psyche", "url" => PSYCHEURL, "desc" => "");
   $menu[] = array("name" => "agora", "title" => "agora", "url" => AGORAURL, "desc" => "a Worthy marketplace", "class" => "fas fa-fw fa-store");
@@ -1681,7 +1681,7 @@ function buildsidebarmenu($menu=[])
 
 /**
  * function which returns the sidebar. if the param is null, builds standard menu options, else passes direct to _fetchnavbar
- * 
+ *
  * @since 20150309
  */
 function fetchsidebar($menu=null)
