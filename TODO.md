@@ -258,12 +258,13 @@ The architecture should handle module failures gracefully without bringing down 
 Create `log_event()` function in each module that builds on `bbsengine6.util.logentry()`:
 
 ```python
-from bbsengine6.util import logentry
+from bbsengine6.util import logentry, getcurrentloginid
 
 def log_event(
     event_type: str,
     *,
     moniker: Optional[str] = None,
+    loginid: Optional[str] = None,   # from getcurrentloginid()
     ip_address: Optional[str] = None,
     fingerprint: Optional[dict] = None,
     module: str,
@@ -274,9 +275,12 @@ def log_event(
 ) -> None:
     """Log a structured event. Builds on bbsengine6.util.logentry()."""
     # Build human-readable message
+    # Format: [module] action key=value key=value free text at end
     parts = [f"[{module}]", action]
     if moniker:
         parts.append(f"moniker={moniker}")
+    if loginid:
+        parts.append(f"loginid={loginid}")
     if table:
         parts.append(f"table={table}")
     if details:
@@ -285,6 +289,23 @@ def log_event(
     message = " ".join(parts)
     
     logentry(message, level=level)
+```
+
+### Log Format Standard
+
+**Format:** `[module] action key=value key=value free_text_at_end`
+
+- Key-value pairs go at the start (e.g., `moniker=john amount=100`)
+- Free text goes at the end (no `reason=` prefix)
+- Use underscores for multi-word fields (e.g., `loginid`, `accountid`)
+
+**Example messages:**
+```
+[auth] login_success moniker=john loginid=jamie ip=192.168.1.1
+[auth] login_failed moniker=john loginid=jamie ip=192.168.1.1 invalid password
+[casino] joined moniker=john table=blackjack-1
+[bank] credit accountid=5 moniker=john amount=1000 type=deposit by=casino
+[bank] transfer_rejected transfer_id=42 accountid=7 by=jane insufficient funds
 ```
 
 ### Authentication Logging
@@ -328,6 +349,56 @@ def log_event(
 [auth] login_failed moniker=john ip=192.168.1.1 reason=invalid_password
 [casino] joined moniker=john table=blackjack-1
 [casino] won moniker=john table=blackjack-1 {'hand': 'natural_blackjack', 'payout': 15}
+```
+
+### Bank Event Logging
+
+Add `log_event()` calls to bank operations in `bbsengine6/bank.py`:
+
+1. **add_funds()** - credit to account
+   - accountid, moniker, amount, type, description, by
+
+2. **remove_funds()** - debit from account
+   - accountid, moniker, amount, type, description, by
+
+3. **transfer()** - transfer request created
+   - from_accountid, from, to_accountid, to, amount, by
+
+4. **approve_transfer()**
+   - transfer_id, accountid, by
+
+5. **reject_transfer()**
+   - transfer_id, accountid, by, reason (free text at end)
+
+**Example messages:**
+```
+[bank] credit accountid=5 moniker=john amount=1000 type=deposit by=casino
+[bank] debit accountid=5 moniker=john amount=50 type=bet by=casino
+[bank] transfer from_accountid=5 from=john to_accountid=7 to=jane amount=100 by=john
+[bank] transfer_approved transfer_id=42 accountid=7 by=jane
+[bank] transfer_rejected transfer_id=42 accountid=7 by=jane insufficient funds
+```
+
+### Auth Ban/Kick Logging
+
+1. **Log user bans**
+   - moniker, by (sysop), duration, reason (free text at end)
+
+2. **Log user unbans**
+   - moniker, by (sysop)
+
+3. **Log user kicks**
+   - moniker, by (sysop), reason (free text at end)
+
+4. **Log failed ban/unban/kick attempts**
+   - moniker, by (sysop), reason (free text at end)
+
+**Example messages:**
+```
+[auth] banned moniker=john by=sysopadmin duration=permanent cheating
+[auth] unbanned moniker=john by=sysopadmin
+[auth] kicked moniker=john by=sysopadmin abuse
+[auth] ban_failed moniker=john by=sysopadmin already banned level=warn
 ```
 
 ## Code Review
