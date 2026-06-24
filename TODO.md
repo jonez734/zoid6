@@ -162,6 +162,30 @@ The `bed` daemon loads a router class dynamically via the `--router` argument. E
 - [ ] Sysops always see hidden tables in list (with indicator)
 - [ ] Sysops can join hidden tables without approval
 
+### Channel Access Control
+
+#### Invite-Only Channels
+- [ ] Add `invite_only` flag to channel creation
+- [ ] Add invite code validation for joining invite-only channels
+- [ ] Use generic `engine.__invite` system for channel invites
+- [ ] Only invited users can subscribe to invite-only channels
+- [ ] Channel owner can manage invites
+
+#### Moderated Channels
+- [ ] Add `moderated` flag to channel creation
+- [ ] Add `moderators` list to channel (monikers)
+- [ ] When moderated, messages queue for moderation
+- [ ] Add message types: `approve_message`, `reject_message`
+- [ ] Moderators receive notification of pending messages
+- [ ] Non-moderators can post but messages require approval
+
+#### Private Channels
+- [ ] Add `private` flag to channel creation
+- [ ] Private channels don't appear in `get_subscriptions` list
+- [ ] Users must know exact channel name to join
+- [ ] Only invited/approved users can subscribe
+- [ ] Sysops see private channels in list (with indicator)
+
 ---
 
 ## Testing
