@@ -98,6 +98,7 @@ The `bed` daemon loads a router class dynamically via the `--router` argument. E
 - [X] Create `zoid6/src/zoid6/api/__init__.py`
 - [X] Create `zoid6/src/zoid6/api/handler.py` - Unified MessageRouter
 - [X] Create `zoid6/src/zoid6/data/bed.json` - service configuration
+- [ ] Create `zoid6/Makefile` for development commands
 - [ ] Make zoid6 installable via `pip install -e zoid6/src`
 - [ ] Create zoid6 test files
 
