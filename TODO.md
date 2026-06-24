@@ -18,24 +18,35 @@ The `bed` daemon loads a router class dynamically via the `--router` argument. E
 
 ### Phase 1: bed Project
 
-- [ ] Create `/home/opencode/data/work/bed/` directory structure
-- [ ] Create `bed/src/bed/__init__.py`
-- [ ] Create `bed/src/bed/bed.py` - daemon with `--router` arg, loads router dynamically
-- [ ] Create `bed/src/bed/config.py` - load_config(), reload_config() for bed.json
-- [ ] Create `bed/src/bed/data/bed.json` - default config (move from casino)
-- [ ] Create `bed/src/bed/api/__init__.py`
-- [ ] Create `bed/src/bed/api/handler.py` - SessionManager, BaseService classes
-- [ ] Create `bed/src/bed/tests/test_bed.py` (move from casino)
-- [ ] Create `bed/pyproject.toml` with entry point
-- [ ] Add comprehensive tests for bed daemon
+- [X] Create `/home/opencode/data/work/bed/` directory structure
+- [X] Create `bed/src/bed/__init__.py`
+- [X] Create `bed/src/bed/main.py` - daemon with `--router` arg, loads router dynamically
+- [X] Create `bed/src/bed/lib.py` - buildargs() for bbsengine6 consistency (main.py imports lib.py)
+- [X] Create `bed/src/bed/config.py` - load_config(), reload_config() for bed.json
+- [X] Create `bed/src/bed/data/bed.json` - default config (move from casino)
+- [X] Create `bed/src/bed/api/__init__.py`
+- [X] Create `bed/src/bed/api/handler.py` - SessionManager, BaseService classes
+- [X] Create `bed/src/bed/tests/test_bed.py` (move from casino)
+- [X] Create `bed/pyproject.toml` with entry point
+- [X] Add comprehensive tests for bed daemon (21 tests)
 
 ### Phase 2: casino Updates
 
-- [ ] Remove `casino/src/casino/bed.py`
-- [ ] Remove `casino/src/casino/data/bed.json`
-- [ ] Remove `casino/src/casino/tests/test_bed.py`
-- [ ] Remove config functions from `casino/src/casino/config.py` (keep only casino-specific)
-- [ ] Keep `casino/src/casino/api/handler.py` as-is
+- [X] Remove `casino/src/casino/bed.py`
+- [X] Remove `casino/src/casino/data/bed.json`
+- [X] Remove `casino/src/casino/tests/test_bed.py`
+- [X] Remove config functions from `casino/src/casino/config.py` (keep only casino-specific)
+- [X] Keep `casino/src/casino/api/handler.py` as-is
+- [X] Fix `test_postoffice_config.py` tests that relied on removed functions
+- [ ] Known failing tests (pre-existing, not Phase 2 related):
+  - `test_blackjack_flow.py::TestBlackjackFullFlow::*` (10 tests) - database not running
+  - `test_commands.py::TestSubcommandResolution::test_game_resolve_ambiguous`
+  - `test_new_features_integration.py::TestSurrenderDisabled::test_surrender_disabled`
+  - `test_postoffice_background_task.py` (2 tests) - database/mocking issues
+  - `test_postoffice_imap_polling.py` (5 tests) - database/mocking issues
+  - `test_postoffice_manual_check.py` (2 tests) - database/mocking issues
+  - `test_postoffice_notification.py` (8 tests) - database/mocking issues
+  - `test_table_maint.py::TestListTables::test_list_tables_includes_status` - DAL bug
 
 ### Phase 3: bbsengine6 Updates
 
