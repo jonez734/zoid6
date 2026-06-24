@@ -96,6 +96,29 @@ The `bed` daemon loads a router class dynamically via the `--router` argument. E
 
 ---
 
+## Table Access Control
+
+### Invite-Only Tables
+- [ ] Add `invite_only` flag to table creation
+- [ ] Add `invite` message type to invite a user to a table
+- [ ] Only invited users can join invite-only tables
+- [ ] Table owner can manage invites (add/remove)
+
+### Join Approval
+- [ ] Add `require_approval` flag to table creation
+- [ ] When enabled, each join request requires owner/sysop approval
+- [ ] Add `approve_join` / `reject_join` message types
+- [ ] Owner receives notification of pending join requests
+
+### Hidden Tables
+- [ ] Add `hidden` flag to table creation
+- [ ] Hidden tables don't appear in `list_tables`
+- [ ] Users must know exact table name to join
+- [ ] Sysops always see hidden tables in list (with indicator)
+- [ ] Sysops can join hidden tables without approval
+
+---
+
 ## Testing
 
 ### bed Daemon Tests
