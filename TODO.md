@@ -109,10 +109,21 @@ The `bed` daemon loads a router class dynamically via the `--router` argument. E
   - tableid (FK to table)
   - code (the invite code)
   - createdbymoniker (moniker who created)
-  - datecreated (timestamp)
-  - useddate (timestamp when used, null if unused)
-  - expiresdate (optional expiration)
-- [ ] Create view with local timestamptz for date fields
+  - datecreated (timestamptz)
+  - useddate (timestamptz when used, null if unused)
+  - expiresdate (timestamptz optional expiration)
+- [ ] Create view following empyre pattern:
+  ```sql
+  create or replace view casino.table_invite as
+      select
+          i.*,
+          timezone(currentmember.tz, datecreated) as datecreatedlocal,
+          timezone(currentmember.tz, useddate) as useddatelocal,
+          timezone(currentmember.tz, expiresdate) as expiresdatelocal
+      from casino.__table_invite as i
+      left outer join engine.__member as currentmember on (currentmember.loginid = CURRENT_USER)
+  ;
+  ```
 
 ### Join Approval
 - [ ] Add `require_approval` flag to table creation
