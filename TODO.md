@@ -110,20 +110,26 @@ The `bed` daemon loads a router class dynamically via the `--router` argument. E
   - code (the invite code)
   - createdbymoniker (moniker who created)
   - datecreated (timestamptz)
-  - useddate (timestamptz when used, null if unused)
-  - expiresdate (timestamptz optional expiration)
-- [ ] Create view using creator's timezone (like memberview.sql pattern):
+  - dateused (timestamptz when used, null if unused)
+  - dateexpires (timestamptz optional expiration)
+- [ ] Create view using viewer's timezone (all dates converted to local timezone of user running query):
   ```sql
   create or replace view casino.table_invite as
       select
           i.*,
-          timezone(m.tz, i.datecreated) as datecreatedlocal,
-          timezone(m.tz, i.useddate) as useddatelocal,
-          timezone(m.tz, i.expiresdate) as expiresdatelocal
+          timezone(currentmember.tz, i.datecreated) as datecreatedlocal,
+          timezone(currentmember.tz, i.dateused) as dateusedlocal,
+          timezone(currentmember.tz, i.dateexpires) as dateexpireslocal
       from casino.__table_invite as i
-      left outer join engine.__member as m on m.moniker = i.createdbymoniker
+      left outer join engine.__member as currentmember on (currentmember.loginid = current_user)
   ;
   ```
+- [ ] Update `casino/dal/table.py:update_table()` to support new flags:
+  - `invite_only` (boolean)
+  - `invite_code` (string)
+  - `require_approval` (boolean)
+  - `hidden` (boolean)
+- [ ] Update related service handlers and commands to pass new flags
 
 ### Join Approval
 - [ ] Add `require_approval` flag to table creation
