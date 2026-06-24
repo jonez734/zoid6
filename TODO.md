@@ -40,9 +40,9 @@ The `bed` daemon loads a router class dynamically via the `--router` argument. E
 ### Phase 3: bbsengine6 Updates
 
 - [ ] Remove `bbsengine6/common.py` - delete duplicate logentry()
-- [ ] Create `bbsengine6/bank/__init__.py`
-- [ ] Create `bbsengine6/bank/api/__init__.py`
-- [ ] Create `bbsengine6/bank/api/handler.py` - BankServiceHandler, MessageRouter
+- [ ] Add WebSocket handler for bank (add to existing bbsengine6/bank/):
+  - [ ] Create `bbsengine6/bank/api/__init__.py`
+  - [ ] Create `bbsengine6/bank/api/handler.py` - BankServiceHandler, MessageRouter
 - [ ] Add log_event() calls to bank operations in bbsengine6/bank.py:
   - [ ] add_funds() - credit to account
   - [ ] remove_funds() - debit from account
