@@ -106,9 +106,9 @@ The `bed` daemon loads a router class dynamically via the `--router` argument. E
   ```sql
   CREATE TABLE engine.__invite (
       id bigserial primary key,
-      module varchar(50) not null,  -- 'casino', 'empyre', 'murdermotel', etc.
-      resourceid varchar(100) not null,  -- tableid, islandid, roomid, etc.
-      code varchar(50) not null,
+      module text not null,  -- 'casino', 'empyre', 'murdermotel', etc.
+      resourceid text not null,  -- tableid, islandid, roomid, etc.
+      code text not null,
       createdbymoniker citext constraint fk_invite_createdby references engine.__member(moniker) on update cascade on delete set null,
       datecreated timestamptz,
       dateused timestamptz,
