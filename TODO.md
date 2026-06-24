@@ -93,11 +93,12 @@ The `bed` daemon loads a router class dynamically via the `--router` argument. E
 
 ### Phase 7: zoid6 Package
 
-- [ ] Create `/home/opencode/data/work/zoid6/src/zoid6/` directory
-- [ ] Create `zoid6/src/zoid6/__init__.py`
-- [ ] Create `zoid6/src/zoid6/api/__init__.py`
-- [ ] Create `zoid6/src/zoid6/api/handler.py` - Unified MessageRouter
-- [ ] Create `zoid6/pyproject.toml`
+- [X] Create `/home/opencode/data/work/zoid6/src/zoid6/` directory
+- [X] Create `zoid6/src/zoid6/__init__.py`
+- [X] Create `zoid6/src/zoid6/api/__init__.py`
+- [X] Create `zoid6/src/zoid6/api/handler.py` - Unified MessageRouter
+- [X] Create `zoid6/src/zoid6/data/bed.json` - service configuration
+- [ ] Make zoid6 installable via `pip install -e zoid6/src`
 - [ ] Create zoid6 test files
 
 ---
