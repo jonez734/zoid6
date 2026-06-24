@@ -201,6 +201,18 @@ The `bed` daemon loads a router class dynamically via the `--router` argument. E
 - [ ] Extract magic numbers/strings to constants
 - [ ] Verify complex logic has explanatory comments
 
+### Security Review
+- [ ] Check for SQL injection vulnerabilities (use parameterized queries)
+- [ ] Verify authentication is enforced on protected endpoints
+- [ ] Check for authorization bypass issues (users can only access their own data)
+- [ ] Validate input sanitization on all user-provided data
+- [ ] Check for XSS vulnerabilities in any string output
+- [ ] Verify WebSocket connections are properly authenticated
+- [ ] Check for rate limiting on sensitive operations
+- [ ] Verify session management is secure
+- [ ] Check that config files with secrets are not committed
+- [ ] Review error messages don't leak sensitive information
+
 ### Specific Files to Review
 - [ ] `casino/api/handler.py` - 1200+ lines, may need splitting
 - [ ] `bbsengine6/bed.py` - understand the existing pattern
