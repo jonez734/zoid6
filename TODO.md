@@ -201,7 +201,8 @@ The `bed` daemon loads a router class dynamically via the `--router` argument. E
 
 ### Bed Network Configuration
 
-- [ ] Add `--bind` option to bed daemon with support for:
+- [ ] Add `bind` option to bed.json config file
+- [ ] Add `--bind` option to bed daemon CLI with support for:
   - `localhost` - resolves to both IPv4 and IPv6 localhost (127.0.0.1 and ::1)
   - `127.0.0.1` - IPv4 localhost only
   - `::1` - IPv6 localhost only
