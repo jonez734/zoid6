@@ -186,6 +186,7 @@ The `bed` daemon loads a router class dynamically via the `--router` argument. E
 
 ### Robustness Review
 - [ ] Check all routers handle import/initialization errors gracefully
+- [ ] Ensure ALL code has proper type annotations (classes, functions, variables)
 - [ ] Verify all handlers have proper type hints
 - [ ] Ensure all optional values are checked before use
 - [ ] Verify database connections are managed properly
