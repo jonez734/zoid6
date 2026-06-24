@@ -100,9 +100,11 @@ The `bed` daemon loads a router class dynamically via the `--router` argument. E
 
 ### Invite-Only Tables
 - [ ] Add `invite_only` flag to table creation
-- [ ] Add `invite` message type to invite a user to a table
-- [ ] Only invited users can join invite-only tables
-- [ ] Table owner can manage invites (add/remove)
+- [ ] Add `invite_code` field - owner sets a code when creating invite-only table
+- [ ] When joining invite-only table, user must provide correct `invite_code`
+- [ ] Add `invite` message type to invite a user to a table (sends code to user)
+- [ ] Only users with correct code can join invite-only tables
+- [ ] Table owner can manage invites and regenerate codes
 
 ### Join Approval
 - [ ] Add `require_approval` flag to table creation
