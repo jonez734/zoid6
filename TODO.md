@@ -181,3 +181,174 @@ bed --router zoid6.api.handler.MessageRouter
 5. Create `mistermcfeely` Python package  
 6. Create `murdermotel` Python package
 7. Create `zoid6` Python package with unified router
+
+## Testing
+
+### Comprehensive Integration Tests
+
+Write/update tests for the modular architecture:
+
+1. **bed Daemon Tests** (`bed/tests/test_bed.py`)
+   - Test that `--router` argument loads correct router class
+   - Test router registration with WebSocket server
+   - Test service message handling
+   - Test signal handling (SIGTERM, SIGHUP)
+
+2. **Module Handler Tests** (per module)
+   - Each module's `tests/test_handler.py`
+   - Test MessageRouter initialization
+   - Test service registration
+   - Test message handling for each service
+   - Test session management
+
+3. **zoid6 Unified Router Tests** (`zoid6/tests/test_unified_router.py`)
+   - Test all module routers are initialized
+   - Test all services are registered with server
+   - Test cross-module message routing
+   - Test full integration with all modules together
+
+4. **Integration Tests** (`zoid6/tests/test_integration.py`)
+   - Test running `bed --router zoid6.api.handler.MessageRouter`
+   - Test WebSocket connection and authentication
+   - Test each module's services respond correctly
+   - Test channel pub/sub across modules
+   - Test bank transfers between casino and member accounts
+   - Test postoffice mail delivery
+
+5. **Test Fixtures**
+   - Create shared fixtures for WebSocket server setup/teardown
+   - Create database test pools for each module
+   - Mock bbsengine6 services appropriately
+
+6. **WebSocket Cleanup**
+   - Ensure ALL tests properly close WebSocket connections
+   - Add test fixtures that guarantee cleanup
+   - Add assertions that verify server is stopped
+   - Check for resource leaks in test teardown
+
+## Error Handling
+
+### Graceful Module Error Handling
+
+The architecture should handle module failures gracefully without bringing down the entire system.
+
+1. **Router Initialization Errors**
+   - Catch import errors when loading router class via `--router`
+   - Catch initialization errors in router `__init__`
+   - Log clear error messages indicating which module failed and why
+
+2. **Service Registration Errors**
+   - Wrap each `router.register_all(server)` call in try/except
+   - If one module's services fail to register, continue with others
+   - Log which services failed to register
+
+3. **Message Handling Errors**
+   - Wrap individual service message handlers in try/except
+   - Return error response to client instead of crashing
+   - Log full traceback for debugging
+
+4. **Runtime Recovery**
+   - Allow modules to be reloaded without restarting entire daemon (via SIGHUP)
+   - Implement health check endpoint to report which modules are active
+
+## Logging
+
+### Structured Event Logging
+
+Create `log_event()` function in each module that builds on `bbsengine6.util.logentry()`:
+
+```python
+from bbsengine6.util import logentry
+
+def log_event(
+    event_type: str,
+    *,
+    moniker: Optional[str] = None,
+    ip_address: Optional[str] = None,
+    fingerprint: Optional[dict] = None,
+    module: str,
+    action: str,
+    table: Optional[str] = None,
+    details: Optional[dict] = None,
+    level: str = "info",
+) -> None:
+    """Log a structured event. Builds on bbsengine6.util.logentry()."""
+    # Build human-readable message
+    parts = [f"[{module}]", action]
+    if moniker:
+        parts.append(f"moniker={moniker}")
+    if table:
+        parts.append(f"table={table}")
+    if details:
+        parts.append(str(details))
+    
+    message = " ".join(parts)
+    
+    logentry(message, level=level)
+```
+
+### Authentication Logging
+
+1. **Log successful authentication**
+   - Moniker
+   - IP address
+   - Any fingerprinting data available (user agent, etc.)
+   - Timestamp
+   - Session ID
+
+2. **Log failed authentication attempts**
+   - Attempted moniker
+   - IP address
+   - Failure reason
+   - Timestamp
+
+3. **Log deauthentication**
+   - Log when user disconnects/logs out
+
+### Module Event Logging
+
+1. **Table/Game events**
+   - "moniker joined table-1"
+   - "moniker left table-1"
+   - "moniker won $X with natural blackjack on blackjack-1"
+   - "moniker bet $X on blackjack-1"
+   - etc.
+
+2. **Generic event structure**
+   ```python
+   log_event("game_action", moniker="...", action="joined", table="blackjack-1", details={...})
+   ```
+
+3. **Module-specific events** - Each module (casino, empyre, murdermotel, etc.) logs its own relevant events
+
+### Log Output Examples
+
+```
+[auth] login_success moniker=john ip=192.168.1.1
+[auth] login_failed moniker=john ip=192.168.1.1 reason=invalid_password
+[casino] joined moniker=john table=blackjack-1
+[casino] won moniker=john table=blackjack-1 {'hand': 'natural_blackjack', 'payout': 15}
+```
+
+## Code Review
+
+### Robustness Review
+1. **Error handling** - Check all routers handle import/initialization errors gracefully
+2. **Type annotations** - Verify all handlers have proper type hints
+3. **Null checks** - Ensure all optional values are checked before use
+4. **Connection pooling** - Verify database connections are managed properly
+5. **Resource cleanup** - Ensure WebSocket connections, db pools are closed on shutdown
+6. **Logging** - Add appropriate logging at key decision points
+
+### Clarity Review
+1. **Docstrings** - Ensure all public classes/functions have docstrings
+2. **Naming** - Verify consistent naming (MessageRouter, BaseService, etc.)
+3. **Structure** - Confirm each module follows the same pattern (`api/handler.py`)
+4. **Imports** - Check imports are clean and avoid circular dependencies
+5. **Constants** - Extract magic numbers/strings to constants
+6. **Comments** - Verify complex logic has explanatory comments
+
+### Specific Files to Review
+- `casino/api/handler.py` - 1200+ lines, may need splitting
+- `bbsengine6/bed.py` - understand the existing pattern
+- Each new module's `api/handler.py` - follow established patterns
