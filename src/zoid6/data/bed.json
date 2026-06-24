@@ -27,7 +27,7 @@
       "description": "Channel service (pub/sub messaging, channels)"
     },
     "casino": {
-      "enabled": false,
+      "enabled": true,
       "modulepath": "casino.api.handler",
       "description": "Casino games (blackjack, poker, etc.)",
       "games": ["blackjack", "poker", "yahtzee"],
