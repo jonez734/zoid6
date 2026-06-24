@@ -108,10 +108,11 @@ The `bed` daemon loads a router class dynamically via the `--router` argument. E
 - [ ] Create `casino.__table_invite` database table to persist invite codes:
   - tableid (FK to table)
   - code (the invite code)
-  - created_by (moniker who created)
-  - created_at (timestamp)
-  - used_at (timestamp when used, null if unused)
-  - expires_at (optional expiration)
+  - createdbymoniker (moniker who created)
+  - datecreated (timestamp)
+  - useddate (timestamp when used, null if unused)
+  - expiresdate (optional expiration)
+- [ ] Create view with local timestamptz for date fields
 
 ### Join Approval
 - [ ] Add `require_approval` flag to table creation
