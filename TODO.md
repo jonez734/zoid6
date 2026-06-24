@@ -117,8 +117,12 @@ The `bed` daemon loads a router class dynamically via the `--router` argument. E
       createdbymoniker citext constraint fk_invite_createdby references engine.__member(moniker) on update cascade on delete set null,
       datecreated timestamptz,
       dateused timestamptz,
-      dateexpires timestamptz
+      dateexpires timestamptz,
+      -- Module-specific FKs for referential integrity:
+      constraint fk_invite_casino foreign key (resourceid) references casino.__table(moniker) on delete cascade
   );
+  -- Add similar FKs as modules are added:
+  -- constraint fk_invite_empyre foreign key (resourceid) references empyre.__island(id) on delete cascade
   ```
 - [ ] Create `engine.invite` view with local timezone conversion
 - [ ] Create `bbsengine6/invite.py` - DAL functions:
