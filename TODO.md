@@ -144,6 +144,16 @@ The `bed` daemon loads a router class dynamically via the `--router` argument. E
   - `hidden` (boolean)
 - [ ] Update related service handlers and commands to pass new flags
 
+### Membership Invites (module='member')
+- [ ] Add `module='member'` to `engine.__invite` for general BBS invites
+- [ ] Message types:
+  - `member_invite_create` - create invite code
+  - `member_invite_list` - list your invite codes
+  - `member_invite_revoke` - revoke unused code
+  - `member_invite_use` - use code during registration
+- [ ] Track referrer (who invited) and invitee (new member)
+- [ ] Keep extensible for future reward system
+
 ### Join Approval
 - [ ] Add `require_approval` flag to table creation
 - [ ] When enabled, each join request requires owner/sysop approval
