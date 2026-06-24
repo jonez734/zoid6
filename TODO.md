@@ -70,11 +70,11 @@ The `bed` daemon loads a router class dynamically via the `--router` argument. E
 
 ### Phase 4: empyre Package (ADD - already exists, add WebSocket handler)
 
-- [ ] Add `empyre/src/empyre/api/__init__.py` - exists, add if needed
-- [ ] Add `empyre/src/empyre/api/handler.py` - MessageRouter for empyre WebSocket services
-- [ ] Keep existing `__init__.py` intact (existing BBS functionality)
-- [ ] Create `empyre/pyproject.toml` if needed
-- [ ] Create empyre test files
+- [X] Add `empyre/src/empyre/api/__init__.py` - exists, add if needed
+- [X] Add `empyre/src/empyre/api/handler.py` - MessageRouter for empyre WebSocket services
+- [X] Keep existing `__init__.py` intact (existing BBS functionality)
+- [X] Create `empyre/pyproject.toml` if needed
+- [X] Create empyre test files
 
 ### Phase 5: mistermcfeely Package (postoffice) (ADD)
 
