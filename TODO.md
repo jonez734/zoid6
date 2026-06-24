@@ -199,6 +199,25 @@ The `bed` daemon loads a router class dynamically via the `--router` argument. E
 - [ ] Anyone can subscribe and read (viewers)
 - [ ] Sysops are always announcers by default
 
+### Bed Network Configuration
+
+- [ ] Add `--bind` option to bed daemon with support for:
+  - `localhost` - resolves to both IPv4 and IPv6 localhost (127.0.0.1 and ::1)
+  - `127.0.0.1` - IPv4 localhost only
+  - `::1` - IPv6 localhost only
+  - `0.0.0.0` - all IPv4 interfaces
+  - `::` - all IPv6 interfaces
+  - Specific IP addresses
+- [ ] Implement dual-stack binding:
+  - When `localhost` is specified, create two sockets (IPv4 and IPv6)
+  - Each socket runs its own WebSocket server instance
+  - Both share the same router/services
+  - Handle connection distribution across both sockets
+- [ ] Default to `localhost` for secure by default (binds to both IPv4/IPv6 localhost)
+- [ ] Add validation for bind address format
+- [ ] Handle "address already in use" errors gracefully
+- [ ] Ensure client can connect to localhost regardless of whether it resolves to IPv4 or IPv6
+
 ---
 
 ## Testing
