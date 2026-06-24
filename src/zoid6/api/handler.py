@@ -3,6 +3,7 @@
 # Unified MessageRouter for zoid6 - loads all BBS modules
 
 from typing import Any, Dict, Optional
+from bbsengine6 import module as bbsmodule
 import json
 from pathlib import Path
 
@@ -39,54 +40,23 @@ class MessageRouter:
 
     def _register_module(self, module_name: str, module_config: Dict[str, Any], server: Any) -> None:
         """Register a single module's services."""
+        module_path = module_config.get("modulepath")
+        if not module_path:
+            print(f"No modulepath configured for {module_name}")
+            return
+
         try:
-            if module_name == "casino":
-                self._register_casino(module_config, server)
-            elif module_name == "empyre":
-                self._register_empyre(module_config, server)
-            elif module_name == "murdermotel":
-                self._register_murdermotel(module_config, server)
-            elif module_name == "mistermcfeely":
-                self._register_mistermcfeely(module_config, server)
-            else:
-                print(f"Unknown module: {module_name}")
+            module = bbsmodule.load(self.args, module_path)
+            RouterClass = getattr(module, "MessageRouter")
+            router = RouterClass(self.args)
+            router.register_all(server)
+            self.routers[module_name] = router
         except ImportError as e:
             print(f"Failed to import {module_name}: {e}")
+        except AttributeError as e:
+            print(f"MessageRouter not found in {module_path}: {e}")
         except Exception as e:
             print(f"Failed to register {module_name}: {e}")
-
-    def _register_casino(self, config: Dict[str, Any], server: Any) -> None:
-        """Register casino module services."""
-        from casino.api.handler import MessageRouter as CasinoRouter
-
-        router = CasinoRouter(self.args)
-        router.register_all(server)
-        self.routers["casino"] = router
-
-    def _register_empyre(self, config: Dict[str, Any], server: Any) -> None:
-        """Register empyre module services."""
-        from empyre.api.handler import MessageRouter as EmpyreRouter
-
-        router = EmpyreRouter(self.args)
-        router.register_all(server)
-        self.routers["empyre"] = router
-
-    def _register_murdermotel(self, config: Dict[str, Any], server: Any) -> None:
-        """Register murdermotel module services."""
-        from murdermotel.api.handler import MessageRouter as MurderMotelRouter
-
-        router = MurderMotelRouter(self.args)
-        router.register_all(server)
-        self.routers["murdermotel"] = router
-
-    def _register_mistermcfeely(self, config: Dict[str, Any], server: Any) -> None:
-        """Register mistermcfeely (postoffice) module services."""
-        from mistermcfeely.api.handler import MessageRouter as MisterMcFeelyRouter
-
-        router = MisterMcFeelyRouter(self.args)
-        router.register_all(server)
-        self.routers["mistermcfeely"] = router
-
 
 def get_config() -> Dict[str, Any]:
     """Get zoid6 configuration."""
