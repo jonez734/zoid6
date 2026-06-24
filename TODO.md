@@ -174,10 +174,16 @@ The `bed` daemon loads a router class dynamically via the `--router` argument. E
 #### Moderated Channels
 - [ ] Add `moderated` flag to channel creation
 - [ ] Add `moderators` list to channel (monikers)
-- [ ] When moderated, messages queue for moderation
+- [ ] Add `member_moderation` config (boolean):
+  - true: members' messages require approval
+  - false: members can post freely (default)
+- [ ] Add `non_member_moderation` config (boolean):
+  - true: non-members' messages require approval
+  - false: non-members can post freely (default)
+- [ ] Add both fields to channel schema
+- [ ] Implement moderation logic based on sender's membership status
 - [ ] Add message types: `approve_message`, `reject_message`
 - [ ] Moderators receive notification of pending messages
-- [ ] Non-moderators can post but messages require approval
 
 #### Private Channels
 - [ ] Add `private` flag to channel creation
