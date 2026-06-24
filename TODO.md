@@ -112,16 +112,16 @@ The `bed` daemon loads a router class dynamically via the `--router` argument. E
   - datecreated (timestamptz)
   - useddate (timestamptz when used, null if unused)
   - expiresdate (timestamptz optional expiration)
-- [ ] Create view following empyre pattern:
+- [ ] Create view using creator's timezone (like memberview.sql pattern):
   ```sql
   create or replace view casino.table_invite as
       select
           i.*,
-          timezone(currentmember.tz, datecreated) as datecreatedlocal,
-          timezone(currentmember.tz, useddate) as useddatelocal,
-          timezone(currentmember.tz, expiresdate) as expiresdatelocal
+          timezone(m.tz, i.datecreated) as datecreatedlocal,
+          timezone(m.tz, i.useddate) as useddatelocal,
+          timezone(m.tz, i.expiresdate) as expiresdatelocal
       from casino.__table_invite as i
-      left outer join engine.__member as currentmember on (currentmember.loginid = CURRENT_USER)
+      left outer join engine.__member as m on m.moniker = i.createdbymoniker
   ;
   ```
 
