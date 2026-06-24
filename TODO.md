@@ -105,25 +105,34 @@ The `bed` daemon loads a router class dynamically via the `--router` argument. E
 - [ ] Add `invite` message type to invite a user to a table (sends code to user)
 - [ ] Only users with correct code can join invite-only tables
 - [ ] Table owner can manage invites and regenerate codes
-- [ ] Create `casino.__table_invite` database table to persist invite codes:
-  - tableid (FK to table)
-  - code (the invite code)
-  - createdbymoniker (moniker who created)
-  - datecreated (timestamptz)
-  - dateused (timestamptz when used, null if unused)
-  - dateexpires (timestamptz optional expiration)
-- [ ] Create view using viewer's timezone (all dates converted to local timezone of user running query):
+
+### Generic Invite Code System (bbsengine6)
+- [ ] Create `bbsengine6/sql/invite.sql` - shared invite code table:
   ```sql
-  create or replace view casino.table_invite as
-      select
-          i.*,
-          timezone(currentmember.tz, i.datecreated) as datecreatedlocal,
-          timezone(currentmember.tz, i.dateused) as dateusedlocal,
-          timezone(currentmember.tz, i.dateexpires) as dateexpireslocal
-      from casino.__table_invite as i
-      left outer join engine.__member as currentmember on (currentmember.loginid = current_user)
-  ;
+  CREATE TABLE engine.__invite (
+      id bigserial primary key,
+      module varchar(50) not null,  -- 'casino', 'empyre', 'murdermotel', etc.
+      resourceid varchar(100) not null,  -- tableid, islandid, roomid, etc.
+      code varchar(50) not null,
+      createdbymoniker citext constraint fk_invite_createdby references engine.__member(moniker) on update cascade on delete set null,
+      datecreated timestamptz,
+      dateused timestamptz,
+      dateexpires timestamptz
+  );
   ```
+- [ ] Create `engine.invite` view with local timezone conversion
+- [ ] Create `bbsengine6/invite.py` - DAL functions:
+  - `create_invite(args, module, resourceid, createdbymoniker, dateexpires)` → returns code
+  - `get_invites(args, module, resourceid)` → list of codes
+  - `revoke_invite(args, invite_id)` → bool
+  - `validate_invite(args, module, resourceid, code)` → returns invite record or None
+  - `mark_used(args, invite_id)` → bool
+
+### Module Updates (remove module-specific tables)
+- [ ] Remove `casino.__table_invite` (use `engine.__invite` instead)
+- [ ] Update casino to use `bbsengine6.invite` module
+- [ ] Each module implements module-specific validation logic
+- [ ] Each module implements message types: `create_invite`, `list_invites`, `revoke_invite`
 - [ ] Update `casino/dal/table.py:update_table()` to support new flags:
   - `invite_only` (boolean)
   - `invite_code` (string)
