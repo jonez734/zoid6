@@ -40,10 +40,17 @@ The `bed` daemon loads a router class dynamically via the `--router` argument. E
 ### Phase 3: bbsengine6 Updates
 
 - [ ] Remove `bbsengine6/common.py` - delete duplicate logentry()
-- [ ] Add WebSocket handler for bank (add to existing bbsengine6/bank/):
+- [ ] Convert `bbsengine6/bank.py` to proper subpackage:
+  - [ ] Create `bbsengine6/bank/__init__.py` - exports: Account, Transaction, Transfer, BankService
+  - [ ] Create `bbsengine6/bank/account.py` - Account class
+  - [ ] Create `bbsengine6/bank/transaction.py` - Transaction class
+  - [ ] Create `bbsengine6/bank/transfer.py` - Transfer class
+  - [ ] Delete old `bbsengine6/bank.py`
+  - [ ] Update all imports that reference `bbsengine6.bank`
+- [ ] Add WebSocket handler for bank:
   - [ ] Create `bbsengine6/bank/api/__init__.py`
   - [ ] Create `bbsengine6/bank/api/handler.py` - BankServiceHandler, MessageRouter
-- [ ] Add log_event() calls to bank operations in bbsengine6/bank.py:
+- [ ] Add log_event() calls to bank operations:
   - [ ] add_funds() - credit to account
   - [ ] remove_funds() - debit from account
   - [ ] transfer() - transfer request created
