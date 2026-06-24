@@ -192,6 +192,13 @@ The `bed` daemon loads a router class dynamically via the `--router` argument. E
 - [ ] Only invited/approved users can subscribe
 - [ ] Sysops see private channels in list (with indicator)
 
+#### Announce-Only Channels
+- [ ] Add `announce_only` flag to channel creation
+- [ ] Add `announcers` list to channel (monikers who can post)
+- [ ] Only annoucers can send messages to the channel
+- [ ] Anyone can subscribe and read (viewers)
+- [ ] Sysops are always announcers by default
+
 ---
 
 ## Testing
