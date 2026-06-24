@@ -57,32 +57,27 @@ The `bed` daemon loads a router class dynamically via the `--router` argument. E
   - [ ] approve_transfer()
   - [ ] reject_transfer()
 
-### Phase 4: empyre Package
+### Phase 4: empyre Package (ADD - already exists, add WebSocket handler)
 
-- [ ] Create `/home/opencode/data/work/empyre/src/empyre/` directory
-- [ ] Create `empyre/src/empyre/__init__.py`
-- [ ] Create `empyre/src/empyre/api/__init__.py`
-- [ ] Create `empyre/src/empyre/api/handler.py` - MessageRouter for empyre services
-- [ ] Create `empyre/pyproject.toml`
+- [ ] Add `empyre/src/empyre/api/__init__.py` - exists, add if needed
+- [ ] Add `empyre/src/empyre/api/handler.py` - MessageRouter for empyre WebSocket services
+- [ ] Keep existing `__init__.py` intact (existing BBS functionality)
+- [ ] Create `empyre/pyproject.toml` if needed
 - [ ] Create empyre test files
 
-### Phase 5: mistermcfeely Package (postoffice)
+### Phase 5: mistermcfeely Package (postoffice) (ADD)
 
-- [ ] Create `/home/opencode/data/work/mistermcfeely/src/mistermcfeely/` directory
-- [ ] Create `mistermcfeely/src/mistermcfeely/__init__.py`
-- [ ] Create `mistermcfeely/src/mistermcfeely/api/__init__.py`
-- [ ] Create `mistermcfeely/src/mistermcfeely/api/handler.py` - MessageRouter for postoffice
+- [ ] Add `mistermcfeely/src/mistermcfeely/api/__init__.py` - exists, add if needed
+- [ ] Add `mistermcfeely/src/mistermcfeely/api/handler.py` - MessageRouter for postoffice
 - [ ] Move `casino/services/postoffice.py` to `mistermcfeely/services/`
-- [ ] Create `mistermcfeely/pyproject.toml`
+- [ ] Create `mistermcfeely/pyproject.toml` if needed
 - [ ] Create mistermcfeely test files
 
-### Phase 6: murdermotel Package
+### Phase 6: murdermotel Package (ADD)
 
-- [ ] Create `/home/opencode/data/work/murdermotel/src/murdermotel/` directory
-- [ ] Create `murdermotel/src/murdermotel/__init__.py`
-- [ ] Create `murdermotel/src/murdermotel/api/__init__.py`
-- [ ] Create `murdermotel/src/murdermotel/api/handler.py` - MessageRouter for murdermotel
-- [ ] Create `murdermotel/pyproject.toml`
+- [ ] Add `murdermotel/src/murdermotel/api/__init__.py` - exists, add if needed
+- [ ] Add `murdermotel/src/murdermotel/api/handler.py` - MessageRouter for murdermotel
+- [ ] Create `murdermotel/pyproject.toml` if needed
 - [ ] Create murdermotel test files
 
 ### Phase 7: zoid6 Package
