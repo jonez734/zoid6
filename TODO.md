@@ -1,5 +1,9 @@
 # Zoid6 Project Plan
 
+## BED bearer token
+
+- [ ] See `bed/TODO.md` "Bearer token" — adopt `bed.api.auth.AuthService` for BED-mode authentication and reconnect. Replaces per-game `auth` implementations. Zoid6 benefits strongly: dashboard / shared-wallet / chat clients that stay open for hours.
+
 ## Overview
 
 Create a modular architecture where each BBS module (casino, empyre, murdermotel, postoffice, bank) can run independently or together via a unified router.
