@@ -50,23 +50,23 @@ The `bed` daemon loads a router class dynamically via the `--router` argument. E
 
 ### Phase 3: bbsengine6 Updates
 
-- [ ] Remove `bbsengine6/common.py` - delete duplicate logentry()
-- [ ] Convert `bbsengine6/bank.py` to proper subpackage:
-  - [ ] Create `bbsengine6/bank/__init__.py` - exports: Account, Transaction, Transfer, BankService
-  - [ ] Create `bbsengine6/bank/account.py` - Account class
-  - [ ] Create `bbsengine6/bank/transaction.py` - Transaction class
-  - [ ] Create `bbsengine6/bank/transfer.py` - Transfer class
-  - [ ] Delete old `bbsengine6/bank.py`
-  - [ ] Update all imports that reference `bbsengine6.bank`
-- [ ] Add WebSocket handler for bank:
-  - [ ] Create `bbsengine6/bank/api/__init__.py`
-  - [ ] Create `bbsengine6/bank/api/handler.py` - BankServiceHandler, MessageRouter
-- [ ] Add log_event() calls to bank operations:
-  - [ ] add_funds() - credit to account
-  - [ ] remove_funds() - debit from account
-  - [ ] transfer() - transfer request created
-  - [ ] approve_transfer()
-  - [ ] reject_transfer()
+- [X] Remove `bbsengine6/common.py` - delete duplicate logentry()
+- [X] Convert `bbsengine6/bank.py` to proper subpackage:
+  - [X] Create `bbsengine6/bank/__init__.py` - exports: Account, Transaction, Transfer, BankService
+  - [X] Create `bbsengine6/bank/account.py` - Account class
+  - [X] Create `bbsengine6/bank/transaction.py` - Transaction class
+  - [X] Create `bbsengine6/bank/transfer.py` - Transfer class
+  - [X] Delete old `bbsengine6/bank.py`
+  - [X] Update all imports that reference `bbsengine6.bank`
+- [X] Add WebSocket handler for bank:
+  - [X] Create `bbsengine6/bank/api/__init__.py`
+  - [X] Create `bbsengine6/bank/api/handler.py` - BankServiceHandler, MessageRouter
+- [X] Add log_event() calls to bank operations:
+  - [X] add_funds() - credit to account
+  - [X] remove_funds() - debit from account
+  - [X] transfer() - transfer request created
+  - [X] approve_transfer()
+  - [X] reject_transfer()
 
 ### Phase 4: empyre Package (ADD - already exists, add WebSocket handler)
 
@@ -78,10 +78,10 @@ The `bed` daemon loads a router class dynamically via the `--router` argument. E
 
 ### Phase 5: mistermcfeely Package (postoffice) (ADD)
 
-- [ ] Add `mistermcfeely/src/mistermcfeely/api/__init__.py` - exists, add if needed
-- [ ] Add `mistermcfeely/src/mistermcfeely/api/handler.py` - MessageRouter for postoffice
-- [ ] Move `casino/services/postoffice.py` to `mistermcfeely/services/`
-- [ ] Create `mistermcfeely/pyproject.toml` if needed
+- [X] Add `mistermcfeely/src/postoffice/api/__init__.py` - exists, add if needed
+- [X] Add `mistermcfeely/src/postoffice/api/handler.py` - MessageRouter for postoffice
+- [X] Move `casino/services/postoffice.py` to `mistermcfeely/services/` (already in mistermcfeely/src/postoffice/service.py)
+- [X] Create `mistermcfeely/pyproject.toml` if needed (already exists)
 - [ ] Create mistermcfeely test files
 
 ### Phase 6: murdermotel Package (ADD)
@@ -290,6 +290,7 @@ The `bed` daemon loads a router class dynamically via the `--router` argument. E
 - [ ] Log full traceback for debugging
 - [ ] Allow modules to be reloaded without restarting entire daemon (via SIGHUP)
 - [ ] Implement health check endpoint to report which modules are active
+- [ ] Check if a MessageRouter with the same modulepath has already been registered, warn/error if duplicate
 
 ---
 
@@ -378,9 +379,140 @@ bed --router zoid6.api.handler.MessageRouter
 
 ---
 
+## Session Module and PlayerService
+
+### Phase 1: Database & Config
+
+- [ ] Update `bbsengine6/sql/session.sql` - add `module` column to `engine.__session`
+- [ ] Update `bed/src/bed/data/bed.json` - add `session` section with `expiry_minutes`
+- [ ] Update `zoid6/src/zoid6/data/bed.json` - add `session` section
+
+### Phase 2: bbsengine6 Session Module
+
+- [ ] Create `bbsengine6/services/session.py` - functional WebSocket session module
+  - [ ] `register_session(args, session_id, moniker, module, is_sysop)`
+  - [ ] `unregister_session(args, session_id)`
+  - [ ] `get_session(args, session_id)` - checks expiry, refreshes
+  - [ ] `get_moniker(args, session_id)`
+  - [ ] `get_module(args, session_id)`
+  - [ ] `get_is_sysop(args, session_id)`
+  - [ ] `set_module_data(args, session_id, key, value)`
+  - [ ] `get_module_data(args, session_id, key)`
+  - [ ] `add_to_collection(args, module, collection_name, key, session_id)`
+  - [ ] `remove_from_collection(args, module, collection_name, key, session_id)`
+  - [ ] `get_collection(args, module, collection_name, key)`
+  - [ ] `garbage_collect(args)`
+
+### Phase 3: Phase 1 Tests
+
+- [ ] `bbsengine6/py/tests/test_session_schema.py` - Schema tests
+  - [ ] test_module_column_exists
+  - [ ] test_session_insert_with_module
+  - [ ] test_session_select_module
+  - [ ] test_session_update_module
+  - [ ] test_session_view_includes_module
+- [ ] `bed/tests/test_session_config.py` - Config tests
+  - [ ] test_session_section_exists
+  - [ ] test_session_expiry_minutes_default
+  - [ ] test_session_config_loads
+  - [ ] test_env_override_session
+- [ ] `bbsengine6/py/tests/test_session_service.py` - Service tests
+  - [ ] test_register_session
+  - [ ] test_register_duplicate
+  - [ ] test_unregister_session
+  - [ ] test_get_session_valid
+  - [ ] test_get_session_expired
+  - [ ] test_get_session_not_found
+  - [ ] test_get_moniker
+  - [ ] test_get_module
+  - [ ] test_get_is_sysop
+  - [ ] test_set_module_data
+  - [ ] test_get_module_data
+  - [ ] test_add_to_collection
+  - [ ] test_get_collection
+  - [ ] test_remove_from_collection
+  - [ ] test_garbage_collect
+  - [ ] test_expiry_refreshed_on_access
+  - [ ] test_full_session_lifecycle
+  - [ ] test_module_isolation
+  - [ ] test_collection_tracks_sessions
+
+#### Phase 3: Integration Tests
+
+- [ ] Test session persists across multiple get_session calls
+- [ ] Test session expiry is extended on each access
+- [ ] Test garbage_collect removes only expired sessions
+- [ ] Test module data is isolated between different modules
+- [ ] Test collection operations work correctly with multiple sessions
+- [ ] Test bed.json session config is loaded correctly by bed daemon
+- [ ] Test session module integrates with bbsengine6 database module
+
+### Phase 4: casino Updates
+
+- [ ] Import `bbsengine6.services.session` instead of local SessionManager
+- [ ] Rename `MemberServiceHandler` → `PlayerServiceHandler`
+- [ ] Change message types: `member_*` → `player_*`
+  - [ ] `member_profile` → `player_profile`
+  - [ ] `member_update` → `player_update`
+  - [ ] `member_tier` → `player_tier`
+  - [ ] `member_referral_code` → `player_referral_code`
+  - [ ] `member_referrals` → `player_referrals`
+- [ ] Change response types: `member_*_result` → `player_*_result`
+- [ ] Add `module: "casino"` to all responses
+- [ ] Update `MessageRouter.member_service` → `player_service`
+- [ ] Update `register_all()` with new message types
+- [ ] Update tests in `casino/src/casino/tests/test_member_services.py`
+
+#### Phase 4: Integration Tests
+
+- [ ] Test PlayerServiceHandler handles player_profile message
+- [ ] Test PlayerServiceHandler handles player_update message
+- [ ] Test PlayerServiceHandler handles player_tier message
+- [ ] Test PlayerServiceHandler handles player_referral_code message
+- [ ] Test PlayerServiceHandler handles player_referrals message
+- [ ] Test response includes module: "casino"
+- [ ] Test old member_* message types return error or are rejected
+- [ ] Test casino session uses bbsengine6.services.session
+- [ ] Test module data (table_moniker) is stored correctly via set_module_data
+- [ ] Test channel subscriptions work with new session module
+- [ ] Test GameServiceHandler continues to work with PlayerServiceHandler changes
+- [ ] Test existing casino tests pass with new naming
+
+### Phase 5: empyre Updates
+
+- [ ] Import `bbsengine6.services.session` instead of local SessionManager
+- [ ] Create `PlayerServiceHandler` in `empyre/api/handler.py`
+- [ ] Create `empyre/services/player.py` - PlayerService for empyre player data
+  - [ ] Uses view `empyre.player` for SELECTs
+  - [ ] Uses table `empyre.__player` for INSERTs/UPDATEs
+- [ ] Add `player_service` to `MessageRouter`
+- [ ] Message types: `player_profile`, `player_update`, `player_tier`, `player_referral_code`, `player_referrals` + empyre-specific
+- [ ] Add `module: "empyre"` to all responses
+- [ ] Update tests in `empyre/src/tests/test_api_handler.py`
+
+#### Phase 5: Integration Tests
+
+- [ ] Test PlayerServiceHandler handles player_profile message
+- [ ] Test PlayerServiceHandler handles player_update message
+- [ ] Test PlayerServiceHandler handles player_tier message
+- [ ] Test PlayerServiceHandler handles player_referral_code message
+- [ ] Test PlayerServiceHandler handles player_referrals message
+- [ ] Test empyre player data (rank, turncount) is returned correctly
+- [ ] Test response includes module: "empyre"
+- [ ] Test empyre session uses bbsengine6.services.session
+- [ ] Test module data (island_moniker) is stored correctly via set_module_data
+- [ ] Test empyre player view is used for SELECTs
+- [ ] Test empyre.__player table is used for INSERTs/UPDATEs
+- [ ] Test channel subscriptions work with new session module
+- [ ] Test empyre-specific player endpoints work (rank, combat stats, etc.)
+- [ ] Test existing empyre tests pass with new PlayerServiceHandler
+
+---
+
 ## What bbsengine6 Provides (Built-in)
 
 - `bbsengine6.services.member` - profile, tier, referrals
 - `bbsengine6.bank` - banking services
 - `bbsengine6.services.auth` - authentication
 - `bbsengine6.services.channel` - pub/sub messaging
+- `bbsengine6.services.session` - WebSocket session management
