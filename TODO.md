@@ -99,9 +99,11 @@ The `bed` daemon loads a router class dynamically via the `--router` argument. E
 - [X] Create `zoid6/src/zoid6/api/handler.py` - Unified MessageRouter
 - [X] Create `zoid6/src/zoid6/data/bed.json` - service configuration
 - [X] Use bbsengine6.module.get() in bed.py for router loading
-- [ ] Create `zoid6/Makefile` for development commands
-- [ ] Make zoid6 installable via `pip install -e zoid6/src`
-- [ ] Create zoid6 test files
+- [X] Create `zoid6/Makefile` for development commands
+- [X] Make zoid6 installable via `pip install -e zoid6/src`
+- [X] Create zoid6 test files
+
+**Implemented 2026-06-25:** Phase 7 complete. Added `zoid6/src/Makefile` with install/test/lint/clean targets. zoid6 is installable editable via `pip install -e zoid6/src`. Test suite: 42 tests in `zoid6/src/zoid6/tests/` (conftest.py, test_config.py, test_message_router.py) — all passing. Tests cover MessageRouter init/config load, register_all skipping disabled services, error handling (ImportError, AttributeError, generic), bbsengine6.module.load usage, get_config/get_enabled_services helpers, and bed.json schema validation.
 
 ---
 
