@@ -12,9 +12,7 @@ export SCSSLOADPATH = --load-path /home/opencode/data/work/zoid6/shared/skin/scs
 
 export SCSS = sass $(SCSSLOADPATH) --sourcemap=none --stop-on-error --trace --style expanded --update
 
-export RSYNC = rsync --chmod=Dg=rwxs,Fgu=rw,Fo=r --no-times --verbose --archive --update --backup --recursive --human-readable --checksum --rsh=ssh --delete-after --mkpath
-
-export
+export RSYNC = rsync --chmod=Dg=rwxs,Fgu=rw,Fo=r --no-times --verbose --archive --update --backup --recursive --human-readable --checksum --rsh=ssh --mkpath # --delete-after
 
 all:
 
@@ -22,12 +20,14 @@ clean:
 	-rm *~
 	$(MAKE) -C php clean
 	$(MAKE) -C shared clean
+	$(MAKE) -C markdown clean
 
-prod: shared
+prod: shared markdown
 #	python -m areyousure || (echo "aborted $$?"; exit 1)
 	mkdir -p $(STAGE)
 	$(MAKE) -C php stage
 	$(MAKE) -C smarty stage
+	$(MAKE) -C markdown stage
 	$(RSYNC) $(STAGE) $(PROD)
 
 shared:
@@ -41,6 +41,7 @@ backup:
 
 
 markdown:
-	$(RSYNC) markdown/ $(HOST):/srv/www/zoid6/markdown/
+	$(MAKE) -C markdown stage
+	$(RSYNC) --dry-run $(STAGE)markdown $(HOST):$(STAGE)
 
 .PHONY: markdown
