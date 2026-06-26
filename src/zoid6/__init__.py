@@ -1,4 +1,6 @@
 # zoid6 - Unified BBS module router
 # This package provides a unified MessageRouter that loads all BBS modules
 
-__version__ = "0.1.0"
+from zoid6._version import __version__
+
+__all__ = ["__version__"]
