@@ -21,3 +21,8 @@ version = { attr = "zoid6._version.__version__" }
 
 [tool.setuptools.package-data]
 zoid6 = ["data/*.json"]
+
+[tool.pytest.ini_options]
+markers = [
+    "integration: marks tests as integration tests (require sibling packages on sys.path)",
+]

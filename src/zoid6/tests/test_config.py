@@ -104,8 +104,22 @@ class TestBedJsonServices:
         assert services["postoffice"]["modulepath"] == "postoffice.api.handler"
 
     def test_disabled_services_skipped(self, services):
-        """empyre, murdermotel, mistermcfeely, postoffice are disabled by default."""
-        for name in ("empyre", "murdermotel", "mistermcfeely", "postoffice"):
+        """auth, member, empyre, murdermotel, mistermcfeely, postoffice are disabled by default.
+
+        auth and member are placeholder modulepaths reserved for future
+        implementation; they must remain disabled until real router modules
+        exist for them. ('channel' is enabled today even though its
+        modulepath does not yet resolve; that misconfiguration is exercised
+        by test_bed_startup.TestBedJsonStartup.test_module_load_import_error_does_not_crash.)
+        """
+        for name in (
+            "auth",
+            "member",
+            "empyre",
+            "murdermotel",
+            "mistermcfeely",
+            "postoffice",
+        ):
             assert services[name]["enabled"] is False, f"{name} should be disabled"
 
     def test_all_modulepaths_are_dotted(self, services):
