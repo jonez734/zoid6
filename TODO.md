@@ -973,3 +973,336 @@ uses) so the new `bed>=0.0.1.dev2026` dep resolves. The current
 test invocation in this repo's `Makefile` (`pytest zoid6/tests`)
 only imports zoid6, so the import-time check passes; the runtime
 declaration is enough to keep pip happy during install.
+
+---
+
+## `data/bed.json` — `bank` and `channel` modulepaths do not resolve
+
+### Problem
+
+`zoid6/src/zoid6/data/bed.json` declares two services with
+`enabled: true` whose `modulepath` strings do not import:
+
+| Service | `modulepath` in `bed.json` | Reality |
+|---|---|---|
+| `bank` | `bank.api.handler` | The bank package lives at `bbsengine6/bank/api/handler.py`. As a top-level `bank`, the path is not importable. `MessageRouter._register_module` logs `Failed to import bank: No module named 'bank'` and the casino-side `BankServiceHandler` is the one that actually wires `bank_balance` / `bank_add` / etc. |
+| `channel` | `channel.api.handler` | No `channel` package exists in `bbsengine6`, no top-level `channel/` sibling project, no `channel/api/handler.py` anywhere in the tree. Logs `Failed to import channel: No module named 'channel'` at every startup. |
+
+Net effect: the `bank` and `channel` enabled-true entries are dead
+config — they never register anything on the `WebSocketServer` because
+their modules don't exist. A reader of `bed.json` reasonably assumes
+"if it's enabled, it works."
+
+### Why this matters
+
+- **Misleading config.** The `enabled: true` flag is the contract
+  "this service runs at startup." Both currently lie.
+- **Startup noise.** Every `bed` startup emits two traceback
+  blocks (`importlib` failures) to the log, which obscures real
+  startup errors.
+- **Confusion for new modules.** A future contributor adding a
+  real `channel` package to `bbsengine6` would reasonably expect
+  `bed.json` to start picking it up; today it would, silently,
+  if they also fix the `modulepath`. But the channel service
+  itself is unimplemented (see `bbsengine6/TODO.md` Phase 7
+  channel work), so flipping the `modulepath` to a not-yet-existing
+  path is premature.
+- **The casino's `BankServiceHandler` already covers the
+  bank-balance / transfer message types** (see
+  `casino/src/casino/api/handler.py:1352-1356`). The `bank`
+  entry in `zoid6/bed.json` was likely an early placeholder
+  before casino absorbed it. If a real `bbsengine6.bank.api`
+  service is the desired replacement, the `modulepath` should
+  be `bbsengine6.bank.api.handler` and the casino's
+  `BankServiceHandler` should defer to it.
+
+### Fix options
+
+#### Option A — disable both until they exist
+
+Set `bank.enabled` and `channel.enabled` to `false` in
+`zoid6/src/zoid6/data/bed.json`. The casino's own
+`BankServiceHandler` continues to register `bank_*` messages;
+nothing changes at runtime. The JSON's `services` section
+remains a complete roadmap of every service zoid6 intends to
+host, but only the ones with working code paths are flipped on.
+
+- **Pros:** Smallest change. No code touched. Eliminates the
+  misleading `enabled: true`. No startup noise.
+- **Cons:** A future contributor has to remember to flip them
+  on when the real modules land.
+
+#### Option B — fix the `bank` modulepath, leave `channel` disabled
+
+Change `zoid6/src/zoid6/data/bed.json` so `bank.modulepath` is
+`bbsengine6.bank.api.handler` (the path that actually
+resolves). `channel` stays disabled until the `channel`
+service is implemented.
+
+- **Pros:** The bank message types are registered from a single
+  source (`bbsengine6.bank.api.handler.BankServiceHandler`).
+  Casino's own `BankServiceHandler` becomes redundant or
+  defers to the bbsengine6 one.
+- **Cons:** Requires deciding what happens when both register
+  `bank_balance` — last writer wins, same as the casino vs.
+  bed `auth` collision today. Currently casino's wins because
+  it registers after bbsengine6's.
+
+#### Option C — fix the `modulepath`s and de-duplicate registrations
+
+Same as B for the JSON, plus a follow-up to make
+`bbsengine6.bank.api.handler.MessageRouter.register_all`
+idempotent (skip if `bank_balance` is already registered) so
+the casino side can safely defer to it. Equivalent work for
+`channel` when it lands.
+
+- **Pros:** Cleanest end state. One source of truth for the
+  bank message types.
+- **Cons:** Cross-repo refactor (casino + bbsengine6 + zoid6
+  all change).
+
+### Recommendation: A for v1, B as a follow-up
+
+`channel` does not exist as a module today, so it stays
+disabled until the channel service lands. `bank` is a one-line
+JSON fix to point at `bbsengine6.bank.api.handler`, but only
+land it after deciding whether to keep the casino-side
+`BankServiceHandler` or defer to `bbsengine6.bank.api`.
+
+### Tasks
+
+- [ ] **Disable `bank` and `channel` in
+  `zoid6/src/zoid6/data/bed.json`** (Option A). One-line each:
+  `"enabled": false`.
+- [ ] **Verify** by running
+  `bed --router zoid6.api.handler.MessageRouter --debug` and
+  confirming the `Failed to import bank` / `Failed to import
+  channel` lines are gone from the startup log.
+- [ ] **Update `zoid6/src/zoid6/tests/test_config.py`** — the
+  `test_disabled_services_skipped` assertion list (line 121)
+  currently only includes `auth`, `member`, `empyre`,
+  `murdermotel`, `mistermcfeely`, `postoffice`. Add `bank` and
+  `channel` to the list when Option A lands.
+- [ ] **Update `zoid6/src/zoid6/tests/test_bed_startup.py`**
+  `test_register_all_loads_every_enabled_service` and
+  `test_register_all_does_not_load_disabled_services` — they
+  currently derive the enabled set from the JSON dynamically,
+  so they pick up the change automatically; no edit needed
+  beyond a re-run.
+- [ ] **Cross-reference to `bbsengine6/TODO.md`** Phase 7
+  channel-service work — when that lands, flip
+  `channel.enabled` to `true` and set `channel.modulepath`
+  to the real path.
+- [ ] **Open question (defer to casino follow-up):** if
+  `bbsengine6.bank.api.handler` is the desired single source
+  of truth for bank message types, casino's
+  `BankServiceHandler` (`casino/src/casino/api/handler.py:1352`)
+  should be removed (or made a no-op forwarder). Tracked
+  separately in `casino/TODO.md` under a new
+  "Defer bank to bbsengine6" section.
+
+**Future rework cross-reference:** the "Failed to import
+bank" warning at startup will resolve naturally as part of
+the casino's "Rework: route per-hand money through the bank"
+plan (see `casino/TODO.md`). The zoid6 unified router's bank
+modulepath must be loadable for that rework to land, since
+the rework makes the bank load-bearing rather than
+operator-only.
+
+### Cross-references
+
+- `zoid6/src/zoid6/tests/test_bed_startup.py` — the new
+  `TestBedStartupIntegration` tests pass `modulepath="bank.api.handler"`
+  to `bbsmodule.load` and assert `Failed to import bank` shows
+  up in `capsys.readouterr()`. After Option A lands, the
+  integration test still passes (the import is now skipped,
+  not failed) but the assertion no longer matches the real
+  log. Update the test to either assert no "Failed to
+  import" lines for `bank`/`channel`, or drop the assertion
+  entirely.
+- `casino/src/casino/api/handler.py:1352-1356` — casino's
+  `BankServiceHandler` registers the same `bank_*` message
+  types that `bbsengine6.bank.api.handler` would. De-duplication
+  decision lives in `casino/TODO.md`.
+- `bbsengine6/TODO.md` Phase 7 — channel service design.
+
+---
+
+## zoid6 unified router: bank modulepath collision (file as separate task)
+
+`zoid6/src/zoid6/data/bed.json` declares a `bank` service
+with `modulepath: "bank.api.handler"`, but the bank package
+lives at `bbsengine6.bank`, not at the top-level `bank`
+namespace. At zoid6 startup, this produces the warning:
+
+```
+Failed to import bank: No module named 'bank'
+```
+
+The casino's own `BankServiceHandler` covers the bank
+message types on the wire (visible in the registered
+services list at startup), so the warning is currently
+non-fatal. But the bank service is `enabled: true` in
+`bed.json` and is intended to be loaded by the zoid6
+unified router; the failure is a real configuration
+mismatch, not a benign log line.
+
+This is filed as a **separate, independently-actionable
+task** so it can be addressed without waiting on the larger
+casino "Rework" plan. The two are related but not blocking
+on each other.
+
+### Tasks
+
+- [ ] **Decide: top-level `bank` package vs
+  `bbsengine6.bank` modulepath.** Either (a) ship a
+  top-level `bank` package (perhaps a thin wrapper that
+  re-exports `bbsengine6.bank` so the modulepath resolves),
+  or (b) update `zoid6/src/zoid6/data/bed.json` to use
+  `bbsengine6.bank.api.handler` as the modulepath.
+- [ ] **Verify after fix.** `python -m bed.main --config
+  /home/opencode/data/work/zoid6/src/zoid6/data/bed.json
+  --router zoid6.api.handler.MessageRouter ...` should
+  start with **no** "Failed to import bank" warning.
+- [ ] **Document the resolution in the bank/handler entry
+  above** (under "Open question" or as a new sub-bullet).
+
+### Cross-references
+
+- `bbsengine6/TODO.md` Phase 7 — bank package restructure.
+- `casino/TODO.md` "Rework: route per-hand money through
+  the bank" — the casino-side rework makes this warning
+  load-bearing rather than noise, so resolving it is a
+  prerequisite for that rework.
+
+---
+
+## `zoid6.api.handler.MessageRouter` does not register `list_services`
+
+### Problem
+
+`zoid6/src/zoid6/api/handler.py:13` `MessageRouter` loads every
+enabled service from `data/bed.json` via
+`MessageRouter.register_all`, but **does not register a
+`list_services` handler itself.** A client that sends
+`{"type": "list_services"}` to a bed instance fronted by the
+zoid6 router gets back
+`{"type": "error", "code": "no_handler", "message": "No handler for message type: list_services"}`.
+
+The zoid6 router is the production path; `bed.json` ships
+with it as the implicit default for any deployment that wants
+the unified message set (auth, ping, list_tables, hit, stand,
+bank_*, …). All of those work; `list_services` does not.
+
+Compare with `bbsengine6.net.defaultrouter.DefaultRouter`
+(`bbsengine6/py/src/bbsengine6/net/defaultrouter.py:15-17`),
+which registers `["auth", "ping", "list_services"]`, and with
+`zoid6.api.monikerrouter.MonikerAuthRouter`
+(`zoid6/src/zoid6/api/monikerrouter.py:25-26`), which does
+the same. The two smaller routers are developer-facing and
+are expected to expose the discovery primitive; the unified
+router isn't, but the asymmetry shows up the moment a
+diagnostic tool (a `wscat` smoke script, the `casino-client`,
+a bot, the `bed ping` console script in
+`bed/src/bed/tools/ping.py`) tries to enumerate what's
+actually registered.
+
+### Why this matters
+
+- **`bed ping`** (`bed/src/bed/tools/ping.py`) connects, sends
+  `ping` (which works), then sends `list_services` to print
+  the registered message types. Against a zoid6-router bed it
+  fails with `no_handler`. The smoke test in
+  `/tmp/bed-logs/smoke.py` (written during the bed+casino
+  bring-up on 2026-06-28) hits this exact failure.
+- **`casino-client` startup** at
+  `casino/src/casino/client/casino_client.py:38-49` doesn't
+  call `list_services` itself, but the user's
+  `casino-client`-testing workflow often starts with
+  `list_services` to confirm the server is the right one
+  (zoid6 unified vs. bare casino vs. dev DefaultRouter).
+- **General client UX.** Listing registered services is the
+  standard "what can I send?" probe. Hiding it on the
+  production router makes the system harder to debug.
+
+### Fix options
+
+#### Option A — register a `list_services` handler in the zoid6 `MessageRouter`
+
+Add a tiny `ListServicesService` (or inline closure) to
+`zoid6/src/zoid6/api/handler.py` that returns
+`{"type": "services", "services": [k for k in
+self.server._services.keys()]}` (matching the shape used by
+`bbsengine6.net.defaultrouter.DefaultRouter._handle_list_services`).
+Register it via
+`self.server.register_service(self, ["list_services"])` in
+`MessageRouter.register_all` (or via a dedicated
+`register_default_services` method called first).
+
+- **Pros:** Matches the behavior of the smaller routers.
+  Zero new dependencies. One file changed.
+- **Cons:** Slight duplication of the `defaultrouter`
+  implementation. The `bbsengine6.net.WebSocketServer`
+  already has a `list_services()` method
+  (`bbsengine6/net/transport.py:497-504`) that returns the
+  same data — the new handler is just a thin
+  message-type wrapper around it.
+
+#### Option B — move the `list_services` handler to `bbsengine6.net.WebSocketServer` itself
+
+Have `WebSocketServer.dispatch_message` (or a new
+`WebSocketServer.handle_list_services` method) answer
+`list_services` directly, with no router involvement.
+
+- **Pros:** Removes the per-router duplication. The
+  `DefaultRouter` and `MonikerAuthRouter` could drop their
+  `list_services` registrations.
+- **Cons:** Cross-repo change (`bbsengine6`); affects every
+  router, not just zoid6. Larger blast radius.
+
+### Recommendation: A
+
+The duplication is one method; A is the lower-risk change
+and unblocks the `bed ping` / `casino-client` smoke
+workflow today. B is the right long-term move but is its
+own refactor.
+
+### Tasks
+
+- [ ] **Add a `ListServicesService` to
+  `zoid6/src/zoid6/api/handler.py`** (Option A). Either as
+  a tiny class or as a closure in
+  `MessageRouter.register_all`. Wire shape matches
+  `DefaultRouter._handle_list_services`:
+  `{"type": "services", "services": [str, ...]}`.
+- [ ] **Register it first** in `MessageRouter.register_all`
+  (before any `bbsmodule.load` call) so it's available even
+  if every enabled service in `bed.json` fails to import.
+- [ ] **Update `zoid6/src/zoid6/tests/test_bed_startup.py`**
+  `test_real_websocketserver_receives_registrations` to
+  also assert `"list_services"` is in
+  `server.list_services()` keys.
+- [ ] **Update `test_real_server_has_casino_message_types`** —
+  add `"list_services"` to the `expected_subset` set.
+- [ ] **Re-run the smoke test** at `/tmp/bed-logs/smoke.py`
+  and confirm `list_services` returns the 56-message-type
+  list instead of `no_handler`.
+- [ ] **Update `casino-client`** (or document the
+  discovery) so a user can call `list_services` to confirm
+  the server before authenticating.
+
+### Cross-references
+
+- `bbsengine6/py/src/bbsengine6/net/defaultrouter.py:15-58`
+  — the reference implementation that already does this for
+  the dev router. Copy its `services` shape verbatim.
+- `zoid6/src/zoid6/api/monikerrouter.py:25-26` — the
+  example router also registers `list_services`. Mirrors the
+  same fix.
+- `bed/src/bed/tools/ping.py` — the `bed ping` console
+  script, which is the primary user of `list_services` in
+  the CLI tooling.
+- `casino/src/casino/client/casino_client.py:38-49` — the
+  casino-client's connection entry point; the smoke-test
+  workflow next to it expects `list_services` to work.
+
