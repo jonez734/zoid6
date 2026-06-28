@@ -7,6 +7,8 @@ from bbsengine6 import module as bbsmodule
 import json
 from pathlib import Path
 
+from zoid6.api.monikerrouter import MonikerAuthRouter  # noqa: F401
+
 
 class MessageRouter:
     """Unified MessageRouter that loads all enabled BBS module routers."""

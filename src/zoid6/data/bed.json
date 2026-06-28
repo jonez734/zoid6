@@ -17,12 +17,12 @@
       "description": "Member service (profile, tier, referrals)"
     },
     "bank": {
-      "enabled": false,
+      "enabled": true,
       "modulepath": "bank.api.handler",
       "description": "Banking service (balance, transfers, history)"
     },
     "channel": {
-      "enabled": false,
+      "enabled": true,
       "modulepath": "channel.api.handler",
       "description": "Channel service (pub/sub messaging, channels)"
     },

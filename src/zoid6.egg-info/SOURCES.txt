@@ -1,5 +1,6 @@
 pyproject.toml
 zoid6/__init__.py
+zoid6/_version.py
 zoid6.egg-info/PKG-INFO
 zoid6.egg-info/SOURCES.txt
 zoid6.egg-info/dependency_links.txt
@@ -7,4 +8,10 @@ zoid6.egg-info/requires.txt
 zoid6.egg-info/top_level.txt
 zoid6/api/__init__.py
 zoid6/api/handler.py
+zoid6/api/monikerrouter.py
 zoid6/data/bed.json
+zoid6/tests/__init__.py
+zoid6/tests/conftest.py
+zoid6/tests/test_config.py
+zoid6/tests/test_message_router.py
+zoid6/tests/test_monikerrouter.py
