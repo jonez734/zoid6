@@ -104,23 +104,37 @@ class TestBedJsonServices:
         assert services["postoffice"]["modulepath"] == "postoffice.api.handler"
 
     def test_disabled_services_skipped(self, services):
-        """auth, member, empyre, murdermotel, mistermcfeely, postoffice are disabled by default.
+        """auth, member, channel, empyre, murdermotel, mistermcfeely, postoffice
+        are disabled by default.
 
         auth and member are placeholder modulepaths reserved for future
         implementation; they must remain disabled until real router modules
-        exist for them. ('channel' is enabled today even though its
-        modulepath does not yet resolve; that misconfiguration is exercised
-        by test_bed_startup.TestBedJsonStartup.test_module_load_import_error_does_not_crash.)
+        exist for them. channel's modulepath does not yet resolve (the
+        channel service is unimplemented); it stays disabled until the
+        modulepath is updated. The 2026-06-28 zoid6 fix flipped channel
+        from enabled=true to enabled=false in data/bed.json. (bank was
+        previously enabled=true with a broken modulepath; the same fix
+        corrected the modulepath to bbsengine6.bank.api.handler, so bank
+        is now enabled and loadable, not disabled.)
         """
         for name in (
             "auth",
             "member",
+            "channel",
             "empyre",
             "murdermotel",
             "mistermcfeely",
             "postoffice",
         ):
             assert services[name]["enabled"] is False, f"{name} should be disabled"
+
+    def test_bank_modulepath_points_at_bbsengine6(self, services):
+        """bank's modulepath is bbsengine6.bank.api.handler (option b in
+        the zoid6 TODO). The bare 'bank.api.handler' path does not resolve
+        as a top-level module; the bbsengine6 bank package does."""
+        bank = services["bank"]
+        assert bank["enabled"] is True
+        assert bank["modulepath"] == "bbsengine6.bank.api.handler"
 
     def test_all_modulepaths_are_dotted(self, services):
         """All modulepaths use dot notation for import."""
