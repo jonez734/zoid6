@@ -10,38 +10,6 @@ from pathlib import Path
 from zoid6.api.monikerrouter import MonikerAuthRouter  # noqa: F401
 
 
-class _ListServicesService:
-    """Built-in `list_services` handler for the unified MessageRouter.
-
-    Mirrors the wire shape of
-    `bbsengine6.net.defaultrouter.DefaultRouter._handle_list_services`
-    and `zoid6.api.monikerrouter.MonikerAuthRouter._handle_list_services`,
-    but returns the *actual* registered services from the WebSocket server
-    (via `server._services.keys()`) instead of a hardcoded list. This
-    lets a client probe the runtime surface area before authenticating.
-
-    The handler is registered first in `MessageRouter.register_all` so it
-    is available even if every per-service module fails to import.
-    """
-
-    def __init__(self, server: Any) -> None:
-        self._server = server
-
-    async def handle_message(
-        self,
-        server: Any,
-        websocket: Any,
-        path: str,
-        message: Dict[str, Any],
-    ) -> Dict[str, Any]:
-        services = sorted(
-            self._server._services.keys()
-            if hasattr(self._server, "_services")
-            else []
-        )
-        return {"type": "services", "services": services}
-
-
 class MessageRouter:
     """Unified MessageRouter that loads all enabled BBS module routers."""
 
@@ -61,14 +29,12 @@ class MessageRouter:
     def register_all(self, server: Any) -> None:
         """Register all enabled module services with the WebSocket server.
 
-        Order matters: the built-in `list_services` handler is registered
-        FIRST so that diagnostic clients (the `bed ping` console script,
-        a `wscat` smoke test, the `casino-client` bring-up workflow) can
-        probe the server's runtime surface area even when every per-
-        service module import in `bed.json` fails.
+        The built-in `list_services` handler lives on
+        `bbsengine6.net.WebSocketServer` itself (it has access to
+        the live `_services` dict, so a per-router copy is duplicate
+        state). Routers only need to register their own message types
+        here.
         """
-        self._register_default_services(server)
-
         services_config = self.config.get("services", {})
 
         for module_name, module_config in services_config.items():
@@ -80,11 +46,6 @@ class MessageRouter:
                 continue
 
             self._register_module(module_name, module_config, server)
-
-    def _register_default_services(self, server: Any) -> None:
-        """Register built-in services the unified router must always expose."""
-        service = _ListServicesService(server)
-        server.register_service(service, ["list_services"])
 
     def _register_module(self, module_name: str, module_config: Dict[str, Any], server: Any) -> None:
         """Register a single module's services."""

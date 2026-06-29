@@ -23,7 +23,7 @@ class MonikerAuthRouter:
         self.sessions: Dict[int, Dict[str, Any]] = {}
 
     def register_all(self, server: Any) -> None:
-        server.register_service(self, ["auth", "ping", "list_services"])
+        server.register_service(self, ["auth", "ping"])
 
     async def handle_message(
         self, server: Any, websocket: Any, path: str, message: Dict[str, Any]
@@ -35,8 +35,6 @@ class MonikerAuthRouter:
             return await self._handle_auth(websocket, message)
         elif msg_type == "ping":
             return await self._handle_ping()
-        elif msg_type == "list_services":
-            return await self._handle_list_services()
 
         return None
 
@@ -113,10 +111,3 @@ class MonikerAuthRouter:
     async def _handle_ping(self) -> Dict[str, Any]:
         """Handle ping message."""
         return {"type": "pong"}
-
-    async def _handle_list_services(self) -> Dict[str, Any]:
-        """Handle list_services message."""
-        return {
-            "type": "services",
-            "services": ["auth", "ping", "list_services"],
-        }

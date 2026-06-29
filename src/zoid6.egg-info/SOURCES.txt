@@ -12,6 +12,7 @@ zoid6/api/monikerrouter.py
 zoid6/data/bed.json
 zoid6/tests/__init__.py
 zoid6/tests/conftest.py
+zoid6/tests/test_bed_startup.py
 zoid6/tests/test_config.py
 zoid6/tests/test_message_router.py
 zoid6/tests/test_monikerrouter.py

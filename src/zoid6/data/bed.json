@@ -18,11 +18,11 @@
     },
     "bank": {
       "enabled": true,
-      "modulepath": "bank.api.handler",
+      "modulepath": "bbsengine6.bank.api.handler",
       "description": "Banking service (balance, transfers, history)"
     },
     "channel": {
-      "enabled": true,
+      "enabled": false,
       "modulepath": "channel.api.handler",
       "description": "Channel service (pub/sub messaging, channels)"
     },

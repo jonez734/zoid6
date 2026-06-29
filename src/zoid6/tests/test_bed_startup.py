@@ -338,12 +338,14 @@ class TestBedJsonStartup:
             assert isinstance(svc["modulepath"], str)
             assert "." in svc["modulepath"]
 
-    def test_register_all_registers_list_services_first(
+    def test_register_all_does_not_register_list_services(
         self, mock_args, mock_server
     ):
-        """register_all calls server.register_service with a list_services
-        handler BEFORE the bbsmodule.load loop, so the handler survives
-        even if every per-service module fails to import."""
+        """zoid6's MessageRouter does NOT register its own list_services
+        handler. The bbsengine6.net.WebSocketServer answers list_services
+        directly via dispatch_message (added in 2026-06-28) so any router
+        that registers a copy is duplicate state. This test pins that
+        the unified router's register_all is silent on list_services."""
         from zoid6.api.handler import MessageRouter
 
         router = MessageRouter(mock_args)
@@ -354,55 +356,71 @@ class TestBedJsonStartup:
         ):
             router.register_all(mock_server)
 
-        # The default-services call happens first; mock_server.register_service
-        # records the call args. The first call's service should be the
-        # _ListServicesService instance, and the message_types list should
-        # contain "list_services".
-        assert mock_server.register_service.called
-        first_call = mock_server.register_service.call_args_list[0]
-        service_obj, message_types = first_call.args
-        assert message_types == ["list_services"]
-        assert service_obj.__class__.__name__ == "_ListServicesService"
-        # And the registered service is still present on the mock server
-        # even though every bbsmodule.load raised. We assert via the call
-        # args (the mock's auto-attrs are themselves MagicMocks).
+        # The mock server's register_service was never called for
+        # "list_services" (the loop didn't load any services either,
+        # so no calls at all). What we care about: no router-level
+        # service claims list_services.
         all_message_types = {
             mt
             for call in mock_server.register_service.call_args_list
             for mt in call.args[1]
         }
-        assert "list_services" in all_message_types
+        assert "list_services" not in all_message_types
 
-    def test_list_services_handler_returns_actual_keys(
+    def test_websocketserver_answers_list_services_directly(
         self, mock_args, mock_server
     ):
-        """The _ListServicesService handler returns the live keys from
-        server._services, sorted, not a hardcoded list."""
-        from zoid6.api.handler import MessageRouter
+        """bbsengine6.net.WebSocketServer.dispatch_message answers
+        list_services directly, returning the live _services keys."""
+        from bbsengine6.net import WebSocketServer
 
-        mock_server._services = {
+        server = WebSocketServer(host="127.0.0.1", port=0)
+        server._services = {
             "auth": object(),
             "ping": object(),
             "list_tables": object(),
         }
-        router = MessageRouter(mock_args)
-        router.register_all(mock_server)
-
-        # The first registered service is the list_services handler.
-        service_obj, _ = mock_server.register_service.call_args_list[0].args
-        # Drive the async handle_message method via asyncio.run.
         import asyncio
-
         reply = asyncio.run(
-            service_obj.handle_message(
-                server=mock_server,
+            server.dispatch_message(
                 websocket=MagicMock(),
                 path="/",
                 message={"type": "list_services"},
             )
         )
-        assert reply["type"] == "services"
-        assert reply["services"] == ["auth", "list_tables", "ping"]
+        assert reply == {
+            "type": "services",
+            "services": ["auth", "list_tables", "ping"],
+        }
+
+    def test_websocketserver_list_services_survives_total_load_failure(
+        self, mock_args, mock_server
+    ):
+        """list_services is answered by the server itself, so it works
+        even if every router fails to register anything. This is the
+        primary use case: a client wants to know what the server
+        supports before authenticating."""
+        from bbsengine6.net import WebSocketServer
+        from zoid6.api.handler import MessageRouter
+
+        server = WebSocketServer(host="127.0.0.1", port=0)
+        router = MessageRouter(mock_args)
+        with patch(
+            "zoid6.api.handler.bbsmodule.load",
+            side_effect=ImportError("simulated missing module"),
+        ):
+            router.register_all(server)
+
+        # No services registered, but list_services still works.
+        import asyncio
+        reply = asyncio.run(
+            server.dispatch_message(
+                websocket=MagicMock(),
+                path="/",
+                message={"type": "list_services"},
+            )
+        )
+        assert reply == {"type": "services", "services": []}
 
 
 # ---------------------------------------------------------------------------
@@ -446,13 +464,20 @@ class TestBedStartupIntegration:
         assert len(services) > 0, (
             f"no services registered; got {services!r}"
         )
-        # The built-in list_services handler is registered first in
-        # MessageRouter.register_all, before any bbsmodule.load. It must
-        # always be present, even if every enabled service failed to
-        # import.
-        assert "list_services" in services, (
-            f"list_services missing from list_services(); got {sorted(services.keys())}"
+        # 'list_services' itself is NOT in server.list_services() because
+        # the WebSocketServer answers it directly without registering
+        # a service for it. To confirm list_services works, drive
+        # dispatch_message and check the reply.
+        import asyncio
+        reply = asyncio.run(
+            server.dispatch_message(
+                websocket=MagicMock(),
+                path="/",
+                message={"type": "list_services"},
+            )
         )
+        assert reply["type"] == "services"
+        assert isinstance(reply["services"], list)
 
     def test_real_server_has_casino_message_types(self, mock_args):
         """If casino.api.handler is importable, its message types are present."""
@@ -471,8 +496,11 @@ class TestBedStartupIntegration:
         services = server.list_services()
         # Spot-check a representative slice of casino's registered types.
         # These names come directly from casino/api/handler.py:1342-1389.
+        # 'auth' and 'ping' are answered by the WebSocketServer directly
+        # (auth via the auth service registered by MonikerAuthRouter and
+        # ping via the WebSocketServer's built-in handler, not casino),
+        # so they are not in casino's service registry.
         expected_subset = {
-            "auth", "ping",
             "list_tables", "join_table", "leave_table",
             "hit", "stand", "double", "split", "surrender",
             "bet",
