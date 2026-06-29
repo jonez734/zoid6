@@ -27,7 +27,12 @@ class TestMonikerAuthRouterRegistration:
     def test_register_all_registers_expected_services(
         self, router_args, mock_server
     ):
-        """register_all registers auth, ping, list_services with the server."""
+        """register_all registers auth, ping with the server.
+
+        list_services is NOT registered here; it is answered directly by
+        bbsengine6.net.WebSocketServer.dispatch_message (added in 2026-06-28).
+        The router must not register its own copy.
+        """
         from zoid6.api.monikerrouter import MonikerAuthRouter
 
         router = MonikerAuthRouter(router_args)
@@ -36,22 +41,24 @@ class TestMonikerAuthRouterRegistration:
         mock_server.register_service.assert_called_once()
         args, _ = mock_server.register_service.call_args
         assert args[0] is router
-        assert args[1] == ["auth", "ping", "list_services"]
+        assert args[1] == ["auth", "ping"]
 
-    @pytest.mark.parametrize("msg_type", ["auth", "ping", "list_services"])
+    @pytest.mark.parametrize("msg_type", ["auth", "ping"])
     def test_handle_message_dispatches_known_types(
         self, router_args, mock_server, msg_type
     ):
-        """handle_message routes known types to their handlers."""
+        """handle_message routes known types to their handlers.
+
+        list_services is not in this set; the WebSocketServer answers it
+        directly without going through any router.
+        """
         from zoid6.api.monikerrouter import MonikerAuthRouter
 
         router = MonikerAuthRouter(router_args)
         with patch.object(router, "_handle_auth", new=AsyncMock()) as mock_auth, \
-             patch.object(router, "_handle_ping", new=AsyncMock()) as mock_ping, \
-             patch.object(router, "_handle_list_services", new=AsyncMock()) as mock_list:
+             patch.object(router, "_handle_ping", new=AsyncMock()) as mock_ping:
             mock_auth.return_value = {"type": "auth_result"}
             mock_ping.return_value = {"type": "pong"}
-            mock_list.return_value = {"type": "services"}
 
             result = asyncio.run(
                 router.handle_message(mock_server, MagicMock(), "/", {"type": msg_type})
@@ -63,18 +70,20 @@ class TestMonikerAuthRouterRegistration:
         elif msg_type == "ping":
             mock_ping.assert_awaited_once()
             assert result == {"type": "pong"}
-        elif msg_type == "list_services":
-            mock_list.assert_awaited_once()
-            assert result == {"type": "services"}
 
     def test_handle_message_unknown_type_returns_none(self, router_args, mock_server):
-        """Unknown message types return None and don't call handlers."""
+        """Unknown message types return None and don't call handlers.
+
+        list_services is no longer handled by the router; the
+        WebSocketServer.dispatch_message answers it before reaching
+        the router. An unknown type that survives the server's
+        built-in list_services check is just a real unknown.
+        """
         from zoid6.api.monikerrouter import MonikerAuthRouter
 
         router = MonikerAuthRouter(router_args)
         with patch.object(router, "_handle_auth", new=AsyncMock()) as mock_auth, \
-             patch.object(router, "_handle_ping", new=AsyncMock()) as mock_ping, \
-             patch.object(router, "_handle_list_services", new=AsyncMock()) as mock_list:
+             patch.object(router, "_handle_ping", new=AsyncMock()) as mock_ping:
             result = asyncio.run(
                 router.handle_message(mock_server, MagicMock(), "/", {"type": "wat"})
             )
@@ -82,10 +91,9 @@ class TestMonikerAuthRouterRegistration:
         assert result is None
         mock_auth.assert_not_awaited()
         mock_ping.assert_not_awaited()
-        mock_list.assert_not_awaited()
 
 
-class TestMonikerAuthRouterPingAndList:
+class TestMonikerAuthRouterPing:
     """Plain response handlers."""
 
     def test_ping_returns_pong(self, router_args):
@@ -93,16 +101,6 @@ class TestMonikerAuthRouterPingAndList:
 
         router = MonikerAuthRouter(router_args)
         assert asyncio.run(router._handle_ping()) == {"type": "pong"}
-
-    def test_list_services_returns_services(self, router_args):
-        from zoid6.api.monikerrouter import MonikerAuthRouter
-
-        router = MonikerAuthRouter(router_args)
-        result = asyncio.run(router._handle_list_services())
-        assert result == {
-            "type": "services",
-            "services": ["auth", "ping", "list_services"],
-        }
 
 
 class TestMonikerAuthRouterHandleAuthEmpty:
