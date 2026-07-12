@@ -22,7 +22,7 @@ clean:
 	$(MAKE) -C shared clean
 	$(MAKE) -C markdown clean
 
-prod: shared markdown
+prod: shared markdown parsedown-deploy
 #	python -m areyousure || (echo "aborted $$?"; exit 1)
 	mkdir -p $(STAGE)
 	$(MAKE) -C php stage
@@ -44,4 +44,10 @@ markdown:
 	$(MAKE) -C markdown stage
 	$(RSYNC) --dry-run $(STAGE)markdown $(HOST):$(STAGE)
 
-.PHONY: markdown
+parsedown-deploy:
+	mkdir -p /srv/www/markdown/
+	$(RSYNC) /home/opencode/data/work/bbsengine6/vendor/erusev/parsedown/Parsedown.php /srv/www/markdown/
+	$(RSYNC) /home/opencode/data/work/bbsengine6/vendor/erusev/parsedown-extra/ParsedownExtra.php /srv/www/markdown/
+	$(RSYNC) /srv/www/markdown/ $(HOST):/srv/www/markdown/
+
+.PHONY: markdown parsedown-deploy

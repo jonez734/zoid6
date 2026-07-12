@@ -16,6 +16,8 @@ namespace zoid6 {
 function bootstrap(array $paths = []): bool
 {
     $defaults = [
+        "/srv/markdown/",
+        "/srv/www/markdown/",
         "/srv/www/zoid6/php/",
     ];
 
