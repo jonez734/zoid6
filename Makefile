@@ -48,6 +48,9 @@ parsedown-deploy:
 	mkdir -p /srv/www/markdown/
 	$(RSYNC) /home/opencode/data/work/bbsengine6/vendor/erusev/parsedown/Parsedown.php /srv/www/markdown/
 	$(RSYNC) /home/opencode/data/work/bbsengine6/vendor/erusev/parsedown-extra/ParsedownExtra.php /srv/www/markdown/
-	$(RSYNC) /srv/www/markdown/ $(HOST):/srv/www/markdown/
+	$(RSYNC) /srv/www/markdown/ $(HOST):$(STAGE)
 
-.PHONY: markdown parsedown-deploy
+php-deploy:
+	$(MAKE) -C php stage
+
+.PHONY: markdown parsedown-deploy php-deploy

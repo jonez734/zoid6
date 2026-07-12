@@ -1,7 +1,7 @@
 <?php
 
 namespace {
-    require_once("/srv/www/bbsengine6/php/bootstrap.php");
+    require_once(__DIR__ . "/../../bbsengine6/php/bootstrap.php");
 }
 
 namespace zoid6 {
