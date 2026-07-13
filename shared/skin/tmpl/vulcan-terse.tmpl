@@ -18,7 +18,7 @@
   in
 <ul class="inlinelist commadelimited">
 {foreach $link.sigs as $sig}
-<li>{include file="breadcrumbs.tmpl" breadcrumbs=$crumb linklast=true itemprop=true}</li>
+<li>{include file="breadcrumbs.tmpl" breadcrumbs=$sig linklast=true itemprop=true}</li>
 {/foreach}
 </ul>
   {/if}
