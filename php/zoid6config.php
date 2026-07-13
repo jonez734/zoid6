@@ -24,7 +24,12 @@ if (defined('\config\SMARTYCOMPILEDTEMPLATESDIR')) {
     define("SMARTYCOMPILEDTEMPLATESDIR", \config\SMARTYCOMPILEDTEMPLATESDIR);
 }
 if (defined('\config\SMARTYPLUGINSDIR')) {
-    define("SMARTYPLUGINSDIR", \config\SMARTYPLUGINSDIR);
+    $plugins = \config\SMARTYPLUGINSDIR;
+    $bbsengine6smarty = "/srv/www/bbsengine6/smarty/";
+    if (is_array($plugins) && !in_array($bbsengine6smarty, $plugins)) {
+        $plugins[] = $bbsengine6smarty;
+    }
+    define("SMARTYPLUGINSDIR", $plugins);
 }
 
 // Shared URL constants - used by all zoid6 sites
