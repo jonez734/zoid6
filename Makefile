@@ -32,7 +32,7 @@ prod: shared markdown parsedown-deploy
 
 shared:
 	$(MAKE) -C shared stage
-	$(RSYNC) $(STAGEDOCROOT)shared/ $(PRODDOCROOT)shared/
+	$(RSYNC) --delete $(STAGEDOCROOT)shared/ $(PRODDOCROOT)shared/
 
 backup:
 	rsync --recursive --verbose --exclude=.venv . /run/media/jam/AEAB-CF37/projects/$(PROJECT)/
