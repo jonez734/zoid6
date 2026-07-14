@@ -73,7 +73,9 @@
 </head>
 {* scene + element + fadeIn classes required for smoothstate animations *}
 <body id="body" class="scene element fadeIn">
+{block name="pageheader"}
 {include file="pageheader.tmpl"}
+{/block}
 {include file="topbar.tmpl" data=$data|default:NULL}
 {include file="maturecontentwarning.tmpl"}
 {block name="content"}

@@ -1,0 +1,11 @@
+// _est2002.scss
+// Established year font styling
+
+@font-face {
+    font-family: estfont;
+    src: url("/shared/skin/fonts/BFTinyHand-Regular.otf");
+}
+
+.est2002 {
+    font-family: estfont;
+}

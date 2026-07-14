@@ -1,11 +1,8 @@
 // pageheader.scss
-// Default pageheader with est2002 enabled
-// Sites can override $pageheader-enable-est2002 before importing
+// Default pageheader with est2002
 
 @import "vars";
 @import "mixins";
-@import "fonts";
-
-$pageheader-enable-est2002: true;
 
 @import "pageheader-core";
+@import "est2002";
