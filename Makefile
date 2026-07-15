@@ -53,7 +53,7 @@ parsedown-deploy:
 php-deploy:
 	$(MAKE) -C php stage
 
-.PHONY: markdown parsedown-deploy php-deploy deploy
+.PHONY: markdown parsedown-deploy php-deploy deploy deploy-www
 
 deploy:
 	$(MAKE) -C shared stage
@@ -62,3 +62,6 @@ deploy:
 	$(RSYNC) smarty/*.php $(STAGE)smarty/
 	$(RSYNC) --delete $(STAGEDOCROOT)shared/ $(PRODDOCROOT)shared/
 	$(RSYNC) $(STAGE) $(PROD)
+
+deploy-www:
+	$(MAKE) -C sites/www prod
