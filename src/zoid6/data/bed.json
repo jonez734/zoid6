@@ -7,7 +7,7 @@
   "debug": false,
   "services": {
     "auth": {
-      "enabled": false,
+      "enabled": true,
       "modulepath": "auth.api.handler",
       "description": "Authentication service (login, logout, session management)"
     },
