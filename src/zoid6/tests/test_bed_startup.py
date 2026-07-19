@@ -317,26 +317,31 @@ class TestBedJsonStartup:
         assert po["mailboxes"] == []
 
     def test_placeholder_services_disabled(self, mock_args):
-        """auth and member are aspirational placeholders and must stay disabled.
+        """member is an aspirational placeholder and must stay disabled.
 
-        Flipping either to enabled=true without supplying a real modulepath
+        Flipping member to enabled=true without supplying a real modulepath
         is a misconfiguration; this test makes that mistake loud.
 
-        Note: 'channel' is enabled in bed.json today but its modulepath
-        ('channel.api.handler') does not yet resolve; that misconfiguration
-        is exercised separately by the
-        test_module_load_import_error_does_not_crash path.
+        auth is enabled (bed auth subsystem needs it), but its modulepath
+        ('auth.api.handler') does not resolve as a top-level module;
+        _register_module catches the ImportError gracefully and bed's
+        own AuthService (bed/api/auth.py) handles authentication.
         """
         from zoid6.api.handler import MessageRouter
 
         router = MessageRouter(mock_args)
-        for name in ("auth", "member"):
-            svc = router.config["services"][name]
-            assert svc["enabled"] is False, (
-                f"placeholder service {name!r} must remain disabled"
-            )
-            assert isinstance(svc["modulepath"], str)
-            assert "." in svc["modulepath"]
+
+        svc = router.config["services"]["member"]
+        assert svc["enabled"] is False, (
+            "placeholder service 'member' must remain disabled"
+        )
+        assert isinstance(svc["modulepath"], str)
+        assert "." in svc["modulepath"]
+
+        svc = router.config["services"]["auth"]
+        assert svc["enabled"] is True, (
+            "auth must be enabled for bed AuthService"
+        )
 
     def test_register_all_does_not_register_list_services(
         self, mock_args, mock_server
@@ -457,10 +462,10 @@ class TestBedStartupIntegration:
         services = server.list_services()
         assert isinstance(services, dict)
         # At least one enabled service must have produced registrations.
-        # bank.api.handler doesn't currently resolve as a top-level
-        # module, channel.api.handler doesn't exist at all, and
-        # casino.api.handler does. So we expect at minimum the casino
-        # registrations to land.
+        # bank resolves as bbsengine6.bank.api.handler, and
+        # casino.api.handler does too.  auth.api.handler is a placeholder
+        # that doesn't exist yet (handled gracefully via ImportError).
+        # So we expect at minimum the casino and bank registrations to land.
         assert len(services) > 0, (
             f"no services registered; got {services!r}"
         )
