@@ -13,7 +13,7 @@
     },
     "member": {
       "enabled": true,
-      "modulepath": "member.api.handler",
+      "modulepath": "bbsengine6.member.api.handler",
       "description": "Member service (profile, tier, referrals)"
     },
     "bank": {
@@ -23,7 +23,7 @@
     },
     "channel": {
       "enabled": true,
-      "modulepath": "channel.api.handler",
+      "modulepath": "bbsengine6.channel.api.handler",
       "description": "Channel service (pub/sub messaging, channels)"
     },
     "casino": {
