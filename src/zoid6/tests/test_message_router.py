@@ -87,9 +87,11 @@ class TestMessageRouterRegisterAll:
             router.register_all(mock_server)
             registered_names = [c.args[0] for c in mock_reg.call_args_list]
             assert "casino" in registered_names
+            assert "member" in registered_names
+            assert "channel" in registered_names
+            assert "postoffice" in registered_names
             assert "empyre" not in registered_names
             assert "murdermotel" not in registered_names
-            assert "postoffice" not in registered_names
             assert "mistermcfeely" not in registered_names
 
     def test_register_all_skips_non_dict_entries(self, mock_args, mock_server):

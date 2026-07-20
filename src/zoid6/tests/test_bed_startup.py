@@ -317,10 +317,14 @@ class TestBedJsonStartup:
         assert po["mailboxes"] == []
 
     def test_placeholder_services_disabled(self, mock_args):
-        """member is an aspirational placeholder and must stay disabled.
+        """empyre and murdermotel are aspirational placeholders and must stay
+        disabled.
 
-        Flipping member to enabled=true without supplying a real modulepath
+        Flipping these to enabled=true without supplying a real modulepath
         is a misconfiguration; this test makes that mistake loud.
+
+        member, channel, and postoffice are now enabled as standalone
+        services with their own handler modules.
 
         auth is enabled (bed auth subsystem needs it), but its modulepath
         ('auth.api.handler') does not resolve as a top-level module;
@@ -331,9 +335,9 @@ class TestBedJsonStartup:
 
         router = MessageRouter(mock_args)
 
-        svc = router.config["services"]["member"]
+        svc = router.config["services"]["empyre"]
         assert svc["enabled"] is False, (
-            "placeholder service 'member' must remain disabled"
+            "placeholder service 'empyre' must remain disabled"
         )
         assert isinstance(svc["modulepath"], str)
         assert "." in svc["modulepath"]
@@ -500,20 +504,13 @@ class TestBedStartupIntegration:
 
         services = server.list_services()
         # Spot-check a representative slice of casino's registered types.
-        # These names come directly from casino/api/handler.py:1342-1389.
-        # 'auth' and 'ping' are answered by the WebSocketServer directly
-        # (auth via the auth service registered by MonikerAuthRouter and
-        # ping via the WebSocketServer's built-in handler, not casino),
-        # so they are not in casino's service registry.
+        # Casino now only registers its own game/auth/chat services.
+        # bank, channel, member, and postoffice are standalone modules.
         expected_subset = {
             "list_tables", "join_table", "leave_table",
             "hit", "stand", "double", "split", "surrender",
             "bet",
             "chat_table", "chat_global", "emote",
-            "bank_balance", "bank_add", "bank_history",
-            "subscribe_channel", "unsubscribe_channel",
-            "check_mail",
-            "member_profile", "member_tier",
             "slot_spin",
             "yahtzee_roll", "yahtzee_score",
             "tictactoe_move", "tictactoe_resign",

@@ -104,30 +104,17 @@ class TestBedJsonServices:
         assert services["postoffice"]["modulepath"] == "postoffice.api.handler"
 
     def test_disabled_services_skipped(self, services):
-        """member, channel, empyre, murdermotel, mistermcfeely, postoffice
-        are disabled by default.
+        """empyre, murdermotel, mistermcfeely are disabled by default.
 
-        member is a placeholder modulepath reserved for future
-        implementation; it must remain disabled until a real router module
-        exists. channel's modulepath does not yet resolve (the channel
-        service is unimplemented); it stays disabled until the modulepath
-        is updated. The 2026-06-28 zoid6 fix flipped channel from
-        enabled=true to enabled=false in data/bed.json. (bank was
-        previously enabled=true with a broken modulepath; the same fix
-        corrected the modulepath to bbsengine6.bank.api.handler, so bank
-        is now enabled and loadable, not disabled.)
-
-        auth is enabled (bed auth subsystem needs it) despite its modulepath
-        being a placeholder; _register_module catches the ImportError
-        gracefully.
+        member, channel, and postoffice are now enabled as standalone
+        services. auth is enabled (bed auth subsystem needs it) despite
+        its modulepath being a placeholder; _register_module catches the
+        ImportError gracefully.
         """
         for name in (
-            "member",
-            "channel",
             "empyre",
             "murdermotel",
             "mistermcfeely",
-            "postoffice",
         ):
             assert services[name]["enabled"] is False, f"{name} should be disabled"
 

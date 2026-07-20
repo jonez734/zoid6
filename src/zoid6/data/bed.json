@@ -12,7 +12,7 @@
       "description": "Authentication service (login, logout, session management)"
     },
     "member": {
-      "enabled": false,
+      "enabled": true,
       "modulepath": "member.api.handler",
       "description": "Member service (profile, tier, referrals)"
     },
@@ -22,7 +22,7 @@
       "description": "Banking service (balance, transfers, history)"
     },
     "channel": {
-      "enabled": false,
+      "enabled": true,
       "modulepath": "channel.api.handler",
       "description": "Channel service (pub/sub messaging, channels)"
     },
@@ -53,7 +53,7 @@
       }
     },
     "postoffice": {
-      "enabled": false,
+      "enabled": true,
       "modulepath": "postoffice.api.handler",
       "description": "Postoffice service (IMAP mail polling and notifications)",
       "poll_interval": 30,
