@@ -521,6 +521,64 @@ class TestBedStartupIntegration:
             f"got: {sorted(services.keys())}"
         )
 
+    # Services that are enabled in bed.json but whose module lives outside
+    # the sibling-repo sys.path or is a placeholder handled by bed itself.
+    _KNOWN_UNIMPORTABLE = {"auth", "postoffice"}
+
+    @pytest.mark.parametrize(
+        "service_name",
+        [
+            name
+            for name, svc in _load_bed_json()["services"].items()
+            if isinstance(svc, dict)
+            and svc.get("enabled") is True
+        ],
+        ids=lambda n: f"enabled-{n}",
+    )
+    def test_enabled_service_imports_cleanly(self, service_name):
+        """Every enabled service's modulepath imports without error and has MessageRouter.
+
+        Known-unimportable services (auth is a bed placeholder; postoffice
+        lives in the mistermcfeely repo which may not be installed) are
+        skipped with a clear message so they don't mask regressions in the
+        real modules.
+        """
+        import importlib
+
+        if service_name in self._KNOWN_UNIMPORTABLE:
+            pytest.skip(
+                f"{service_name!r} is a known placeholder / external "
+                f"module; skipping import check"
+            )
+
+        cfg = _load_bed_json()
+        svc = cfg["services"][service_name]
+        modulepath = svc["modulepath"]
+
+        module = importlib.import_module(modulepath)
+        assert hasattr(module, "MessageRouter"), (
+            f"enabled service {service_name!r} at {modulepath!r} "
+            f"imports but has no MessageRouter class"
+        )
+
+    @pytest.mark.parametrize(
+        "service_name",
+        [
+            name
+            for name, svc in _load_bed_json()["services"].items()
+            if isinstance(svc, dict) and svc.get("enabled") is True
+        ],
+        ids=lambda n: f"enabled-{n}",
+    )
+    def test_enabled_service_modulepath_is_dotted(self, service_name):
+        """Every enabled service has a non-empty dotted modulepath."""
+        cfg = _load_bed_json()
+        svc = cfg["services"][service_name]
+        modulepath = svc["modulepath"]
+        assert isinstance(modulepath, str) and "." in modulepath, (
+            f"enabled service {service_name!r} has invalid modulepath: {modulepath!r}"
+        )
+
     def test_get_enabled_services_reflects_runtime_load(
         self, mock_args
     ):
