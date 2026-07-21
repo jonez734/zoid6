@@ -3,6 +3,7 @@
 ## BED bearer token
 
 - [ ] See `bed/TODO.md` "Bearer token" — adopt `bed.api.auth.AuthService` for BED-mode authentication and reconnect. Replaces per-game `auth` implementations. Zoid6 benefits strongly: dashboard / shared-wallet / chat clients that stay open for hours.
+- [ ] **Override built-in services** — allow zoid6 to replace bed-native services (auth, member) with its own implementations. Add an `"override": true` flag in bed.json; when set, zoid6 skips the "must exist" RuntimeError, calls `server.unregister_service()` on the existing service, then loads and registers its own from `modulepath`.
 
 ## BED `Sink` integration with `bbsengine6.io` (cross-project)
 
@@ -539,7 +540,7 @@ bed --router zoid6.api.handler.MessageRouter
 
 ### Phase 4: casino Updates
 
-- [ ] Import `bbsengine6.services.session` instead of local SessionManager
+- [ ] Import `bbsengine6.services.session` instead of local SessionManager (Note: in-memory base `bbsengine6.session.core.SessionManager` already extracted; only DB-backed `services/session.py` remains)
 - [ ] Rename `MemberServiceHandler` → `PlayerServiceHandler`
 - [ ] Change message types: `member_*` → `player_*`
   - [ ] `member_profile` → `player_profile`
@@ -570,7 +571,7 @@ bed --router zoid6.api.handler.MessageRouter
 
 ### Phase 5: empyre Updates
 
-- [ ] Import `bbsengine6.services.session` instead of local SessionManager
+- [ ] Import `bbsengine6.services.session` instead of local SessionManager (Note: in-memory base `bbsengine6.session.core.SessionManager` already extracted; only DB-backed `services/session.py` remains)
 - [ ] Create `PlayerServiceHandler` in `empyre/api/handler.py`
 - [ ] Create `empyre/services/player.py` - PlayerService for empyre player data
   - [ ] Uses view `empyre.player` for SELECTs
