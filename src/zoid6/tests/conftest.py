@@ -36,9 +36,23 @@ def real_args():
 
 @pytest.fixture
 def mock_server():
-    """Provide a MagicMock WebSocket server."""
+    """Provide a MagicMock WebSocket server.
+
+    By default get_service returns a mock for the services that bed
+    and zoid6 guarantee at runtime ('auth' from bed, 'member_profile'
+    from the bbsengine6 member module).  Tests that want to exercise
+    the startup-check failure paths can override get_service.
+    """
     server = MagicMock()
     server.register_service = MagicMock()
     server.list_services = MagicMock(return_value={})
-    server.get_service = MagicMock(return_value=None)
+
+    _PRESENT = {"auth", "member_profile"}
+
+    def _get_service(name):
+        if name in _PRESENT:
+            return MagicMock()
+        return None
+
+    server.get_service = MagicMock(side_effect=_get_service)
     return server

@@ -3,7 +3,7 @@
 # Unified MessageRouter for zoid6 - loads all BBS modules
 
 from typing import Any, Dict, Optional
-from bbsengine6 import module as bbsmodule
+from bbsengine6 import io, module as bbsmodule
 import json
 from pathlib import Path
 
@@ -21,6 +21,7 @@ class MessageRouter:
     def _load_config(self) -> Dict[str, Any]:
         """Load zoid6 configuration from bed.json."""
         config_path = Path(__file__).parent.parent / "data" / "bed.json"
+        io.echo(f"bed.json config path: {config_path}", level="info")
         if config_path.exists():
             with open(config_path) as f:
                 return json.load(f)
@@ -34,7 +35,18 @@ class MessageRouter:
         the live `_services` dict, so a per-router copy is duplicate
         state). Routers only need to register their own message types
         here.
+
+        Raises RuntimeError if bed's AuthService is not already
+        registered (auth is handled by bed natively, not by this
+        router) or if the member module failed to load.
         """
+        if server.get_service("auth") is None:
+            raise RuntimeError(
+                "AuthService not registered on server. "
+                "bed must start with auth enabled (token_persistence != 'none') "
+                "before the zoid6 router loads."
+            )
+
         services_config = self.config.get("services", {})
 
         for module_name, module_config in services_config.items():
@@ -46,6 +58,13 @@ class MessageRouter:
                 continue
 
             self._register_module(module_name, module_config, server)
+
+        if server.get_service("member_profile") is None:
+            raise RuntimeError(
+                "Member service not registered. "
+                "bbsengine6.member.api.handler must be importable and "
+                "enabled in bed.json for zoid6 to start."
+            )
 
     def _register_module(self, module_name: str, module_config: Dict[str, Any], server: Any) -> None:
         """Register a single module's services."""

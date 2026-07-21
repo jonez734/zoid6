@@ -317,19 +317,19 @@ class TestBedJsonStartup:
         assert po["mailboxes"] == []
 
     def test_placeholder_services_disabled(self, mock_args):
-        """empyre and murdermotel are aspirational placeholders and must stay
+        """empyre, murdermotel, and auth are placeholders and must stay
         disabled.
 
         Flipping these to enabled=true without supplying a real modulepath
         is a misconfiguration; this test makes that mistake loud.
 
+        auth is disabled because bed AuthService (bed/api/auth.py) handles
+        authentication natively before any router loads.  The auth entry
+        in bed.json is a documentation placeholder — its modulepath
+        ('auth.api.handler') does not resolve as a top-level module.
+
         member, channel, and postoffice are now enabled as standalone
         services with their own handler modules.
-
-        auth is enabled (bed auth subsystem needs it), but its modulepath
-        ('auth.api.handler') does not resolve as a top-level module;
-        _register_module catches the ImportError gracefully and bed's
-        own AuthService (bed/api/auth.py) handles authentication.
         """
         from zoid6.api.handler import MessageRouter
 
@@ -343,9 +343,48 @@ class TestBedJsonStartup:
         assert "." in svc["modulepath"]
 
         svc = router.config["services"]["auth"]
-        assert svc["enabled"] is True, (
-            "auth must be enabled for bed AuthService"
+        assert svc["enabled"] is False, (
+            "auth must be disabled; bed handles auth natively"
         )
+
+    def test_register_all_fails_without_auth(self, mock_args):
+        """register_all raises RuntimeError when bed AuthService is missing.
+
+        Bed must register auth on the server before the zoid6 router
+        loads.  If auth is absent something is fundamentally broken
+        (wrong router class, auth disabled in bed config, etc.) and
+        zoid6 should refuse to start.
+        """
+        from zoid6.api.handler import MessageRouter
+
+        server = MagicMock()
+        server.get_service = MagicMock(return_value=None)
+        router = MessageRouter(mock_args)
+
+        with pytest.raises(RuntimeError, match="AuthService not registered"):
+            router.register_all(server)
+
+    def test_register_all_fails_without_member(self, mock_args):
+        """register_all raises RuntimeError when the member module did not load.
+
+        member is enabled in bed.json and bbsengine6.member.api.handler
+        must be importable.  If it failed to load (import error, missing
+        MessageRouter, etc.) zoid6 should refuse to start rather than
+        run with a partial service set.
+        """
+        from zoid6.api.handler import MessageRouter
+
+        def _get_service(name):
+            if name == "auth":
+                return MagicMock()
+            return None
+
+        server = MagicMock()
+        server.get_service = MagicMock(side_effect=_get_service)
+        router = MessageRouter(mock_args)
+
+        with pytest.raises(RuntimeError, match="Member service not registered"):
+            router.register_all(server)
 
     def test_register_all_does_not_register_list_services(
         self, mock_args, mock_server
@@ -406,21 +445,25 @@ class TestBedJsonStartup:
         self, mock_args, mock_server
     ):
         """list_services is answered by the server itself, so it works
-        even if every router fails to register anything. This is the
-        primary use case: a client wants to know what the server
-        supports before authenticating."""
+        even if the router fails to register module services.  Auth is
+        pre-registered (as bed does at startup) but all module imports
+        are mocked to fail, so register_all raises at the member check.
+        list_services still works on the server regardless."""
         from bbsengine6.net import WebSocketServer
         from zoid6.api.handler import MessageRouter
 
         server = WebSocketServer(host="127.0.0.1", port=0)
+        # Simulate bed's auth registration (happens before the router loads).
+        server.register_service(MagicMock(), ["auth"])
         router = MessageRouter(mock_args)
         with patch(
             "zoid6.api.handler.bbsmodule.load",
             side_effect=ImportError("simulated missing module"),
         ):
-            router.register_all(server)
+            with pytest.raises(RuntimeError, match="Member service not registered"):
+                router.register_all(server)
 
-        # No services registered, but list_services still works.
+        # register_all failed, but list_services on the server still works.
         import asyncio
         reply = asyncio.run(
             server.dispatch_message(
@@ -429,7 +472,8 @@ class TestBedJsonStartup:
                 message={"type": "list_services"},
             )
         )
-        assert reply == {"type": "services", "services": []}
+        assert reply["type"] == "services"
+        assert isinstance(reply["services"], list)
 
 
 # ---------------------------------------------------------------------------
@@ -460,6 +504,8 @@ class TestBedStartupIntegration:
         from zoid6.api.handler import MessageRouter
 
         server = WebSocketServer(host="127.0.0.1", port=0)
+        # Simulate bed's auth registration (happens before the router loads).
+        server.register_service(MagicMock(), ["auth"])
         router = MessageRouter(mock_args)
 
         router.register_all(server)
@@ -499,6 +545,8 @@ class TestBedStartupIntegration:
             pytest.skip("casino.api.handler not importable in this env")
 
         server = WebSocketServer(host="127.0.0.1", port=0)
+        # Simulate bed's auth registration (happens before the router loads).
+        server.register_service(MagicMock(), ["auth"])
         router = MessageRouter(mock_args)
         router.register_all(server)
 
@@ -522,8 +570,9 @@ class TestBedStartupIntegration:
         )
 
     # Services that are enabled in bed.json but whose module lives outside
-    # the sibling-repo sys.path or is a placeholder handled by bed itself.
-    _KNOWN_UNIMPORTABLE = {"auth", "postoffice"}
+    # the sibling-repo sys.path.  auth is disabled (bed handles it natively)
+    # so it does not appear in the parametrized enabled set at all.
+    _KNOWN_UNIMPORTABLE = {"postoffice"}
 
     @pytest.mark.parametrize(
         "service_name",
@@ -538,10 +587,11 @@ class TestBedStartupIntegration:
     def test_enabled_service_imports_cleanly(self, service_name):
         """Every enabled service's modulepath imports without error and has MessageRouter.
 
-        Known-unimportable services (auth is a bed placeholder; postoffice
-        lives in the mistermcfeely repo which may not be installed) are
-        skipped with a clear message so they don't mask regressions in the
-        real modules.
+        Known-unimportable services (postoffice lives in the mistermcfeely
+        repo which may not be installed) are skipped with a clear message
+        so they don't mask regressions in the real modules.  auth is
+        disabled in bed.json (bed handles it natively) so it never
+        appears in this parametrized set.
         """
         import importlib
 

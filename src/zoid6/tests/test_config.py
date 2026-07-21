@@ -104,17 +104,21 @@ class TestBedJsonServices:
         assert services["postoffice"]["modulepath"] == "postoffice.api.handler"
 
     def test_disabled_services_skipped(self, services):
-        """empyre, murdermotel, mistermcfeely are disabled by default.
+        """empyre, murdermotel, mistermcfeely, and auth are disabled by default.
+
+        auth is disabled because bed AuthService (bed/api/auth.py) handles
+        authentication natively before any router loads.  The auth entry
+        in bed.json is a documentation placeholder — its modulepath
+        ('auth.api.handler') does not resolve as a top-level module.
 
         member, channel, and postoffice are now enabled as standalone
-        services. auth is enabled (bed auth subsystem needs it) despite
-        its modulepath being a placeholder; _register_module catches the
-        ImportError gracefully.
+        services with their own handler modules.
         """
         for name in (
             "empyre",
             "murdermotel",
             "mistermcfeely",
+            "auth",
         ):
             assert services[name]["enabled"] is False, f"{name} should be disabled"
 

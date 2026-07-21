@@ -7,9 +7,9 @@
   "debug": false,
   "services": {
     "auth": {
-      "enabled": true,
+      "enabled": false,
       "modulepath": "auth.api.handler",
-      "description": "Authentication service (login, logout, session management)"
+      "description": "Disabled — bed AuthService (bed/api/auth.py) handles auth natively before any router loads. This placeholder modulepath does not resolve; kept for documentation."
     },
     "member": {
       "enabled": true,
