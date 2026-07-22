@@ -9,6 +9,8 @@ from pathlib import Path
 
 from zoid6.api.monikerrouter import MonikerAuthRouter  # noqa: F401
 
+_BED_JSON = Path(__file__).parent.parent / "data" / "bed.json"
+
 
 class MessageRouter:
     """Unified MessageRouter that loads all enabled BBS module routers."""
@@ -19,23 +21,20 @@ class MessageRouter:
         self.routers: Dict[str, Any] = {}
 
     def _load_config(self) -> Dict[str, Any]:
-        """Load zoid6 configuration from bed.json.
+        """Load configuration via bed.config.load_config().
 
-        Uses args.config_file (the --config path) so that the same
-        bed.json that bed loaded is also used here — no fallback search.
+        Delegates to bed's canonical loader which handles env-var
+        merging (BED_* prefix) and override support.  Requires
+        args.config_file (the --config path) — no fallback search.
         """
+        from bed.config import load_config
+
         config_path = getattr(self.args, "config_file", None)
         if not config_path:
             raise RuntimeError(
-                "MessageRouter requires args.config_file (the --config path). "
-                "No fallback search is performed."
+                "MessageRouter requires args.config_file (the --config path)."
             )
-        io.echo(f"bed.json config path: {config_path}", level="info")
-        config_path_obj = Path(config_path)
-        if not config_path_obj.exists():
-            raise FileNotFoundError(f"Config file not found: {config_path}")
-        with open(config_path_obj) as f:
-            return json.load(f)
+        return load_config(config_path)
 
     def register_all(self, server: Any) -> None:
         """Register all enabled module services with the WebSocket server.
@@ -97,10 +96,9 @@ class MessageRouter:
             print(f"Failed to register {module_name}: {e}")
 
 def get_config() -> Dict[str, Any]:
-    """Get zoid6 configuration."""
-    config_path = Path(__file__).parent.parent / "data" / "bed.json"
-    if config_path.exists():
-        with open(config_path) as f:
+    """Read the bundled zoid6/data/bed.json (package introspection only)."""
+    if _BED_JSON.exists():
+        with open(_BED_JSON) as f:
             return json.load(f)
     return {}
 

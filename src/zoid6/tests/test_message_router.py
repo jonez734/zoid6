@@ -56,7 +56,7 @@ class TestMessageRouterConfigLoad:
         from zoid6.api.handler import MessageRouter
 
         mock_args.config_file = str(tmp_path / "nonexistent.json")
-        with pytest.raises(FileNotFoundError, match="Config file not found"):
+        with pytest.raises(FileNotFoundError):
             MessageRouter(mock_args)
 
 
