@@ -51,28 +51,13 @@ class TestMessageRouterConfigLoad:
         cfg = router._load_config()
         assert isinstance(cfg, dict)
 
-    def test_load_config_missing_file_returns_empty(self, mock_args, tmp_path, monkeypatch):
-        """If bed.json missing, config is empty dict."""
+    def test_load_config_missing_file_raises(self, mock_args, tmp_path):
+        """If bed.json missing, _load_config raises FileNotFoundError."""
         from zoid6.api.handler import MessageRouter
-        import zoid6.api.handler as handler_mod
 
-        fake_handler_path = tmp_path / "handler.py"
-        fake_handler_path.write_text("# stub")
-        fake_data_dir = tmp_path / "data"
-        fake_data_dir.mkdir()
-
-        original_path = handler_mod.Path
-        monkeypatch.setattr(
-            handler_mod,
-            "Path",
-            lambda *a, **kw: fake_handler_path.parent
-            if a and str(a[0]).endswith("handler.py")
-            else fake_data_dir / "bed.json",
-        )
-
-        router = MessageRouter(mock_args)
-        cfg = router._load_config()
-        assert cfg == {}
+        mock_args.config_file = str(tmp_path / "nonexistent.json")
+        with pytest.raises(FileNotFoundError, match="Config file not found"):
+            MessageRouter(mock_args)
 
 
 class TestMessageRouterRegisterAll:

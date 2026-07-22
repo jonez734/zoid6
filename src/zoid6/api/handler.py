@@ -19,13 +19,23 @@ class MessageRouter:
         self.routers: Dict[str, Any] = {}
 
     def _load_config(self) -> Dict[str, Any]:
-        """Load zoid6 configuration from bed.json."""
-        config_path = Path(__file__).parent.parent / "data" / "bed.json"
+        """Load zoid6 configuration from bed.json.
+
+        Uses args.config_file (the --config path) so that the same
+        bed.json that bed loaded is also used here — no fallback search.
+        """
+        config_path = getattr(self.args, "config_file", None)
+        if not config_path:
+            raise RuntimeError(
+                "MessageRouter requires args.config_file (the --config path). "
+                "No fallback search is performed."
+            )
         io.echo(f"bed.json config path: {config_path}", level="info")
-        if config_path.exists():
-            with open(config_path) as f:
-                return json.load(f)
-        return {}
+        config_path_obj = Path(config_path)
+        if not config_path_obj.exists():
+            raise FileNotFoundError(f"Config file not found: {config_path}")
+        with open(config_path_obj) as f:
+            return json.load(f)
 
     def register_all(self, server: Any) -> None:
         """Register all enabled module services with the WebSocket server.
