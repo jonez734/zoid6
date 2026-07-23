@@ -20,7 +20,7 @@ include = ["zoid6*"]
 version = { attr = "zoid6._version.__version__" }
 
 [tool.setuptools.package-data]
-zoid6 = ["data/*.json"]
+zoid6 = ["data/*.json", "daemon/*.tmpfiles"]
 
 [tool.pytest.ini_options]
 markers = [

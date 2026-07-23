@@ -967,6 +967,46 @@ mirroring the one in `bed/src/Makefile` (i.e. copy
 `zoid6/src/zoid6/daemon/zoid6-bed.service` to
 `/etc/systemd/system/zoid6-bed.service` and `daemon-reload`).
 
+### Prerequisite (added 2026-07-22)
+The FHS plumbing for `/etc/zoid6/bed.json` and the tmpfiles
+drop-in has landed first, so the draft unit above can resolve
+its `--config` path:
+- `zoid6/src/zoid6/daemon/zoid6.tmpfiles` (in-package, shipped
+  in the wheel via `package-data`).
+- `zoid6/src/zoid6/data/bed.json` is the canonical source;
+  `make -C zoid6/src install-etc` rsyncs it from
+  `usr/share/factory/etc/zoid6/` to `/etc/zoid6/bed.json`.
+- `make -C zoid6/src install-tmpfiles` installs the tmpfiles
+  drop-in to `/usr/lib/tmpfiles.d/zoid6.conf` and materializes
+  `/etc/zoid6`.
+- The draft unit above should reference `/etc/zoid6/bed.json`
+  instead of `/opt/zoid6/src/zoid6/data/bed.json` once it ships.
+
+### Ownership on `/etc/zoid6/` (added 2026-07-22)
+All zoid6 FHS files are owned `root:root`:
+- `/etc/zoid6/` → `755 root:root`
+- `/etc/zoid6/bed.json` → `644 root:root`
+- `/usr/lib/tmpfiles.d/zoid6.conf` → `644 root:root`
+
+The `install-etc` and `install-tmpfiles` Makefile targets use
+`sudo install -m 0644 -o root -g root …` (not `rsync`) so
+ownership is set explicitly rather than inherited from the
+source file. Both targets also run a follow-up
+`sudo chown root:root …` as a self-heal, so re-running
+`make -C src install-fhs` from a real-privilege shell fixes
+ownership regardless of how a prior install landed it.
+
+**Dev-box gotcha**: in containers with `NoNewPrivs` set
+(e.g. this dev environment), `sudo install` runs as the
+original user, so the files end up `opencode:opencode` on
+first install. The follow-up `sudo chown` is *also* blocked
+in that case. The directory `/etc/zoid6/` is created by
+`systemd-tmpfiles` which honors the tmpfiles file's owner
+column, so it lands `root:root` even in the no-privilege
+container. The two files are fixed by re-running
+`make -C src install-fhs` from a real-privilege shell — the
+chown steps in the Makefile then execute for real.
+
 ### Follow-up: bed CLI in this repo's CI
 Any CI for zoid6 that runs `make test` should also
 `pip install -e ../bed/src` first (or whatever layout the deploy
