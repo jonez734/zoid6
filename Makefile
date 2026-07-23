@@ -14,6 +14,9 @@ export SCSS = sass $(SCSSLOADPATH) --sourcemap=none --stop-on-error --trace --st
 
 export RSYNC = rsync --chmod=Dg=rwxs,Fgu=rw,Fo=r --no-times --verbose --archive --update --backup --recursive --human-readable --checksum --rsh=ssh --mkpath # --delete-after
 
+export PYTHON ?= python3
+VERSION = $(shell date +%Y%m%d%H%M)
+
 all:
 
 clean:
@@ -65,3 +68,15 @@ deploy:
 
 deploy-www:
 	$(MAKE) -C sites/www prod
+
+.PHONY: version build commit-version
+
+version:
+	$(MAKE) -C src version
+
+build: version
+	$(MAKE) -C src build
+
+commit-version:
+	git add src/$(PROJECT)/_version.py
+	git diff --cached --quiet || git commit -m "Bump $(PROJECT) version to $(VERSION)"
