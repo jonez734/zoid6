@@ -80,6 +80,7 @@ function buildchoices($choices=[])
     $choices[] = ["name" => "www", "title" => "www site", "url" => "/", "desc" => "www site"];
 //    $choices[] = ["name" => "repo", "title" => "download site", "url" => "https://repo.zoidtechnologies.com", "desc" => "repo site"];
     $choices[] = ["name" => "empyre", "title" => "the game empyre", "url" => "/empyre/", "desc" => ""];
+    $choices[] = ["name" => "backuptools", "title" => "backup utilities", "url" => "/backuptools/", "desc" => "backup utilities"];
     return \bbsengine6\buildchoices($choices);
 }
 
