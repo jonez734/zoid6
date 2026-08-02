@@ -2,7 +2,7 @@
 # zoid6/api/handler.py
 # Unified MessageRouter for zoid6 - loads all BBS modules
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 from bbsengine6 import io, module as bbsmodule
 import json
 from pathlib import Path
@@ -26,6 +26,8 @@ class MessageRouter:
         Delegates to bed's canonical loader which handles env-var
         merging (BED_* prefix) and override support.  Requires
         args.config_file (the --config path) — no fallback search.
+        Validates the resulting shape so misconfiguration fails loudly
+        at startup rather than silently skipping modules.
         """
         from bed.config import load_config
 
@@ -34,7 +36,35 @@ class MessageRouter:
             raise RuntimeError(
                 "MessageRouter requires args.config_file (the --config path)."
             )
-        return load_config(config_path)
+        config = load_config(config_path)
+        self._validate_config(config)
+        return config
+
+    @staticmethod
+    def _validate_config(config: Any) -> None:
+        """Raise RuntimeError if ``config`` is not a dict of section→dict.
+
+        The router iterates ``config["services"]`` later; a non-dict
+        top-level or a missing/typed ``services`` key is a config bug,
+        not a runtime condition we should silently paper over.
+        """
+        if not isinstance(config, dict):
+            raise RuntimeError(
+                f"MessageRouter config must be a JSON object, got {type(config).__name__}"
+            )
+        services = config.get("services")
+        if services is None:
+            return
+        if not isinstance(services, dict):
+            raise RuntimeError(
+                f"MessageRouter config 'services' must be an object, got {type(services).__name__}"
+            )
+        for module_name, module_config in services.items():
+            if not isinstance(module_config, dict):
+                raise RuntimeError(
+                    f"MessageRouter config services.{module_name} must be an object, "
+                    f"got {type(module_config).__name__}"
+                )
 
     def register_all(self, server: Any) -> None:
         """Register all enabled module services with the WebSocket server.
@@ -79,7 +109,10 @@ class MessageRouter:
         """Register a single module's services."""
         module_path = module_config.get("modulepath")
         if not module_path:
-            print(f"No modulepath configured for {module_name}")
+            io.echo(
+                f"MessageRouter: no modulepath configured for {module_name}",
+                level="warning",
+            )
             return
 
         try:
@@ -89,11 +122,20 @@ class MessageRouter:
             router.register_all(server)
             self.routers[module_name] = router
         except ImportError as e:
-            print(f"Failed to import {module_name}: {e}")
+            io.echo(
+                f"MessageRouter: failed to import {module_name}: {e}",
+                level="error",
+            )
         except AttributeError as e:
-            print(f"MessageRouter not found in {module_path}: {e}")
+            io.echo(
+                f"MessageRouter: MessageRouter not found in {module_path}: {e}",
+                level="error",
+            )
         except Exception as e:
-            print(f"Failed to register {module_name}: {e}")
+            io.echo(
+                f"MessageRouter: failed to register {module_name}: {e}",
+                level="error",
+            )
 
 def get_config() -> Dict[str, Any]:
     """Read the bundled zoid6/data/bed.json (package introspection only)."""

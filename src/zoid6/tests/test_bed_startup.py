@@ -188,9 +188,10 @@ class TestBedJsonStartup:
             assert c.args[0] != "bogus"
 
     def test_module_load_import_error_does_not_crash(
-        self, mock_args, mock_server, capsys
+        self, mock_args, mock_server, caplog
     ):
         """ImportError for one module is caught; remaining modules still register."""
+        import logging
         from zoid6.api.handler import MessageRouter
 
         router = MessageRouter(mock_args)
@@ -215,18 +216,22 @@ class TestBedJsonStartup:
         with patch(
             "zoid6.api.handler.bbsmodule.load", side_effect=maybe_fail
         ):
-            router.register_all(mock_server)
+            with caplog.at_level(logging.ERROR, logger="asimov"):
+                router.register_all(mock_server)
 
-        captured = capsys.readouterr()
-        assert f"Failed to import {target}" in captured.out
+        assert any(
+            f"failed to import {target}" in rec.getMessage().lower()
+            for rec in caplog.records
+        ), f"expected 'failed to import {target}' in logs"
         # The failing module must not appear in router.routers; the others
         # must still be there.
         assert target not in router.routers
 
     def test_module_load_attribute_error_does_not_crash(
-        self, mock_args, mock_server, capsys
+        self, mock_args, mock_server, caplog
     ):
         """AttributeError (no MessageRouter) is caught and logged."""
+        import logging
         from zoid6.api.handler import MessageRouter
 
         router = MessageRouter(mock_args)
@@ -251,10 +256,13 @@ class TestBedJsonStartup:
         with patch(
             "zoid6.api.handler.bbsmodule.load", side_effect=maybe_fail
         ):
-            router.register_all(mock_server)
+            with caplog.at_level(logging.ERROR, logger="asimov"):
+                router.register_all(mock_server)
 
-        captured = capsys.readouterr()
-        assert "MessageRouter not found" in captured.out
+        assert any(
+            "messagerouter not found" in rec.getMessage().lower()
+            for rec in caplog.records
+        ), "expected 'MessageRouter not found' in logs"
         assert target not in router.routers
 
     def test_bed_section_fields(self, mock_args):

@@ -1,29 +1,50 @@
 #!/usr/bin/env python3
 # zoid6/api/monikerrouter.py
-# MonikerAuthRouter - Example router that authenticates a member by
-# confirming the supplied moniker exists in the database. The password
-# is NOT validated - any password is accepted. Use this as a starting
-# point when wiring a real game to BED, then layer in password checking.
+# MonikerAuthRouter - Example router. Authentication is delegated to
+# bed's MonikerOnlyCredentialProvider so the password-validating
+# behaviour lives in one place. Bed's AuthService handles the wire
+# ``auth`` message natively, so this router registers only ``ping``
+# with the WebSocket server.
+#
+# Games that want a custom ``auth`` flow can subclass this router,
+# override ``register_all`` to register their own ``auth`` handler, and
+# call ``self._handle_auth`` (or a customised version) from there.
 
 from typing import Any, Dict, Optional
 
-from bbsengine6 import io, member
+from bbsengine6 import io
+from bed.api.credential_provider import (
+    CredentialProvider,
+    MonikerOnlyCredentialProvider,
+)
+from bed.api.token_store import MemberInfo
 
 
 class MonikerAuthRouter:
-    """Example router: confirms the moniker exists in the database.
+    """Example router: delegates auth to bed's
+    :class:`MonikerOnlyCredentialProvider` and registers ``ping``.
 
-    Compare with `bbsengine6.net.defaultrouter.DefaultRouter`, which
-    accepts any moniker. This router refuses unknown / invalid / empty
-    monikers but still accepts any password.
+    The router is kept around as a worked example for games that want
+    to plug their own message handlers into the bbsengine6 WebSocket
+    server. Auth itself is the responsibility of bed's
+    :class:`bed.api.auth.AuthService`; this router therefore registers
+    only ``ping`` by default.
     """
 
-    def __init__(self, args: Any):
+    def __init__(
+        self,
+        args: Any,
+        *,
+        provider: Optional[CredentialProvider] = None,
+    ):
         self.args = args
         self.sessions: Dict[int, Dict[str, Any]] = {}
+        self._provider: CredentialProvider = (
+            provider if provider is not None else MonikerOnlyCredentialProvider()
+        )
 
     def register_all(self, server: Any) -> None:
-        server.register_service(self, ["auth", "ping"])
+        server.register_service(self, ["ping"])
 
     async def handle_message(
         self, server: Any, websocket: Any, path: str, message: Dict[str, Any]
@@ -31,17 +52,27 @@ class MonikerAuthRouter:
         """Handle incoming message."""
         msg_type = message.get("type")
 
-        if msg_type == "auth":
-            return await self._handle_auth(websocket, message)
-        elif msg_type == "ping":
+        if msg_type == "ping":
             return await self._handle_ping()
 
         return None
 
-    async def _handle_auth(self, websocket: Any, message: Dict[str, Any]) -> Dict[str, Any]:
-        """Handle auth message."""
-        moniker = message.get("moniker", "")
-        _password = message.get("password", "")
+    async def _handle_auth(
+        self, websocket: Any, message: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Delegate authentication to bed's
+        :class:`MonikerOnlyCredentialProvider`.
+
+        Preserves the historical wire-level distinctions
+        ("Moniker required" / "Invalid moniker" / "Authentication
+        service unavailable" / "Member not found") by mapping
+        provider outcomes back to the original envelopes. This method
+        is NOT routed by :meth:`register_all` because bed's
+        AuthService already handles ``auth``; subclasses can opt in
+        by overriding ``register_all``.
+        """
+        moniker = (message.get("moniker") or "").strip()
+        password = message.get("password", "")
 
         if not moniker:
             return {
@@ -53,8 +84,11 @@ class MonikerAuthRouter:
             }
 
         try:
-            exists = member.moniker_exists(
-                self.args, moniker, pool=self.args.pool
+            info: Optional[MemberInfo] = self._provider.authenticate(
+                self.args,
+                moniker,
+                password,
+                pool=getattr(self.args, "pool", None),
             )
         except ValueError as e:
             io.echo(
@@ -81,7 +115,7 @@ class MonikerAuthRouter:
                 "message": "Authentication service unavailable",
             }
 
-        if not exists:
+        if info is None:
             return {
                 "type": "auth_result",
                 "success": False,
@@ -90,14 +124,9 @@ class MonikerAuthRouter:
                 "message": "Member not found",
             }
 
-        is_sysop = member.issysop(
-            self.args, moniker=moniker, pool=self.args.pool
-        )
-
-        session_id = id(websocket)
-        self.sessions[session_id] = {
-            "moniker": moniker,
-            "is_sysop": bool(is_sysop) if is_sysop is not None else False,
+        self.sessions[id(websocket)] = {
+            "moniker": info.moniker,
+            "is_sysop": info.is_sysop,
         }
 
         return {

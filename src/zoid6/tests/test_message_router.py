@@ -106,8 +106,9 @@ class TestMessageRouterRegisterAll:
             mock_router_instance.register_all.assert_called_with(mock_server)
             assert "casino" in router.routers
 
-    def test_register_all_handles_import_error(self, mock_args, mock_server, capsys):
+    def test_register_all_handles_import_error(self, mock_args, mock_server, caplog):
         """ImportError for a module is caught and logged, doesn't crash."""
+        import logging
         from zoid6.api.handler import MessageRouter
 
         router = MessageRouter(mock_args)
@@ -115,15 +116,19 @@ class TestMessageRouterRegisterAll:
             "zoid6.api.handler.bbsmodule.load",
             side_effect=ImportError("missing"),
         ):
-            router.register_all(mock_server)
+            with caplog.at_level(logging.ERROR, logger="asimov"):
+                router.register_all(mock_server)
         assert "casino" not in router.routers
-        captured = capsys.readouterr()
-        assert "Failed to import casino" in captured.out
+        assert any(
+            "failed to import casino" in rec.getMessage().lower()
+            for rec in caplog.records
+        ), f"expected 'failed to import casino' in logs, got {[r.getMessage() for r in caplog.records]}"
 
     def test_register_all_handles_missing_message_router_class(
-        self, mock_args, mock_server, capsys
+        self, mock_args, mock_server, caplog
     ):
         """AttributeError (no MessageRouter) is caught and logged."""
+        import logging
         from zoid6.api.handler import MessageRouter
 
         router = MessageRouter(mock_args)
@@ -131,10 +136,13 @@ class TestMessageRouterRegisterAll:
             "zoid6.api.handler.bbsmodule.load",
             side_effect=AttributeError("no MessageRouter"),
         ):
-            router.register_all(mock_server)
+            with caplog.at_level(logging.ERROR, logger="asimov"):
+                router.register_all(mock_server)
         assert "casino" not in router.routers
-        captured = capsys.readouterr()
-        assert "MessageRouter not found" in captured.out
+        assert any(
+            "messagerouter not found" in rec.getMessage().lower()
+            for rec in caplog.records
+        ), f"expected 'messagerouter not found' in logs, got {[r.getMessage() for r in caplog.records]}"
 
     def test_register_all_handles_generic_exception(
         self, mock_args, mock_server, capsys
@@ -154,15 +162,19 @@ class TestMessageRouterRegisterAll:
 class TestMessageRouterRegisterModule:
     """Test the per-module _register_module method."""
 
-    def test_register_module_missing_modulepath(self, mock_args, mock_server, capsys):
+    def test_register_module_missing_modulepath(self, mock_args, mock_server, caplog):
         """If modulepath missing, skip with a message and don't raise."""
+        import logging
         from zoid6.api.handler import MessageRouter
 
         router = MessageRouter(mock_args)
-        router._register_module("foo", {}, mock_server)
+        with caplog.at_level(logging.WARNING, logger="asimov"):
+            router._register_module("foo", {}, mock_server)
         assert "foo" not in router.routers
-        captured = capsys.readouterr()
-        assert "No modulepath" in captured.out
+        assert any(
+            "no modulepath" in rec.getMessage().lower()
+            for rec in caplog.records
+        ), f"expected 'no modulepath' in logs, got {[r.getMessage() for r in caplog.records]}"
 
     def test_register_module_success(self, mock_args, mock_server):
         """Successful module registration stores router in self.routers."""

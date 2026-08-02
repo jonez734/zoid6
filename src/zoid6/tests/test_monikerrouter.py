@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """Tests for zoid6.api.monikerrouter.MonikerAuthRouter.
 
-The router is an example that authenticates a member by confirming the
-supplied moniker exists in the database. The password is NOT validated.
-These tests use mocks for the bbsengine6.member helpers to avoid touching
-a real PostgreSQL database.
+The router is an example that delegates authentication to bed's
+MonikerOnlyCredentialProvider. Bed handles the wire ``auth`` message
+natively, so this router only registers ``ping`` with the WebSocket
+server. The ``_handle_auth`` method is kept as a documented private
+helper for subclasses that want to opt into routing ``auth`` themselves.
+
+These tests use mocks to avoid touching a real PostgreSQL database.
 """
 import sys
 from unittest.mock import MagicMock, patch
@@ -24,14 +27,14 @@ def router_args(mock_args):
 class TestMonikerAuthRouterRegistration:
     """register_all and message dispatch."""
 
-    def test_register_all_registers_expected_services(
+    def test_register_all_registers_ping_only(
         self, router_args, mock_server
     ):
-        """register_all registers auth, ping with the server.
+        """register_all registers ``ping`` with the server.
 
-        list_services is NOT registered here; it is answered directly by
-        bbsengine6.net.WebSocketServer.dispatch_message (added in 2026-06-28).
-        The router must not register its own copy.
+        ``auth`` is NOT registered here; bed's AuthService handles the
+        wire ``auth`` message natively. The router must not overwrite
+        bed's auth handler.
         """
         from zoid6.api.monikerrouter import MonikerAuthRouter
 
@@ -41,55 +44,40 @@ class TestMonikerAuthRouterRegistration:
         mock_server.register_service.assert_called_once()
         args, _ = mock_server.register_service.call_args
         assert args[0] is router
-        assert args[1] == ["auth", "ping"]
+        assert args[1] == ["ping"]
 
-    @pytest.mark.parametrize("msg_type", ["auth", "ping"])
-    def test_handle_message_dispatches_known_types(
-        self, router_args, mock_server, msg_type
+    def test_handle_message_ping_dispatches_to_ping_handler(
+        self, router_args, mock_server
     ):
-        """handle_message routes known types to their handlers.
-
-        list_services is not in this set; the WebSocketServer answers it
-        directly without going through any router.
-        """
+        """handle_message routes ``ping`` to ``_handle_ping``."""
         from zoid6.api.monikerrouter import MonikerAuthRouter
 
         router = MonikerAuthRouter(router_args)
-        with patch.object(router, "_handle_auth", new=AsyncMock()) as mock_auth, \
-             patch.object(router, "_handle_ping", new=AsyncMock()) as mock_ping:
-            mock_auth.return_value = {"type": "auth_result"}
+        with patch.object(router, "_handle_ping", new=AsyncMock()) as mock_ping:
             mock_ping.return_value = {"type": "pong"}
-
             result = asyncio.run(
-                router.handle_message(mock_server, MagicMock(), "/", {"type": msg_type})
+                router.handle_message(mock_server, MagicMock(), "/", {"type": "ping"})
             )
+        mock_ping.assert_awaited_once()
+        assert result == {"type": "pong"}
 
-        if msg_type == "auth":
-            mock_auth.assert_awaited_once()
-            assert result == {"type": "auth_result"}
-        elif msg_type == "ping":
-            mock_ping.assert_awaited_once()
-            assert result == {"type": "pong"}
-
-    def test_handle_message_unknown_type_returns_none(self, router_args, mock_server):
+    def test_handle_message_unknown_type_returns_none(
+        self, router_args, mock_server
+    ):
         """Unknown message types return None and don't call handlers.
 
-        list_services is no longer handled by the router; the
-        WebSocketServer.dispatch_message answers it before reaching
-        the router. An unknown type that survives the server's
-        built-in list_services check is just a real unknown.
+        ``auth`` is no longer routed by this router; ``list_services``
+        is answered directly by ``WebSocketServer.dispatch_message``.
+        Anything else is a real unknown.
         """
         from zoid6.api.monikerrouter import MonikerAuthRouter
 
         router = MonikerAuthRouter(router_args)
-        with patch.object(router, "_handle_auth", new=AsyncMock()) as mock_auth, \
-             patch.object(router, "_handle_ping", new=AsyncMock()) as mock_ping:
+        with patch.object(router, "_handle_ping", new=AsyncMock()) as mock_ping:
             result = asyncio.run(
                 router.handle_message(mock_server, MagicMock(), "/", {"type": "wat"})
             )
-
         assert result is None
-        mock_auth.assert_not_awaited()
         mock_ping.assert_not_awaited()
 
 
@@ -103,24 +91,31 @@ class TestMonikerAuthRouterPing:
         assert asyncio.run(router._handle_ping()) == {"type": "pong"}
 
 
-class TestMonikerAuthRouterHandleAuthEmpty:
-    """Empty / missing moniker short-circuits before any DB call."""
+class TestMonikerAuthRouterHandleAuthProvider:
+    """``_handle_auth`` delegates to bed's MonikerOnlyCredentialProvider."""
 
-    def test_empty_moniker_rejects_without_db_call(
-        self, router_args, monkeypatch
+    def _build_router_with_provider(self, router_args, provider):
+        from zoid6.api.monikerrouter import MonikerAuthRouter
+
+        return MonikerAuthRouter(router_args, provider=provider)
+
+    def test_empty_moniker_rejects_without_provider_call(
+        self, router_args
     ):
-        """An empty moniker is rejected with 'Moniker required' and no DB call."""
-        from zoid6.api import monikerrouter
+        """An empty moniker is rejected with 'Moniker required' and no
+        provider call."""
+        from bed.api.token_store import MemberInfo
 
-        calls = {"moniker_exists": 0, "issysop": 0}
-        fake_exists = MagicMock(side_effect=lambda *a, **kw: calls.__setitem__("moniker_exists", calls["moniker_exists"] + 1) or True)
-        fake_issysop = MagicMock(side_effect=lambda *a, **kw: calls.__setitem__("issysop", calls["issysop"] + 1) or False)
-        monkeypatch.setattr(monikerrouter.member, "moniker_exists", fake_exists)
-        monkeypatch.setattr(monikerrouter.member, "issysop", fake_issysop)
-
-        router = monikerrouter.MonikerAuthRouter(router_args)
+        fake_provider = MagicMock()
+        fake_provider.authenticate = MagicMock(
+            return_value=MemberInfo(moniker="x", is_sysop=False, balance=None)
+        )
+        router = self._build_router_with_provider(router_args, fake_provider)
         ws = MagicMock()
-        result = asyncio.run(router._handle_auth(ws, {"type": "auth", "moniker": "", "password": "x"}))
+
+        result = asyncio.run(
+            router._handle_auth(ws, {"type": "auth", "moniker": "", "password": "x"})
+        )
 
         assert result == {
             "type": "auth_result",
@@ -129,37 +124,23 @@ class TestMonikerAuthRouterHandleAuthEmpty:
             "balance": 0,
             "message": "Moniker required",
         }
-        assert calls["moniker_exists"] == 0
-        assert calls["issysop"] == 0
+        fake_provider.authenticate.assert_not_called()
         assert id(ws) not in router.sessions
 
-    def test_missing_moniker_key_also_rejects(self, router_args, monkeypatch):
-        """A message with no 'moniker' key is treated as empty."""
-        from zoid6.api import monikerrouter
+    def test_provider_returns_member_info_registers_session(
+        self, router_args
+    ):
+        """A successful provider lookup registers the session with
+        is_sysop from MemberInfo."""
+        from bed.api.token_store import MemberInfo
 
-        fake_exists = MagicMock(return_value=True)
-        monkeypatch.setattr(monikerrouter.member, "moniker_exists", fake_exists)
-
-        router = monikerrouter.MonikerAuthRouter(router_args)
+        fake_provider = MagicMock()
+        fake_provider.authenticate = MagicMock(
+            return_value=MemberInfo(moniker="alice", is_sysop=True, balance=None)
+        )
+        router = self._build_router_with_provider(router_args, fake_provider)
         ws = MagicMock()
-        result = asyncio.run(router._handle_auth(ws, {"type": "auth", "password": "x"}))
 
-        assert result["success"] is False
-        assert result["message"] == "Moniker required"
-        fake_exists.assert_not_called()
-
-
-class TestMonikerAuthRouterHandleAuthSuccess:
-    """Moniker exists -> success path."""
-
-    def test_moniker_exists_true_registers_session(self, router_args, monkeypatch):
-        from zoid6.api import monikerrouter
-
-        monkeypatch.setattr(monikerrouter.member, "moniker_exists", MagicMock(return_value=True))
-        monkeypatch.setattr(monikerrouter.member, "issysop", MagicMock(return_value=False))
-
-        router = monikerrouter.MonikerAuthRouter(router_args)
-        ws = MagicMock()
         result = asyncio.run(
             router._handle_auth(ws, {"type": "auth", "moniker": "alice", "password": ""})
         )
@@ -170,94 +151,42 @@ class TestMonikerAuthRouterHandleAuthSuccess:
         assert "moniker check" in result["message"]
         assert id(ws) in router.sessions
         assert router.sessions[id(ws)]["moniker"] == "alice"
-        assert router.sessions[id(ws)]["is_sysop"] is False
-
-    def test_issysop_true_sets_is_sysop(self, router_args, monkeypatch):
-        """A sysop member is registered with is_sysop=True."""
-        from zoid6.api import monikerrouter
-
-        monkeypatch.setattr(monikerrouter.member, "moniker_exists", MagicMock(return_value=True))
-        monkeypatch.setattr(monikerrouter.member, "issysop", MagicMock(return_value=True))
-
-        router = monikerrouter.MonikerAuthRouter(router_args)
-        ws = MagicMock()
-        asyncio.run(router._handle_auth(ws, {"type": "auth", "moniker": "root", "password": "x"}))
-
         assert router.sessions[id(ws)]["is_sysop"] is True
 
-    def test_issysop_none_collapsed_to_false(self, router_args, monkeypatch):
-        """issysop returning None (DB error) is treated as is_sysop=False."""
-        from zoid6.api import monikerrouter
+        # Verify the provider was called with the router args + pool.
+        fake_provider.authenticate.assert_called_once()
+        kwargs = fake_provider.authenticate.call_args.kwargs
+        assert kwargs["pool"] is router_args.pool
 
-        monkeypatch.setattr(monikerrouter.member, "moniker_exists", MagicMock(return_value=True))
-        monkeypatch.setattr(monikerrouter.member, "issysop", MagicMock(return_value=None))
-
-        router = monikerrouter.MonikerAuthRouter(router_args)
-        ws = MagicMock()
-        asyncio.run(router._handle_auth(ws, {"type": "auth", "moniker": "alice", "password": "x"}))
-
-        assert router.sessions[id(ws)]["is_sysop"] is False
-
-    @pytest.mark.parametrize("password", ["", "wrong", "hunter2"])
-    def test_password_is_ignored_when_moniker_exists(
-        self, router_args, monkeypatch, password
+    def test_provider_returns_none_means_member_not_found(
+        self, router_args
     ):
-        """Any password is accepted as long as the moniker exists."""
-        from zoid6.api import monikerrouter
-
-        monkeypatch.setattr(monikerrouter.member, "moniker_exists", MagicMock(return_value=True))
-        monkeypatch.setattr(monikerrouter.member, "issysop", MagicMock(return_value=False))
-
-        router = monikerrouter.MonikerAuthRouter(router_args)
+        """Provider returning None -> 'Member not found'."""
+        fake_provider = MagicMock()
+        fake_provider.authenticate = MagicMock(return_value=None)
+        router = self._build_router_with_provider(router_args, fake_provider)
         ws = MagicMock()
-        result = asyncio.run(
-            router._handle_auth(ws, {"type": "auth", "moniker": "alice", "password": password})
-        )
 
-        assert result["success"] is True
-
-
-class TestMonikerAuthRouterHandleAuthRejection:
-    """Unknown / invalid moniker paths."""
-
-    def test_moniker_exists_false_rejects(self, router_args, monkeypatch):
-        from zoid6.api import monikerrouter
-
-        monkeypatch.setattr(monikerrouter.member, "moniker_exists", MagicMock(return_value=False))
-        fake_issysop = MagicMock(return_value=False)
-        monkeypatch.setattr(monikerrouter.member, "issysop", fake_issysop)
-
-        router = monikerrouter.MonikerAuthRouter(router_args)
-        ws = MagicMock()
         result = asyncio.run(
             router._handle_auth(ws, {"type": "auth", "moniker": "ghost", "password": "x"})
         )
 
-        assert result == {
-            "type": "auth_result",
-            "success": False,
-            "moniker": "ghost",
-            "balance": 0,
-            "message": "Member not found",
-        }
+        assert result["success"] is False
+        assert result["moniker"] == "ghost"
+        assert result["message"] == "Member not found"
         assert id(ws) not in router.sessions
-        fake_issysop.assert_not_called()
 
-    def test_moniker_exists_value_error_rejects_as_invalid(
-        self, router_args, monkeypatch
+    def test_provider_value_error_means_invalid_moniker(
+        self, router_args
     ):
-        """ValueError from moniker_exists -> 'Invalid moniker' failure."""
-        from zoid6.api import monikerrouter
-
-        def boom(*args, **kwargs):
-            raise ValueError("contains non-ASCII characters")
-
-        monkeypatch.setattr(monikerrouter.member, "moniker_exists", MagicMock(side_effect=boom))
-        fake_issysop = MagicMock(return_value=False)
-        monkeypatch.setattr(monikerrouter.member, "issysop", fake_issysop)
-
-        router = monikerrouter.MonikerAuthRouter(router_args)
+        """Provider raising ValueError -> 'Invalid moniker'."""
+        fake_provider = MagicMock()
+        fake_provider.authenticate = MagicMock(
+            side_effect=ValueError("contains non-ASCII characters")
+        )
+        router = self._build_router_with_provider(router_args, fake_provider)
         ws = MagicMock()
+
         result = asyncio.run(
             router._handle_auth(ws, {"type": "auth", "moniker": "café", "password": "x"})
         )
@@ -266,21 +195,19 @@ class TestMonikerAuthRouterHandleAuthRejection:
         assert result["message"] == "Invalid moniker"
         assert result["moniker"] == "café"
         assert id(ws) not in router.sessions
-        fake_issysop.assert_not_called()
 
-    def test_db_error_rejects_as_unavailable(self, router_args, monkeypatch):
-        """Generic DB error -> 'Authentication service unavailable'."""
-        from zoid6.api import monikerrouter
-
-        def boom(*args, **kwargs):
-            raise RuntimeError("connection refused")
-
-        monkeypatch.setattr(monikerrouter.member, "moniker_exists", MagicMock(side_effect=boom))
-        fake_issysop = MagicMock(return_value=False)
-        monkeypatch.setattr(monikerrouter.member, "issysop", fake_issysop)
-
-        router = monikerrouter.MonikerAuthRouter(router_args)
+    def test_provider_generic_exception_means_service_unavailable(
+        self, router_args
+    ):
+        """Any non-ValueError exception from the provider -> 'service
+        unavailable'."""
+        fake_provider = MagicMock()
+        fake_provider.authenticate = MagicMock(
+            side_effect=RuntimeError("connection refused")
+        )
+        router = self._build_router_with_provider(router_args, fake_provider)
         ws = MagicMock()
+
         result = asyncio.run(
             router._handle_auth(ws, {"type": "auth", "moniker": "alice", "password": "x"})
         )
@@ -288,7 +215,14 @@ class TestMonikerAuthRouterHandleAuthRejection:
         assert result["success"] is False
         assert result["message"] == "Authentication service unavailable"
         assert id(ws) not in router.sessions
-        fake_issysop.assert_not_called()
+
+    def test_default_provider_is_moniker_only(self, router_args):
+        """No provider passed -> default to MonikerOnlyCredentialProvider."""
+        from zoid6.api.monikerrouter import MonikerAuthRouter
+        from bed.api.credential_provider import MonikerOnlyCredentialProvider
+
+        router = MonikerAuthRouter(router_args)
+        assert isinstance(router._provider, MonikerOnlyCredentialProvider)
 
 
 class TestMonikerAuthRouterReexport:
