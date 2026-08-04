@@ -1,7 +1,0 @@
-Metadata-Version: 2.4
-Name: zoid6
-Version: 0.0.1.dev202606281508
-Summary: Unified BBS module router for zoid6
-Requires-Python: <3.13,>=3.9
-Requires-Dist: bbsengine6
-Requires-Dist: bed>=0.0.1.dev2026
