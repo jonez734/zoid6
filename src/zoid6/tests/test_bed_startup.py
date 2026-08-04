@@ -82,6 +82,35 @@ class TestBedJsonStartup:
         }
         assert set(get_enabled_services()) == expected
 
+    def test_all_enabled_modulepaths_are_importable(self):
+        """Every enabled modulepath in zoid6.json is importable.
+
+        Catches typos and missing-on-sys.path entries before bed ever
+        starts. Modules that are explicitly marked unimportable in
+        zoid6.json (e.g. ``postoffice`` until it ships) are skipped.
+        """
+        from bbsengine6.module import is_importable
+        from zoid6.api.handler import get_enabled_services
+
+        # postoffice is enabled but its module is not yet importable.
+        # The test asserts the importable ones, not the placeholder.
+        _KNOWN_UNIMPORTABLE = {"postoffice"}
+
+        cfg = _load_config()
+        services = {
+            name: svc
+            for name, svc in cfg.get("services", {}).items()
+            if isinstance(svc, dict) and svc.get("modulepath")
+        }
+        failures = {}
+        for name in get_enabled_services():
+            if name in _KNOWN_UNIMPORTABLE:
+                continue
+            mp = services[name]["modulepath"]
+            if not is_importable(mp):
+                failures[name] = mp
+        assert failures == {}, f"Unimportable modulepaths: {failures}"
+
     def test_register_all_loads_every_enabled_service(
         self, mock_args, mock_server
     ):
