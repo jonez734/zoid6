@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Tests for zoid6 startup behavior driven by data/bed.json.
+"""Tests for zoid6 startup behavior driven by data/zoid6.json.
 
 These tests exercise the configuration-to-router wiring performed by
 zoid6.api.handler.MessageRouter.register_all. They prove that:
 
-  * the shipped bed.json parses and exposes the expected top-level sections,
-  * every enabled service in bed.json gets loaded via bbsmodule.load and has
+  * the shipped zoid6.json parses and exposes the expected top-level sections,
+  * every enabled service in zoid6.json gets loaded via bbsmodule.load and has
     its MessageRouter.register_all(server) invoked,
   * every disabled service is skipped,
   * per-service extras (casino sub-config, postoffice poll_interval, etc.)
@@ -39,14 +39,14 @@ for _sibling in (
         sys.path.insert(0, _sibling)
 
 
-def _bed_json_path() -> Path:
+def _config_path() -> Path:
     from zoid6.api.handler import get_bundled_config_path
 
     return Path(get_bundled_config_path())
 
 
-def _load_bed_json() -> dict:
-    with open(_bed_json_path()) as f:
+def _load_config() -> dict:
+    with open(_config_path()) as f:
         return json.load(f)
 
 
@@ -56,10 +56,10 @@ def _load_bed_json() -> dict:
 
 
 class TestBedJsonStartup:
-    """Unit tests for bed.json loading and MessageRouter orchestration."""
+    """Unit tests for zoid6.json loading and MessageRouter orchestration."""
 
     def test_default_config_loads(self, mock_args):
-        """MessageRouter reads zoid6/data/bed.json on init and exposes services."""
+        """MessageRouter reads zoid6/data/zoid6.json on init and exposes services."""
         from zoid6.api.handler import MessageRouter
 
         router = MessageRouter(mock_args)
@@ -75,7 +75,7 @@ class TestBedJsonStartup:
         """get_enabled_services() returns exactly the entries flagged enabled."""
         from zoid6.api.handler import get_enabled_services
 
-        cfg = _load_bed_json()
+        cfg = _load_config()
         expected = {
             name for name, svc in cfg["services"].items()
             if isinstance(svc, dict) and svc.get("enabled") is True
@@ -89,7 +89,7 @@ class TestBedJsonStartup:
         from zoid6.api.handler import MessageRouter
 
         router = MessageRouter(mock_args)
-        cfg = _load_bed_json()
+        cfg = _load_config()
         enabled = {
             name for name, svc in cfg["services"].items()
             if isinstance(svc, dict) and svc.get("enabled") is True
@@ -117,7 +117,7 @@ class TestBedJsonStartup:
         from zoid6.api.handler import MessageRouter
 
         router = MessageRouter(mock_args)
-        cfg = _load_bed_json()
+        cfg = _load_config()
         disabled = {
             name: svc["modulepath"]
             for name, svc in cfg["services"].items()
@@ -144,7 +144,7 @@ class TestBedJsonStartup:
         from zoid6.api.handler import MessageRouter
 
         router = MessageRouter(mock_args)
-        cfg = _load_bed_json()
+        cfg = _load_config()
         enabled = {
             name: svc["modulepath"]
             for name, svc in cfg["services"].items()
@@ -192,20 +192,20 @@ class TestBedJsonStartup:
     ):
         """ImportError on a required service is logged and skipped;
         register_all() completes for the rest. The ``required`` flag
-        in bed.json is documentation-only; failures are never fatal
+        in zoid6.json is documentation-only; failures are never fatal
         here so the daemon can keep serving the services that did
         load and the server can still answer list_services."""
         import logging
         from zoid6.api.handler import MessageRouter
 
         router = MessageRouter(mock_args)
-        cfg = _load_bed_json()
+        cfg = _load_config()
         enabled = [
             name for name, svc in cfg["services"].items()
             if isinstance(svc, dict) and svc.get("enabled") is True
         ]
         if not enabled:
-            pytest.skip("no enabled services in bed.json; nothing to fail on")
+            pytest.skip("no enabled services in zoid6.json; nothing to fail on")
 
         target = enabled[0]
         target_path = cfg["services"][target]["modulepath"]
@@ -240,13 +240,13 @@ class TestBedJsonStartup:
         from zoid6.api.handler import MessageRouter
 
         router = MessageRouter(mock_args)
-        cfg = _load_bed_json()
+        cfg = _load_config()
         enabled = [
             name for name, svc in cfg["services"].items()
             if isinstance(svc, dict) and svc.get("enabled") is True
         ]
         if not enabled:
-            pytest.skip("no enabled services in bed.json; nothing to fail on")
+            pytest.skip("no enabled services in zoid6.json; nothing to fail on")
 
         target = enabled[0]
         target_path = cfg["services"][target]["modulepath"]
@@ -281,13 +281,13 @@ class TestBedJsonStartup:
         from zoid6.api.handler import MessageRouter
 
         router = MessageRouter(mock_args)
-        cfg = _load_bed_json()
+        cfg = _load_config()
         enabled = [
             name for name, svc in cfg["services"].items()
             if isinstance(svc, dict) and svc.get("enabled") is True
         ]
         if not enabled:
-            pytest.skip("no enabled services in bed.json; nothing to fail on")
+            pytest.skip("no enabled services in zoid6.json; nothing to fail on")
 
         target = enabled[0]
         target_path = cfg["services"][target]["modulepath"]
@@ -320,13 +320,13 @@ class TestBedJsonStartup:
         from zoid6.api.handler import MessageRouter
 
         router = MessageRouter(mock_args)
-        cfg = _load_bed_json()
+        cfg = _load_config()
         enabled = [
             name for name, svc in cfg["services"].items()
             if isinstance(svc, dict) and svc.get("enabled") is True
         ]
         if not enabled:
-            pytest.skip("no enabled services in bed.json; nothing to fail on")
+            pytest.skip("no enabled services in zoid6.json; nothing to fail on")
 
         target = enabled[0]
         target_path = cfg["services"][target]["modulepath"]
@@ -410,12 +410,12 @@ class TestBedJsonStartup:
         assert po["poll_interval"] == 30
         assert po["mailboxes"] == []
 
-    def test_postoffice_marked_optional_in_bed_json(self):
+    def test_postoffice_marked_optional_in_config(self):
         """postoffice is enabled but its module is not currently
         importable in the standard test environment. It must be
-        marked ``required: false`` in bed.json so its missing module
+        marked ``required: false`` in zoid6.json so its missing module
         does not abort the daemon."""
-        cfg = _load_bed_json()
+        cfg = _load_config()
         po = cfg["services"]["postoffice"]
         assert po.get("enabled") is True
         assert po.get("required") is False, (
@@ -432,7 +432,7 @@ class TestBedJsonStartup:
 
         auth is disabled because bed AuthService (bed/api/auth.py) handles
         authentication natively before any router loads.  The auth entry
-        in bed.json is a documentation placeholder — its modulepath
+        in zoid6.json is a documentation placeholder — its modulepath
         ('auth.api.handler') does not resolve as a top-level module.
 
         member, channel, and postoffice are now enabled as standalone
@@ -474,7 +474,7 @@ class TestBedJsonStartup:
     def test_register_all_fails_without_member(self, mock_args):
         """register_all raises RuntimeError when the member module did not load.
 
-        member is enabled in bed.json and bbsengine6.member.api.handler
+        member is enabled in zoid6.json and bbsengine6.member.api.handler
         must be importable.  If it failed to load (import error, missing
         MessageRouter, etc.) zoid6 should refuse to start rather than
         run with a partial service set.
@@ -676,7 +676,7 @@ class TestBedStartupIntegration:
             f"got: {sorted(services.keys())}"
         )
 
-    # Services that are enabled in bed.json but whose module lives outside
+    # Services that are enabled in zoid6.json but whose module lives outside
     # the sibling-repo sys.path.  auth is disabled (bed handles it natively)
     # so it does not appear in the parametrized enabled set at all.
     _KNOWN_UNIMPORTABLE = {"postoffice"}
@@ -685,7 +685,7 @@ class TestBedStartupIntegration:
         "service_name",
         [
             name
-            for name, svc in _load_bed_json()["services"].items()
+            for name, svc in _load_config()["services"].items()
             if isinstance(svc, dict)
             and svc.get("enabled") is True
         ],
@@ -697,7 +697,7 @@ class TestBedStartupIntegration:
         Known-unimportable services (postoffice lives in the mistermcfeely
         repo which may not be installed) are skipped with a clear message
         so they don't mask regressions in the real modules.  auth is
-        disabled in bed.json (bed handles it natively) so it never
+        disabled in zoid6.json (bed handles it natively) so it never
         appears in this parametrized set.
         """
         import importlib
@@ -708,7 +708,7 @@ class TestBedStartupIntegration:
                 f"module; skipping import check"
             )
 
-        cfg = _load_bed_json()
+        cfg = _load_config()
         svc = cfg["services"][service_name]
         modulepath = svc["modulepath"]
 
@@ -722,14 +722,14 @@ class TestBedStartupIntegration:
         "service_name",
         [
             name
-            for name, svc in _load_bed_json()["services"].items()
+            for name, svc in _load_config()["services"].items()
             if isinstance(svc, dict) and svc.get("enabled") is True
         ],
         ids=lambda n: f"enabled-{n}",
     )
     def test_enabled_service_modulepath_is_dotted(self, service_name):
         """Every enabled service has a non-empty dotted modulepath."""
-        cfg = _load_bed_json()
+        cfg = _load_config()
         svc = cfg["services"][service_name]
         modulepath = svc["modulepath"]
         assert isinstance(modulepath, str) and "." in modulepath, (
@@ -747,7 +747,7 @@ class TestBedStartupIntegration:
         from zoid6.api.handler import MessageRouter, get_enabled_services
 
         router = MessageRouter(mock_args)
-        cfg = _load_bed_json()
+        cfg = _load_config()
         enabled = {
             name for name, svc in cfg["services"].items()
             if isinstance(svc, dict) and svc.get("enabled") is True

@@ -28,9 +28,9 @@ help:
 	@echo "  install       Install zoid6 in editable mode (pip install -e .)"
 	@echo "  install-dev   Install zoid6 with test extras"
 	@echo "  install-fhs   Install FHS system files (/etc/zoid6 + tmpfiles drop-in)"
-	@echo "  install-etc   Install /etc/zoid6/bed.json from factory defaults"
+	@echo "  install-etc   Install /etc/zoid6/zoid6.json from factory defaults"
 	@echo "  install-tmpfiles Install /usr/lib/tmpfiles.d/zoid6.conf"
-	@echo "  uninstall-etc Remove /etc/zoid6/bed.json"
+	@echo "  uninstall-etc Remove /etc/zoid6/zoid6.json"
 	@echo "  uninstall-tmpfiles Remove tmpfiles drop-in"
 	@echo "  factory-sync  Copy in-tree data/ + daemon/ to usr/share/factory/"
 	@echo "  test          Run tests with pytest"
@@ -110,13 +110,13 @@ deploy-tui: install
 
 install-etc:
 	sudo install -d -m 0755 -o root -g root $(ETC_DIR)
-	sudo install -m 0644 -o root -g root $(FACTORY_DIR)/bed.json $(ETC_DIR)/bed.json
-	sudo chown root:root $(ETC_DIR)/bed.json
-	@echo "Installed $(ETC_DIR)/bed.json from factory defaults"
+	sudo install -m 0644 -o root -g root $(FACTORY_DIR)/zoid6.json $(ETC_DIR)/zoid6.json
+	sudo chown root:root $(ETC_DIR)/zoid6.json
+	@echo "Installed $(ETC_DIR)/zoid6.json from factory defaults"
 
 uninstall-etc:
-	-sudo rm -f $(ETC_DIR)/bed.json
-	@echo "Removed $(ETC_DIR)/bed.json"
+	-sudo rm -f $(ETC_DIR)/zoid6.json
+	@echo "Removed $(ETC_DIR)/zoid6.json"
 
 install-tmpfiles:
 	sudo install -m 0644 -o root -g root $(TMPFILES_SRC) $(TMPFILES_DST)
@@ -133,6 +133,6 @@ install-fhs: install-etc install-tmpfiles
 
 factory-sync:
 	install -d -m 0755 $(FACTORY_DIR)
-	install -m 0644 -o opencode -g opencode $(PACKAGE)/data/bed.json $(FACTORY_DIR)/bed.json
+	install -m 0644 -o opencode -g opencode $(PACKAGE)/data/zoid6.json $(FACTORY_DIR)/zoid6.json
 	install -m 0644 -o opencode -g opencode $(PACKAGE)/daemon/$(PROJECT).tmpfiles $(FACTORY_DIR)/$(PROJECT).tmpfiles
 	@echo "Synced factory defaults from in-tree sources"

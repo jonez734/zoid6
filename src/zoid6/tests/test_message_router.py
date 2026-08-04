@@ -3,7 +3,7 @@
 
 These tests use mocks to avoid touching real databases, modules, or sockets.
 The router's job is configuration-driven orchestration: load enabled services
-from bed.json and call each module's MessageRouter.register_all(server).
+from zoid6.json and call each module's MessageRouter.register_all(server).
 """
 import sys
 from unittest.mock import MagicMock, patch
@@ -25,7 +25,7 @@ class TestMessageRouterInit:
         assert isinstance(router.routers, dict)
 
     def test_init_loads_config(self, mock_args):
-        """MessageRouter loads bed.json on init."""
+        """MessageRouter loads zoid6.json on init."""
         from zoid6.api.handler import MessageRouter
 
         router = MessageRouter(mock_args)
@@ -52,7 +52,7 @@ class TestMessageRouterConfigLoad:
         assert isinstance(cfg, dict)
 
     def test_load_config_missing_file_raises(self, mock_args, tmp_path):
-        """If bed.json missing, _load_config raises FileNotFoundError."""
+        """If zoid6.json missing, _load_config raises FileNotFoundError."""
         from zoid6.api.handler import MessageRouter
 
         mock_args.config_file = str(tmp_path / "nonexistent.json")
@@ -201,7 +201,7 @@ class TestGetConfigModuleFunctions:
     """Test module-level helper functions."""
 
     def test_get_config_returns_dict(self):
-        """get_config returns a dict from bed.json."""
+        """get_config returns a dict from zoid6.json."""
         from zoid6.api.handler import get_config
 
         cfg = get_config()
@@ -295,7 +295,7 @@ class TestPackageMetadata:
         assert MessageRouter is not None
 
     def test_bed_json_shipped(self):
-        """data/bed.json is shipped with the package."""
+        """data/zoid6.json is shipped with the package."""
         from pathlib import Path
 
         from zoid6.api.handler import get_bundled_config_path

@@ -55,7 +55,7 @@ class TestMessageRouterValidateConfig:
         """
         from zoid6.api.handler import MessageRouter
 
-        cfg_path = tmp_path / "bed.json"
+        cfg_path = tmp_path / "zoid6.json"
         cfg_path.write_text('{"services": "not-a-dict"}')
 
         mock_args.config_file = str(cfg_path)

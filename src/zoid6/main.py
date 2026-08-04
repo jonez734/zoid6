@@ -12,7 +12,7 @@ def _resolve_config_path() -> str:
     override = os.environ.get(_CONFIG_FILE_ENV)
     if override:
         return override
-    etc_path = "/etc/zoid6/bed.json"
+    etc_path = "/etc/zoid6/zoid6.json"
     if os.path.isfile(etc_path):
         return etc_path
     return get_bundled_config_path()

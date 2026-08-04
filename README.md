@@ -23,8 +23,8 @@ on the roadmap).
 
 ```bash
 pip install -e .
-zoid6                       # uses /etc/zoid6/bed.json if present,
-                            # else the packaged zoid6/data/bed.json
+zoid6                       # uses /etc/zoid6/zoid6.json if present,
+                            # else the packaged zoid6/data/zoid6.json
 ```
 
 The `zoid6` console script is a thin wrapper around `bed --router
@@ -32,8 +32,8 @@ zoid6.api.handler.MessageRouter`. It resolves a config path in this
 order:
 
 1. `$ZOID6_CONFIG` (env-var override)
-2. `/etc/zoid6/bed.json` (FHS-installed config)
-3. the packaged `src/zoid6/data/bed.json`
+2. `/etc/zoid6/zoid6.json` (FHS-installed config)
+3. the packaged `src/zoid6/data/zoid6.json`
 
 and then forwards to `bed.main.main`. Every flag `bed` accepts
 (`--host`, `--port`, `--debug`, `--foreground`, `--pidfile`, …) is
@@ -54,13 +54,13 @@ wscat -c ws://127.0.0.1:8765
 
 ### Production
 
-The `usr/share/factory/etc/zoid6/bed.json` factory default is installed
-to `/etc/zoid6/bed.json` by the host-package installer. The systemd
+The `usr/share/factory/etc/zoid6/zoid6.json` factory default is installed
+to `/etc/zoid6/zoid6.json` by the host-package installer. The systemd
 unit lives in the `bed` repo (`bed/src/bed/daemon/bed.service`) and
 expects to be invoked as:
 
 ```bash
-/var/lib/bed/venv/bin/zoid6 --config /etc/zoid6/bed.json
+/var/lib/bed/venv/bin/zoid6 --config /etc/zoid6/zoid6.json
 ```
 
 `make install` (in `bed/`) will set up the `bed` user, venv, and
@@ -81,7 +81,7 @@ zoid6/
 │   │   ├── handler.py           MessageRouter — loads all enabled modules
 │   │   └── monikerrouter.py     Worked-example router (delegates auth to bed)
 │   ├── data/
-│   │   └── bed.json             Bundled default config
+│   │   └── zoid6.json             Bundled default config
 │   ├── daemon/
 │   │   └── zoid6.tmpfiles       systemd-tmpfiles drop-in
 │   └── tests/                   pytest (config + MessageRouter)
@@ -121,7 +121,7 @@ zoid6/
 ├── handbook/                    User / developer documentation
 │   └── SMOOTHSTATE.md           Page-transition framework guide
 │
-├── usr/share/factory/etc/zoid6/ FHS factory defaults (bed.json + tmpfiles)
+├── usr/share/factory/etc/zoid6/ FHS factory defaults (zoid6.json + tmpfiles)
 │
 ├── index.php                    5-line stub (requires config.php + session.php)
 ├── Makefile                     Root build orchestrator
@@ -133,7 +133,7 @@ zoid6/
 ## The MessageRouter
 
 `zoid6.api.handler.MessageRouter` is what `zoid6` loads into `bed`.
-It reads the bundled or FHS-installed `bed.json`, walks the
+It reads the bundled or FHS-installed `zoid6.json`, walks the
 `services` block, and imports each enabled module's `MessageRouter`
 class. The result is one WebSocket server speaking every BBS module's
 wire protocol in a single process.
@@ -157,7 +157,7 @@ The shipped config enables:
 | `murdermotel` | `murdermotel.api.handler`           | (not yet implemented)                 |
 | `mistermcfeely` | `mistermcfeely.api.handler`        | (not yet implemented)                 |
 
-The `casino` block in `bed.json` is more detailed than the rest — it
+The `casino` block in `zoid6.json` is more detailed than the rest — it
 configures the per-game actions (`hit`, `stand`, `double`, `split`,
 `surrender`), the table lifecycle (`list_tables`, `create_table`,
 `join_table`, `leave_table`, `watch_table`), and the chat surface
@@ -186,7 +186,7 @@ and has its own README.
 ## FHS install
 
 ```
-/etc/zoid6/bed.json         (from usr/share/factory/etc/zoid6/bed.json)
+/etc/zoid6/zoid6.json         (from usr/share/factory/etc/zoid6/zoid6.json)
 /var/lib/zoid6/              (created by zoid6.tmpfiles)
 /var/log/zoid6/              (created by zoid6.tmpfiles)
 /var/lib/bed/venv/bin/zoid6  (console script, installed by bed)

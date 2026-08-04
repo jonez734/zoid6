@@ -3,7 +3,7 @@
 ## BED bearer token
 
 - [ ] See `bed/TODO.md` "Bearer token" — adopt `bed.api.auth.AuthService` for BED-mode authentication and reconnect. Replaces per-game `auth` implementations. Zoid6 benefits strongly: dashboard / shared-wallet / chat clients that stay open for hours.
-- [ ] **Override built-in services** — allow zoid6 to replace bed-native services (auth, member) with its own implementations. Add an `"override": true` flag in bed.json; when set, zoid6 skips the "must exist" RuntimeError, calls `server.unregister_service()` on the existing service, then loads and registers its own from `modulepath`.
+- [ ] **Override built-in services** — allow zoid6 to replace bed-native services (auth, member) with its own implementations. Add an `"override": true` flag in zoid6.json; when set, zoid6 skips the "must exist" RuntimeError, calls `server.unregister_service()` on the existing service, then loads and registers its own from `modulepath`.
 
 ## BED `Sink` integration with `bbsengine6.io` (cross-project)
 
@@ -130,7 +130,7 @@ The `bed` daemon loads a router class dynamically via the `--router` argument. E
 - [X] Create `zoid6/src/zoid6/__init__.py`
 - [X] Create `zoid6/src/zoid6/api/__init__.py`
 - [X] Create `zoid6/src/zoid6/api/handler.py` - Unified MessageRouter
-- [X] Create `zoid6/src/zoid6/data/bed.json` - service configuration
+- [X] Create `zoid6/src/zoid6/data/zoid6.json` - service configuration
 - [X] Use bbsengine6.module.get() in bed.py for router loading
 - [X] Create `zoid6/Makefile` for development commands
 - [X] Make zoid6 installable via `pip install -e zoid6/src`
@@ -476,7 +476,7 @@ bed --router zoid6.api.handler.MessageRouter
 
 - [ ] Update `bbsengine6/sql/session.sql` - add `module` column to `engine.__session`
 - [ ] Update `bed/src/bed/data/bed.json` - add `session` section with `expiry_minutes`
-- [ ] Update `zoid6/src/zoid6/data/bed.json` - add `session` section
+- [ ] Update `zoid6/src/zoid6/data/zoid6.json` - add `session` section
 
 ### Phase 2: bbsengine6 Session Module
 
@@ -930,7 +930,7 @@ WorkingDirectory=/opt/bed
 EnvironmentFile=-/etc/bed/bed.env
 
 ExecStart=/usr/bin/bed \
-  --config /opt/zoid6/src/zoid6/data/bed.json \
+  --config /opt/zoid6/src/zoid6/data/zoid6.json \
   --router zoid6.api.handler.MessageRouter \
   --no-autorestart
 
@@ -968,24 +968,24 @@ mirroring the one in `bed/src/Makefile` (i.e. copy
 `/etc/systemd/system/zoid6-bed.service` and `daemon-reload`).
 
 ### Prerequisite (added 2026-07-22)
-The FHS plumbing for `/etc/zoid6/bed.json` and the tmpfiles
+The FHS plumbing for `/etc/zoid6/zoid6.json` and the tmpfiles
 drop-in has landed first, so the draft unit above can resolve
 its `--config` path:
 - `zoid6/src/zoid6/daemon/zoid6.tmpfiles` (in-package, shipped
   in the wheel via `package-data`).
-- `zoid6/src/zoid6/data/bed.json` is the canonical source;
+- `zoid6/src/zoid6/data/zoid6.json` is the canonical source;
   `make -C zoid6/src install-etc` rsyncs it from
-  `usr/share/factory/etc/zoid6/` to `/etc/zoid6/bed.json`.
+  `usr/share/factory/etc/zoid6/` to `/etc/zoid6/zoid6.json`.
 - `make -C zoid6/src install-tmpfiles` installs the tmpfiles
   drop-in to `/usr/lib/tmpfiles.d/zoid6.conf` and materializes
   `/etc/zoid6`.
-- The draft unit above should reference `/etc/zoid6/bed.json`
-  instead of `/opt/zoid6/src/zoid6/data/bed.json` once it ships.
+- The draft unit above should reference `/etc/zoid6/zoid6.json`
+  instead of `/opt/zoid6/src/zoid6/data/zoid6.json` once it ships.
 
 ### Ownership on `/etc/zoid6/` (added 2026-07-22)
 All zoid6 FHS files are owned `root:root`:
 - `/etc/zoid6/` → `755 root:root`
-- `/etc/zoid6/bed.json` → `644 root:root`
+- `/etc/zoid6/zoid6.json` → `644 root:root`
 - `/usr/lib/tmpfiles.d/zoid6.conf` → `644 root:root`
 
 The `install-etc` and `install-tmpfiles` Makefile targets use
@@ -1017,21 +1017,21 @@ declaration is enough to keep pip happy during install.
 
 ---
 
-## `data/bed.json` — `bank` and `channel` modulepaths do not resolve
+## `data/zoid6.json` — `bank` and `channel` modulepaths do not resolve
 
 ### Problem
 
-`zoid6/src/zoid6/data/bed.json` declares two services with
+`zoid6/src/zoid6/data/zoid6.json` declares two services with
 `enabled: true` whose `modulepath` strings do not import:
 
-| Service | `modulepath` in `bed.json` | Reality |
+| Service | `modulepath` in `zoid6.json` | Reality |
 |---|---|---|
 | `bank` | `bank.api.handler` | The bank package lives at `bbsengine6/bank/api/handler.py`. As a top-level `bank`, the path is not importable. `MessageRouter._register_module` logs `Failed to import bank: No module named 'bank'` and the casino-side `BankServiceHandler` is the one that actually wires `bank_balance` / `bank_add` / etc. |
 | `channel` | `channel.api.handler` | No `channel` package exists in `bbsengine6`, no top-level `channel/` sibling project, no `channel/api/handler.py` anywhere in the tree. Logs `Failed to import channel: No module named 'channel'` at every startup. |
 
 Net effect: the `bank` and `channel` enabled-true entries are dead
 config — they never register anything on the `WebSocketServer` because
-their modules don't exist. A reader of `bed.json` reasonably assumes
+their modules don't exist. A reader of `zoid6.json` reasonably assumes
 "if it's enabled, it works."
 
 ### Why this matters
@@ -1043,7 +1043,7 @@ their modules don't exist. A reader of `bed.json` reasonably assumes
   startup errors.
 - **Confusion for new modules.** A future contributor adding a
   real `channel` package to `bbsengine6` would reasonably expect
-  `bed.json` to start picking it up; today it would, silently,
+  `zoid6.json` to start picking it up; today it would, silently,
   if they also fix the `modulepath`. But the channel service
   itself is unimplemented (see `bbsengine6/TODO.md` Phase 7
   channel work), so flipping the `modulepath` to a not-yet-existing
@@ -1051,7 +1051,7 @@ their modules don't exist. A reader of `bed.json` reasonably assumes
 - **The casino's `BankServiceHandler` already covers the
   bank-balance / transfer message types** (see
   `casino/src/casino/api/handler.py:1352-1356`). The `bank`
-  entry in `zoid6/bed.json` was likely an early placeholder
+  entry in `zoid6/zoid6.json` was likely an early placeholder
   before casino absorbed it. If a real `bbsengine6.bank.api`
   service is the desired replacement, the `modulepath` should
   be `bbsengine6.bank.api.handler` and the casino's
@@ -1062,7 +1062,7 @@ their modules don't exist. A reader of `bed.json` reasonably assumes
 #### Option A — disable both until they exist
 
 Set `bank.enabled` and `channel.enabled` to `false` in
-`zoid6/src/zoid6/data/bed.json`. The casino's own
+`zoid6/src/zoid6/data/zoid6.json`. The casino's own
 `BankServiceHandler` continues to register `bank_*` messages;
 nothing changes at runtime. The JSON's `services` section
 remains a complete roadmap of every service zoid6 intends to
@@ -1075,7 +1075,7 @@ host, but only the ones with working code paths are flipped on.
 
 #### Option B — fix the `bank` modulepath, leave `channel` disabled
 
-Change `zoid6/src/zoid6/data/bed.json` so `bank.modulepath` is
+Change `zoid6/src/zoid6/data/zoid6.json` so `bank.modulepath` is
 `bbsengine6.bank.api.handler` (the path that actually
 resolves). `channel` stays disabled until the `channel`
 service is implemented.
@@ -1113,7 +1113,7 @@ land it after deciding whether to keep the casino-side
 ### Tasks
 
 - [ ] **Disable `bank` and `channel` in
-  `zoid6/src/zoid6/data/bed.json`** (Option A). One-line each:
+  `zoid6/src/zoid6/data/zoid6.json`** (Option A). One-line each:
   `"enabled": false`.
 - [ ] **Verify** by running
   `bed --router zoid6.api.handler.MessageRouter --debug` and
@@ -1171,7 +1171,7 @@ operator-only.
 
 ## zoid6 unified router: bank modulepath collision (file as separate task)
 
-`zoid6/src/zoid6/data/bed.json` declares a `bank` service
+`zoid6/src/zoid6/data/zoid6.json` declares a `bank` service
 with `modulepath: "bank.api.handler"`, but the bank package
 lives at `bbsengine6.bank`, not at the top-level `bank`
 namespace. At zoid6 startup, this produces the warning:
@@ -1184,7 +1184,7 @@ The casino's own `BankServiceHandler` covers the bank
 message types on the wire (visible in the registered
 services list at startup), so the warning is currently
 non-fatal. But the bank service is `enabled: true` in
-`bed.json` and is intended to be loaded by the zoid6
+`zoid6.json` and is intended to be loaded by the zoid6
 unified router; the failure is a real configuration
 mismatch, not a benign log line.
 
@@ -1199,10 +1199,10 @@ on each other.
   `bbsengine6.bank` modulepath.** Either (a) ship a
   top-level `bank` package (perhaps a thin wrapper that
   re-exports `bbsengine6.bank` so the modulepath resolves),
-  or (b) update `zoid6/src/zoid6/data/bed.json` to use
+  or (b) update `zoid6/src/zoid6/data/zoid6.json` to use
   `bbsengine6.bank.api.handler` as the modulepath.
 - [ ] **Verify after fix.** `python -m bed.main --config
-  /home/opencode/data/work/zoid6/src/zoid6/data/bed.json
+  /home/opencode/data/work/zoid6/src/zoid6/data/zoid6.json
   --router zoid6.api.handler.MessageRouter ...` should
   start with **no** "Failed to import bank" warning.
 - [ ] **Document the resolution in the bank/handler entry
@@ -1223,14 +1223,14 @@ on each other.
 ### Problem
 
 `zoid6/src/zoid6/api/handler.py:13` `MessageRouter` loads every
-enabled service from `data/bed.json` via
+enabled service from `data/zoid6.json` via
 `MessageRouter.register_all`, but **does not register a
 `list_services` handler itself.** A client that sends
 `{"type": "list_services"}` to a bed instance fronted by the
 zoid6 router gets back
 `{"type": "error", "code": "no_handler", "message": "No handler for message type: list_services"}`.
 
-The zoid6 router is the production path; `bed.json` ships
+The zoid6 router is the production path; `zoid6.json` ships
 with it as the implicit default for any deployment that wants
 the unified message set (auth, ping, list_tables, hit, stand,
 bank_*, …). All of those work; `list_services` does not.
@@ -1318,7 +1318,7 @@ own refactor.
   `{"type": "services", "services": [str, ...]}`.
 - [ ] **Register it first** in `MessageRouter.register_all`
   (before any `bbsmodule.load` call) so it's available even
-  if every enabled service in `bed.json` fails to import.
+  if every enabled service in `zoid6.json` fails to import.
 - [ ] **Update `zoid6/src/zoid6/tests/test_bed_startup.py`**
   `test_real_websocketserver_receives_registrations` to
   also assert `"list_services"` is in
@@ -1361,7 +1361,7 @@ that is no longer needed once the fixes land.
 This entry is the consolidated session plan and serves as
 the index for the per-repo implementation tasks. The per-
 repo tasks already exist in the `## \`--pidfile\` PID file
-management` (bed TODO), `## \`data/bed.json\` — \`bank\` and
+management` (bed TODO), `## \`data/zoid6.json\` — \`bank\` and
 \`channel\` modulepaths do not resolve` (zoid6 TODO),
 `## zoid6 unified router: bank modulepath collision` (zoid6
 TODO), and `## \`zoid6.api.handler.MessageRouter\` does not
@@ -1379,12 +1379,12 @@ section above for the per-repo task list.
    was rewritten to focus on the per-hand money-flow rework
    plan in `casino/8b3417e`; this entry is now superseded.
 
-2. **`zoid6/src/zoid6/data/bed.json` `bank` and `channel`
+2. **`zoid6/src/zoid6/data/zoid6.json` `bank` and `channel`
    `modulepath`s do not resolve** — open. Fix path:
    `bank.modulepath` → `bbsengine6.bank.api.handler`;
    `channel.enabled` → `false` (channel service does not
    exist yet). See the
-   `## \`data/bed.json\` — \`bank\` and \`channel\`
+   `## \`data/zoid6.json\` — \`bank\` and \`channel\`
    modulepaths do not resolve` and
    `## zoid6 unified router: bank modulepath collision`
    sections above for tasks.
@@ -1423,7 +1423,7 @@ When green-lit, the fixes land in this order:
    new method + 1 test in
    `zoid6/src/zoid6/tests/test_bed_startup.py`).
 3. **`zoid6`**: bank/channel JSON fix (2 lines in
-   `zoid6/src/zoid6/data/bed.json` + assertion list update
+   `zoid6/src/zoid6/data/zoid6.json` + assertion list update
    in `zoid6/src/zoid6/tests/test_config.py`).
 4. **`casino`**: delete the superseded `--pidfile` entry
    in the `## BED (BBS Engine Daemon) Improvements`
@@ -1466,7 +1466,7 @@ awaits `self.server.stop()` and releases the port.
 - `bed/TODO.md` "## `_apply_auth_config` overwrites CLI
   `--bed-secret` with literal `~`" — per-repo tasks for
   the tilde fix (Step 1).
-- `zoid6/TODO.md` "## `data/bed.json` — `bank` and
+- `zoid6/TODO.md` "## `data/zoid6.json` — `bank` and
   `channel` modulepaths do not resolve" — per-repo
   tasks for the JSON fix (Step 3).
 - `zoid6/TODO.md` "## zoid6 unified router: bank

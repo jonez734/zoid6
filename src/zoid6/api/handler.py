@@ -100,7 +100,7 @@ class MessageRouter:
             raise RuntimeError(
                 "Member service not registered. "
                 "bbsengine6.member.api.handler must be importable and "
-                "enabled in bed.json for zoid6 to start."
+                "enabled in zoid6.json for zoid6 to start."
             )
 
     def _register_module(self, module_name: str, module_config: Dict[str, Any], server: Any) -> None:
@@ -110,7 +110,7 @@ class MessageRouter:
         raising) are logged at error level and the module is skipped.
         register_all() continues with the remaining services so the
         daemon can still answer list_services and any other services
-        that did load. The ``required`` flag in bed.json is accepted
+        that did load. The ``required`` flag in zoid6.json is accepted
         for documentation but no longer changes behavior — every
         failure is treated as non-fatal here.
         """
@@ -145,20 +145,20 @@ class MessageRouter:
             )
 
 def get_config() -> Dict[str, Any]:
-    """Read the bundled zoid6/data/bed.json."""
-    with data_get("bed.json") as f:
+    """Read the bundled zoid6/data/zoid6.json."""
+    with data_get("zoid6.json") as f:
         return json.load(f)
 
 
 def get_bundled_config_path() -> str:
-    """Resolve the packaged bed.json filesystem path."""
+    """Resolve the packaged zoid6.json filesystem path."""
     try:
-        p = bbsmodule.file("zoid6", "data", "bed.json")
+        p = bbsmodule.file("zoid6", "data", "zoid6.json")
         if p is not None:
             return str(p)
     except TypeError:
         pass
-    return data_path("bed.json")
+    return data_path("zoid6.json")
 
 
 def get_enabled_services() -> list[str]:

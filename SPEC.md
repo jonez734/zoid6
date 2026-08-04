@@ -49,7 +49,7 @@ empyre / …
 ```
 
 `zoid6.main.main` is essentially `bed.main.main --router
-zoid6.api.handler.MessageRouter --config /etc/zoid6/bed.json` with
+zoid6.api.handler.MessageRouter --config /etc/zoid6/zoid6.json` with
 an env-var override (`$ZOID6_CONFIG`) and a packaged default
 fallback.
 
@@ -59,7 +59,7 @@ fallback.
 |-------------------|-------------|-----------------------------------------------------|
 | `MessageRouter`   | v1 stable   | loads every enabled module; fails loudly on misconfig|
 | `MonikerAuthRouter` | v1 stable | worked example; auth delegated to bed               |
-| bundled `bed.json`| v1 stable   | 87 lines; 5 enabled modules + 4 disabled placeholders|
+| bundled `zoid6.json`| v1 stable   | 87 lines; 5 enabled modules + 4 disabled placeholders|
 | FHS factory tree  | v1 stable   | byte-identical to packaged default; pinned by test  |
 | `zoid6.tmpfiles`  | v1 stable   | systemd-tmpfiles drop-in                            |
 | `php/zoid6.php`   | legacy/frozen | 1,723-line monolith; no new features planned    |
@@ -77,7 +77,7 @@ honoured because nothing else is stripped from argv.
 ```bash
 $ zoid6 --port 9000 --foreground --debug
 # resolves to:
-# bed --config /etc/zoid6/bed.json
+# bed --config /etc/zoid6/zoid6.json
 #     --router zoid6.api.handler.MessageRouter
 #     --port 9000 --foreground --debug
 ```
@@ -119,15 +119,15 @@ example. It:
 
 ### 3.4 Config helpers
 
-`MessageRouter.get_config()` reads the bundled `zoid6/data/bed.json`.
+`MessageRouter.get_config()` reads the bundled `zoid6/data/zoid6.json`.
 `MessageRouter.get_bundled_config_path()` returns its filesystem
 path. `MessageRouter.get_enabled_services()` returns the list of
 service names where `enabled == True`.
 
 ## 4. Configuration schema
 
-The shipped `src/zoid6/data/bed.json` (also byte-identical to
-`usr/share/factory/etc/zoid6/bed.json`) is 87 lines and has this
+The shipped `src/zoid6/data/zoid6.json` (also byte-identical to
+`usr/share/factory/etc/zoid6/zoid6.json`) is 87 lines and has this
 shape:
 
 ```json
@@ -242,14 +242,14 @@ Each site ships its own `config.php`, `htaccess-prod`, and Makefile.
 ## 7. FHS install layout
 
 ```
-/etc/zoid6/bed.json           (installed from usr/share/factory/etc/zoid6/bed.json)
+/etc/zoid6/zoid6.json           (installed from usr/share/factory/etc/zoid6/zoid6.json)
 /var/lib/zoid6/                (created by zoid6.tmpfiles)
 /var/log/zoid6/                (created by zoid6.tmpfiles)
 /var/lib/bed/venv/bin/zoid6    (console script, installed by `bed make install-venv`)
 ```
 
-`usr/share/factory/etc/zoid6/bed.json` is byte-identical to
-`src/zoid6/data/bed.json`; the test suite pins this.
+`usr/share/factory/etc/zoid6/zoid6.json` is byte-identical to
+`src/zoid6/data/zoid6.json`; the test suite pins this.
 
 `usr/share/factory/etc/zoid6/zoid6.tmpfiles` is the systemd-tmpfiles
 drop-in that creates `/var/log/zoid6` and `/var/lib/zoid6`.
@@ -264,8 +264,8 @@ because the user, venv, and lifecycle all belong to bed.
 | Router entry                         | `src/zoid6/main.py`                        |
 | Unified router                       | `src/zoid6/api/handler.py`                 |
 | Example router (MonikerAuthRouter)   | `src/zoid6/api/monikerrouter.py`           |
-| Bundled config                       | `src/zoid6/data/bed.json`                  |
-| FHS factory config                   | `usr/share/factory/etc/zoid6/bed.json`     |
+| Bundled config                       | `src/zoid6/data/zoid6.json`                  |
+| FHS factory config                   | `usr/share/factory/etc/zoid6/zoid6.json`     |
 | tmpfiles drop-in                     | `src/zoid6/daemon/zoid6.tmpfiles`          |
 | Console-script manifest              | `src/pyproject.toml`                       |
 | Daemon integration                   | [`bed`](../bed/)                           |
@@ -301,7 +301,7 @@ because the user, venv, and lifecycle all belong to bed.
 | `src/zoid6/api/handler.py`                      | MessageRouter                             |
 | `src/zoid6/api/monikerrouter.py`                | Worked example                            |
 | `src/zoid6/lib.py`                              | `PACKAGENAME = "zoid6"`                   |
-| `src/zoid6/data/bed.json`                       | Bundled default config                    |
+| `src/zoid6/data/zoid6.json`                       | Bundled default config                    |
 | `src/zoid6/daemon/zoid6.tmpfiles`               | systemd-tmpfiles drop-in                  |
 | `src/zoid6/tests/conftest.py`                   | pytest fixtures                           |
 | `src/zoid6/tests/test_bed_startup.py`           | FHS factory byte-equality                 |
@@ -310,7 +310,7 @@ because the user, venv, and lifecycle all belong to bed.
 | `src/zoid6/tests/test_monikerrouter.py`         | MonikerAuthRouter                         |
 | `src/zoid6/tests/test_validate_config.py`       | Config shape validation                   |
 | `src/pyproject.toml`                            | Python manifest                           |
-| `usr/share/factory/etc/zoid6/bed.json`          | FHS factory config (identical to bundled) |
+| `usr/share/factory/etc/zoid6/zoid6.json`          | FHS factory config (identical to bundled) |
 | `usr/share/factory/etc/zoid6/zoid6.tmpfiles`    | FHS factory tmpfiles                      |
 | `php/zoid6.php`                                 | PHP framework monolith                    |
 | `php/zoid6config.php`                           | Smarty constant aliases                   |

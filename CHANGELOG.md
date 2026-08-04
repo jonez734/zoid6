@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### zoid6: rename config file from `bed.json` to `zoid6.json`
+
+- `src/zoid6/data/bed.json` → `src/zoid6/data/zoid6.json`
+- `usr/share/factory/etc/zoid6/bed.json` → `usr/share/factory/etc/zoid6/zoid6.json`
+- FHS install path: `/etc/zoid6/bed.json` → `/etc/zoid6/zoid6.json`
+- `get_config()` / `get_bundled_config_path()` now load
+  `zoid6.json`; `main.py` resolves `/etc/zoid6/zoid6.json`.
+- `src/Makefile` `install-etc` / `uninstall-etc` /
+  `factory-sync` updated to the new filename.
+- `tests/test_config.py` and `tests/test_bed_startup.py`
+  updated; the FHS byte-equality test now compares
+  `usr/share/factory/etc/zoid6/zoid6.json` to
+  `src/zoid6/data/zoid6.json`.
+- Note: this is a breaking change for hosts that already have
+  `/etc/zoid6/bed.json` installed — `make install-etc` will
+  install the new file alongside or instead of the old one,
+  and existing hosts should `sudo mv /etc/zoid6/bed.json
+  /etc/zoid6/zoid6.json` (or just rerun `make install-etc`
+  to overwrite) before the next `zoid6` start.
+
 ### zoid6: run from venv via pyproject console script
 
 - `src/pyproject.toml` now registers `zoid6 = "zoid6.main:main"` so a
