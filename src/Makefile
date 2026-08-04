@@ -1,6 +1,6 @@
 PROJECT = zoid6
 OUTDIR = /srv/repo/$(PROJECT)/
-VERSION = $(shell date +%Y%m%d%H%M)
+VERSION := $(shell date +%Y%m%d%H%M)
 
 PYTHON ?= python3
 PIP ?= $(PYTHON) -m pip
@@ -45,8 +45,8 @@ help:
 	@echo "  sign          GPG-detach-sign every artifact in $(OUTDIR)"
 	@echo "  release       clean + version + build + rename-sdist + sign"
 
-install:
-	$(PIP) install -e $(SRC)
+install: version
+	$(PIP) install --no-cache-dir -e $(SRC)
 
 install-dev: install
 	$(PIP) install pytest pytest-cov

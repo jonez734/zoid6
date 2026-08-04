@@ -297,9 +297,9 @@ class TestPackageMetadata:
     def test_bed_json_shipped(self):
         """data/bed.json is shipped with the package."""
         from pathlib import Path
-        import zoid6
 
-        data_dir = Path(zoid6.__file__).parent / "data"
-        bed_json = data_dir / "bed.json"
+        from zoid6.api.handler import get_bundled_config_path
+
+        bed_json = Path(get_bundled_config_path())
         assert bed_json.exists()
         assert bed_json.is_file()

@@ -40,9 +40,9 @@ for _sibling in (
 
 
 def _bed_json_path() -> Path:
-    import zoid6
+    from zoid6.api.handler import get_bundled_config_path
 
-    return Path(zoid6.__file__).parent / "data" / "bed.json"
+    return Path(get_bundled_config_path())
 
 
 def _load_bed_json() -> dict:

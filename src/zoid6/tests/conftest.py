@@ -1,14 +1,15 @@
 """Shared pytest fixtures for zoid6 tests."""
 import argparse
 import sys
-from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
 
 sys.path.insert(0, "/home/opencode/data/work/zoid6/src")
 
-_BED_JSON = str(Path(__file__).resolve().parent.parent / "data" / "bed.json")
+from zoid6.api.handler import get_bundled_config_path  # noqa: E402
+
+_BED_JSON = get_bundled_config_path()
 
 
 @pytest.fixture

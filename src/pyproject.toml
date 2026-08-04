@@ -16,7 +16,10 @@ dependencies = [
 where = ["."]
 include = ["zoid6*"]
 
-[tool.setuptools.dynamic]
+[project.scripts]
+zoid6 = "zoid6.main:main"
+
+[tool.setuptools.dynamic]	
 version = { attr = "zoid6._version.__version__" }
 
 [tool.setuptools.package-data]

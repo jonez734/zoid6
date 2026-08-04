@@ -15,9 +15,9 @@ sys.path.insert(0, "/home/opencode/data/work/zoid6/src")
 
 
 def _bed_json_path() -> Path:
-    import zoid6
+    from zoid6.api.handler import get_bundled_config_path
 
-    return Path(zoid6.__file__).parent / "data" / "bed.json"
+    return Path(get_bundled_config_path())
 
 
 class TestBedJsonFile:
@@ -170,3 +170,25 @@ class TestBedJsonSchemaConsistency:
             db = data["database"]
             for field in ("name", "host", "port"):
                 assert field in db
+
+
+class TestBedJsonFactorySync:
+    """Guard against drift between src/zoid6/data/bed.json and the
+    usr/share/factory/etc/zoid6/bed.json FHS factory default. The
+    factory default is what `make -C src install-etc` ships to
+    /etc/zoid6/bed.json on a real install, so a stale copy silently
+    ships an out-of-date config to production hosts.
+    """
+
+    def test_factory_default_matches_source(self):
+        """usr/share/factory/etc/zoid6/bed.json must equal src/zoid6/data/bed.json."""
+        from pathlib import Path
+
+        src = _bed_json_path()
+        factory = Path(
+            "/home/opencode/data/work/zoid6/usr/share/factory/etc/zoid6/bed.json"
+        )
+        assert src.read_bytes() == factory.read_bytes(), (
+            f"{factory} is out of date; run `make -C zoid6/src factory-sync` "
+            "to sync from src/zoid6/data/bed.json"
+        )

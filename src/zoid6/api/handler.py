@@ -5,11 +5,9 @@
 from typing import Any, Dict
 from bbsengine6 import io, module as bbsmodule
 import json
-from pathlib import Path
 
 from zoid6.api.monikerrouter import MonikerAuthRouter  # noqa: F401
-
-_BED_JSON = Path(__file__).parent.parent / "data" / "bed.json"
+from zoid6.data import get as data_get, path as data_path
 
 
 class MessageRouter:
@@ -138,11 +136,20 @@ class MessageRouter:
             )
 
 def get_config() -> Dict[str, Any]:
-    """Read the bundled zoid6/data/bed.json (package introspection only)."""
-    if _BED_JSON.exists():
-        with open(_BED_JSON) as f:
-            return json.load(f)
-    return {}
+    """Read the bundled zoid6/data/bed.json."""
+    with data_get("bed.json") as f:
+        return json.load(f)
+
+
+def get_bundled_config_path() -> str:
+    """Resolve the packaged bed.json filesystem path."""
+    try:
+        p = bbsmodule.file("zoid6", "data", "bed.json")
+        if p is not None:
+            return str(p)
+    except TypeError:
+        pass
+    return data_path("bed.json")
 
 
 def get_enabled_services() -> list[str]:
