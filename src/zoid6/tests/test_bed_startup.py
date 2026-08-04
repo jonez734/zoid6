@@ -187,10 +187,14 @@ class TestBedJsonStartup:
         for c in mock_reg.call_args_list:
             assert c.args[0] != "bogus"
 
-    def test_module_load_import_error_does_not_crash(
+    def test_required_module_load_import_error_is_logged(
         self, mock_args, mock_server, caplog
     ):
-        """ImportError for one module is caught; remaining modules still register."""
+        """ImportError on a required service is logged and skipped;
+        register_all() completes for the rest. The ``required`` flag
+        in bed.json is documentation-only; failures are never fatal
+        here so the daemon can keep serving the services that did
+        load and the server can still answer list_services."""
         import logging
         from zoid6.api.handler import MessageRouter
 
@@ -219,18 +223,19 @@ class TestBedJsonStartup:
             with caplog.at_level(logging.ERROR, logger="asimov"):
                 router.register_all(mock_server)
 
+        # The error log names the failing service so the operator can
+        # tell which module was skipped, but register_all completes.
         assert any(
             f"failed to import {target}" in rec.getMessage().lower()
             for rec in caplog.records
         ), f"expected 'failed to import {target}' in logs"
-        # The failing module must not appear in router.routers; the others
-        # must still be there.
         assert target not in router.routers
 
-    def test_module_load_attribute_error_does_not_crash(
+    def test_optional_module_load_import_error_is_swallowed(
         self, mock_args, mock_server, caplog
     ):
-        """AttributeError (no MessageRouter) is caught and logged."""
+        """ImportError on a non-required (``required: false``) service is
+        logged and skipped; register_all() completes for the rest."""
         import logging
         from zoid6.api.handler import MessageRouter
 
@@ -245,6 +250,87 @@ class TestBedJsonStartup:
 
         target = enabled[0]
         target_path = cfg["services"][target]["modulepath"]
+        # Force the picked service to be optional for this test only.
+        router.config["services"][target]["required"] = False
+
+        def maybe_fail(args, path):
+            if path == target_path:
+                raise ImportError("simulated missing module")
+            mod = MagicMock()
+            mod.MessageRouter.return_value = MagicMock()
+            return mod
+
+        with patch(
+            "zoid6.api.handler.bbsmodule.load", side_effect=maybe_fail
+        ):
+            with caplog.at_level(logging.ERROR, logger="asimov"):
+                router.register_all(mock_server)
+
+        assert any(
+            f"failed to import {target}" in rec.getMessage().lower()
+            for rec in caplog.records
+        ), f"expected 'failed to import {target}' in logs"
+        assert target not in router.routers
+
+    def test_required_module_load_attribute_error_is_logged(
+        self, mock_args, mock_server, caplog
+    ):
+        """AttributeError (no MessageRouter) on a required service is
+        logged and skipped; register_all() completes for the rest."""
+        import logging
+        from zoid6.api.handler import MessageRouter
+
+        router = MessageRouter(mock_args)
+        cfg = _load_bed_json()
+        enabled = [
+            name for name, svc in cfg["services"].items()
+            if isinstance(svc, dict) and svc.get("enabled") is True
+        ]
+        if not enabled:
+            pytest.skip("no enabled services in bed.json; nothing to fail on")
+
+        target = enabled[0]
+        target_path = cfg["services"][target]["modulepath"]
+
+        def maybe_fail(args, path):
+            if path == target_path:
+                raise AttributeError("no MessageRouter class")
+            mod = MagicMock()
+            mod.MessageRouter.return_value = MagicMock()
+            return mod
+
+        with patch(
+            "zoid6.api.handler.bbsmodule.load", side_effect=maybe_fail
+        ):
+            with caplog.at_level(logging.ERROR, logger="asimov"):
+                router.register_all(mock_server)
+
+        assert any(
+            "messagerouter not found" in rec.getMessage().lower()
+            for rec in caplog.records
+        ), "expected 'MessageRouter not found' in logs"
+        assert target not in router.routers
+
+    def test_optional_module_load_attribute_error_is_swallowed(
+        self, mock_args, mock_server, caplog
+    ):
+        """AttributeError (no MessageRouter) on a non-required service is
+        logged and skipped."""
+        import logging
+        from zoid6.api.handler import MessageRouter
+
+        router = MessageRouter(mock_args)
+        cfg = _load_bed_json()
+        enabled = [
+            name for name, svc in cfg["services"].items()
+            if isinstance(svc, dict) and svc.get("enabled") is True
+        ]
+        if not enabled:
+            pytest.skip("no enabled services in bed.json; nothing to fail on")
+
+        target = enabled[0]
+        target_path = cfg["services"][target]["modulepath"]
+        router.config["services"][target]["required"] = False
 
         def maybe_fail(args, path):
             if path == target_path:
@@ -323,6 +409,19 @@ class TestBedJsonStartup:
         po = router.config["services"]["postoffice"]
         assert po["poll_interval"] == 30
         assert po["mailboxes"] == []
+
+    def test_postoffice_marked_optional_in_bed_json(self):
+        """postoffice is enabled but its module is not currently
+        importable in the standard test environment. It must be
+        marked ``required: false`` in bed.json so its missing module
+        does not abort the daemon."""
+        cfg = _load_bed_json()
+        po = cfg["services"]["postoffice"]
+        assert po.get("enabled") is True
+        assert po.get("required") is False, (
+            f"postoffice must be required=false so a missing or broken "
+            f"postoffice module does not take the daemon down; got {po!r}"
+        )
 
     def test_placeholder_services_disabled(self, mock_args):
         """empyre, murdermotel, and auth are placeholders and must stay

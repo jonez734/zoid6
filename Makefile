@@ -56,7 +56,7 @@ parsedown-deploy:
 php-deploy:
 	$(MAKE) -C php stage
 
-.PHONY: markdown parsedown-deploy php-deploy deploy deploy-www
+.PHONY: markdown parsedown-deploy php-deploy deploy deploy-www deploy-tui
 
 deploy:
 	$(MAKE) -C shared stage
@@ -68,6 +68,9 @@ deploy:
 
 deploy-www:
 	$(MAKE) -C sites/www prod
+
+deploy-tui:
+	$(MAKE) -C src release
 
 .PHONY: version build commit-version
 

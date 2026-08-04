@@ -104,7 +104,16 @@ class MessageRouter:
             )
 
     def _register_module(self, module_name: str, module_config: Dict[str, Any], server: Any) -> None:
-        """Register a single module's services."""
+        """Register a single module's services.
+
+        Failures (ImportError, missing MessageRouter class, register_all
+        raising) are logged at error level and the module is skipped.
+        register_all() continues with the remaining services so the
+        daemon can still answer list_services and any other services
+        that did load. The ``required`` flag in bed.json is accepted
+        for documentation but no longer changes behavior — every
+        failure is treated as non-fatal here.
+        """
         module_path = module_config.get("modulepath")
         if not module_path:
             io.echo(
