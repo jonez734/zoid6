@@ -70,7 +70,7 @@ deploy-www:
 	$(MAKE) -C sites/www prod
 
 deploy-tui:
-	$(MAKE) -C src release
+	$(MAKE) -C src deploy-tui
 
 .PHONY: version build commit-version
 

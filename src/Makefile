@@ -17,6 +17,7 @@ TMPFILES_DST = /usr/lib/tmpfiles.d/$(PROJECT).conf
 .PHONY: all help install install-dev test test-cov test-verbose lint clean uninstall egg-info
 .PHONY: build version rename-sdist sign release
 .PHONY: install-etc install-tmpfiles install-fhs uninstall-etc uninstall-tmpfiles factory-sync
+.PHONY: deploy-tui
 
 all: help
 
@@ -44,6 +45,7 @@ help:
 	@echo "  rename-sdist  Rename built sdist to include -src suffix"
 	@echo "  sign          GPG-detach-sign every artifact in $(OUTDIR)"
 	@echo "  release       clean + version + build + rename-sdist + sign"
+	@echo "  deploy-tui    install (editable); does NOT build/sign artifacts"
 
 install: version
 	$(PIP) install --no-cache-dir -e $(SRC)
@@ -103,6 +105,8 @@ sign:
 	done
 
 release: clean version build rename-sdist sign
+
+deploy-tui: install
 
 install-etc:
 	sudo install -d -m 0755 -o root -g root $(ETC_DIR)
