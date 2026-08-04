@@ -83,6 +83,7 @@
   "database": {
     "name": "zoid6",
     "host": "localhost",
-    "port": 5432
+    "port": 5432,
+    "dsn": "host=localhost port=5432 dbname=zoid6"
   }
 }
