@@ -1,0 +1,31 @@
+[Unit]
+Description=zoid6 - BBS Engine Router (custom-configured bed)
+Documentation=https://bbsengine.org/
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=zoid6
+Group=zoid6
+WorkingDirectory=/var/lib/zoid6
+
+EnvironmentFile=-/etc/zoid6/zoid6.env
+
+ExecStart=@VENV_DIR@/bin/bed --config /etc/zoid6/zoid6.json --router zoid6.api.handler.MessageRouter
+
+ExecReload=/bin/kill -HUP $MAINPID
+
+Restart=on-failure
+RestartSec=5s
+
+KillMode=mixed
+KillSignal=SIGTERM
+TimeoutStopSec=30s
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=zoid6
+
+[Install]
+WantedBy=multi-user.target

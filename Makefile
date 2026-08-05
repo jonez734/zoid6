@@ -17,6 +17,10 @@ export RSYNC = rsync --chmod=Dg=rwxs,Fgu=rw,Fo=r --no-times --verbose --archive 
 export PYTHON ?= python3
 VERSION = $(shell date +%Y%m%d%H%M)
 
+export VENV_DIR ?= /var/lib/zoid6/venv
+export VENV_USER ?= zoid6
+export VENV_GROUP ?= zoid6
+
 all:
 
 clean:
@@ -71,6 +75,20 @@ deploy-www:
 
 deploy-tui:
 	$(MAKE) -C src deploy-tui
+
+.PHONY: install-venv uninstall-venv install-fhs uninstall-fhs
+
+install-venv:
+	$(MAKE) -C src install-venv VENV_DIR="$(VENV_DIR)" VENV_USER="$(VENV_USER)" VENV_GROUP="$(VENV_GROUP)"
+
+uninstall-venv:
+	$(MAKE) -C src uninstall-venv VENV_DIR="$(VENV_DIR)"
+
+install-fhs:
+	$(MAKE) -C src install-fhs VENV_DIR="$(VENV_DIR)" VENV_USER="$(VENV_USER)" VENV_GROUP="$(VENV_GROUP)"
+
+uninstall-fhs:
+	$(MAKE) -C src uninstall-fhs VENV_DIR="$(VENV_DIR)"
 
 .PHONY: version build commit-version
 

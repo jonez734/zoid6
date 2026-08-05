@@ -13,10 +13,21 @@ FACTORY_DIR = $(CURDIR)/../usr/share/factory/etc/$(PROJECT)
 ETC_DIR = /etc/$(PROJECT)
 TMPFILES_SRC = $(PACKAGE)/daemon/$(PROJECT).tmpfiles
 TMPFILES_DST = /usr/lib/tmpfiles.d/$(PROJECT).conf
+SYSUSERS_SRC = $(PACKAGE)/daemon/$(PROJECT).sysusers
+SYSUSERS_DST = /usr/lib/sysusers.d/$(PROJECT).conf
+UNIT_SRC = $(PACKAGE)/daemon/$(PROJECT).service
+UNIT_DST = /usr/lib/systemd/system/$(PROJECT).service
+
+VENV_DIR ?= /var/lib/zoid6/venv
+VENV_USER ?= zoid6
+VENV_GROUP ?= zoid6
 
 .PHONY: all help install install-dev test test-cov test-verbose lint clean uninstall egg-info
 .PHONY: build version rename-sdist sign release
 .PHONY: install-etc install-tmpfiles install-fhs uninstall-etc uninstall-tmpfiles factory-sync
+.PHONY: install-sysusers uninstall-sysusers
+.PHONY: install-venv uninstall-venv restorecon
+.PHONY: install-systemd uninstall-systemd uninstall-fhs
 .PHONY: deploy-tui
 
 all: help
@@ -27,11 +38,18 @@ help:
 	@echo "Targets:"
 	@echo "  install       Install zoid6 in editable mode (pip install -e .)"
 	@echo "  install-dev   Install zoid6 with test extras"
-	@echo "  install-fhs   Install FHS system files (/etc/zoid6 + tmpfiles drop-in)"
+	@echo "  install-fhs   Install FHS system files (sysusers + tmpfiles + venv + systemd + etc)"
 	@echo "  install-etc   Install /etc/zoid6/zoid6.json from factory defaults"
 	@echo "  install-tmpfiles Install /usr/lib/tmpfiles.d/zoid6.conf"
+	@echo "  install-sysusers Install /usr/lib/sysusers.d/zoid6.conf (creates zoid6 user/group)"
+	@echo "  install-venv  Ensure shared venv at $(VENV_DIR) (owner: $(VENV_USER):$(VENV_GROUP))"
+	@echo "  install-systemd Install /usr/lib/systemd/system/zoid6.service (@VENV_DIR@ templated)"
 	@echo "  uninstall-etc Remove /etc/zoid6/zoid6.json"
 	@echo "  uninstall-tmpfiles Remove tmpfiles drop-in"
+	@echo "  uninstall-sysusers Remove sysusers drop-in"
+	@echo "  uninstall-venv Remove $(VENV_DIR)"
+	@echo "  uninstall-systemd Stop, disable, and remove the zoid6.service unit"
+	@echo "  restorecon    Relabel $(VENV_DIR)/bin for SELinux"
 	@echo "  factory-sync  Copy in-tree data/ + daemon/ to usr/share/factory/"
 	@echo "  test          Run tests with pytest"
 	@echo "  test-verbose  Run tests with verbose output"
@@ -118,7 +136,7 @@ uninstall-etc:
 	-sudo rm -f $(ETC_DIR)/zoid6.json
 	@echo "Removed $(ETC_DIR)/zoid6.json"
 
-install-tmpfiles:
+install-tmpfiles: install-sysusers
 	sudo install -m 0644 -o root -g root $(TMPFILES_SRC) $(TMPFILES_DST)
 	sudo chown root:root $(TMPFILES_DST)
 	sudo systemd-tmpfiles --create
@@ -128,11 +146,59 @@ uninstall-tmpfiles:
 	-sudo rm -f $(TMPFILES_DST)
 	@echo "Removed $(TMPFILES_DST)"
 
-install-fhs: install-etc install-tmpfiles
+install-sysusers:
+	sudo install -m 0644 -o root -g root $(SYSUSERS_SRC) $(SYSUSERS_DST)
+	sudo chown root:root $(SYSUSERS_DST)
+	sudo systemd-sysusers
+	@echo "Created zoid6 user and group via $(SYSUSERS_DST)"
+
+uninstall-sysusers:
+	-sudo rm -f $(SYSUSERS_DST)
+	@echo "Removed $(SYSUSERS_DST)"
+
+install-venv: install-sysusers
+	@command -v sudo >/dev/null 2>&1 || { echo "Error: sudo required"; exit 1; }
+	@sudo -u $(VENV_USER) test -d "$(VENV_DIR)" || sudo -u $(VENV_USER) $(PYTHON) -m venv "$(VENV_DIR)"
+	sudo -u $(VENV_USER) $(VENV_DIR)/bin/pip install --upgrade pip
+	sudo -u $(VENV_USER) $(VENV_DIR)/bin/pip install --quiet build setuptools wheel
+	@command -v semanage >/dev/null 2>&1 && \
+		sudo semanage fcontext -a -t bin_t "$(VENV_DIR)/bin(/.*)?" 2>/dev/null || true
+	@command -v restorecon >/dev/null 2>&1 && sudo restorecon -R $(VENV_DIR)/bin/ || true
+	@echo "Ensured shared venv at $(VENV_DIR) (owner: $(VENV_USER):$(VENV_GROUP))"
+
+uninstall-venv:
+	-sudo rm -rf $(VENV_DIR)
+	@echo "Removed $(VENV_DIR)"
+
+install-systemd:
+	sed 's|@VENV_DIR@|$(VENV_DIR)|g' $(UNIT_SRC) | sudo tee $(UNIT_DST) > /dev/null
+	sudo chmod 0644 $(UNIT_DST)
+	sudo chown root:root $(UNIT_DST)
+	sudo systemctl daemon-reload
+	@echo "Installed $(UNIT_DST)"
+
+uninstall-systemd:
+	-sudo systemctl stop $(PROJECT) 2>/dev/null
+	-sudo systemctl disable $(PROJECT) 2>/dev/null
+	-sudo rm -f $(UNIT_DST)
+	-sudo systemctl daemon-reload
+	@echo "Removed $(UNIT_DST)"
+
+restorecon:
+	@command -v semanage >/dev/null 2>&1 && \
+		sudo semanage fcontext -a -t bin_t "$(VENV_DIR)/bin(/.*)?" 2>/dev/null || true
+	sudo restorecon -R $(VENV_DIR)/bin/
+	@echo "Relabeled $(VENV_DIR)/bin/ for SELinux"
+
+install-fhs: install-sysusers install-tmpfiles install-venv install-systemd install-etc
 	@echo "zoid6 FHS files installed"
+
+uninstall-fhs: uninstall-systemd uninstall-venv uninstall-tmpfiles uninstall-sysusers uninstall-etc
+	@echo "zoid6 FHS files uninstalled"
 
 factory-sync:
 	install -d -m 0755 $(FACTORY_DIR)
 	install -m 0644 -o opencode -g opencode $(PACKAGE)/data/zoid6.json $(FACTORY_DIR)/zoid6.json
 	install -m 0644 -o opencode -g opencode $(PACKAGE)/daemon/$(PROJECT).tmpfiles $(FACTORY_DIR)/$(PROJECT).tmpfiles
+	install -m 0644 -o opencode -g opencode $(PACKAGE)/daemon/$(PROJECT).sysusers $(FACTORY_DIR)/$(PROJECT).sysusers
 	@echo "Synced factory defaults from in-tree sources"

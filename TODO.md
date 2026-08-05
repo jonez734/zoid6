@@ -1482,3 +1482,77 @@ awaits `self.server.stop()` and releases the port.
   get_player_balance and place_bet` — the casino-side
   fix for the NULL credits crash (already landed).
 
+---
+
+## Shared venv under `zoid6` (single venv for all bbsengine6 services)
+
+zoid6 is the anchor package for a single shared venv at `/var/lib/zoid6/venv`, owned by a `zoid6` system user/group. All bbsengine6 services (bed, postoffice, casino, empyre, murdermotel, etc.) are installed into it so any service user can `import` any package. `deploytool` owns the topology — per-project Makefiles do not hard-code venv paths.
+
+### Foundation (zoid6 repo)
+
+- [x] Create `src/zoid6/daemon/zoid6.sysusers`:
+  - [x] `u zoid6 - "zoid6 BBS Router" /var/lib/zoid6 -`
+  - [x] `g zoid6 - -`
+  - [x] `m bed zoid6` (bridge: bed service user joins the zoid6 group)
+  - [x] `m postoffice zoid6` (bridge: postoffice service user joins the zoid6 group)
+- [x] Replace `src/zoid6/daemon/zoid6.tmpfiles` with full layout:
+  - [x] `d /etc/zoid6 0755 root root - -`
+  - [x] `d /var/lib/zoid6 0755 zoid6 zoid6 - -`
+  - [x] `d /var/lib/zoid6/venv 0755 zoid6 zoid6 - -`
+  - [x] `d /var/log/zoid6 0755 zoid6 zoid6 - -`
+- [x] Create `src/zoid6/daemon/zoid6.service` (templated, `@VENV_DIR@` placeholder):
+  - [x] `User=zoid6`, `Group=zoid6`, `WorkingDirectory=/var/lib/zoid6`
+  - [x] `ExecStart=@VENV_DIR@/bin/bed --config /etc/zoid6/zoid6.json --router zoid6.api.handler.MessageRouter` (`--router` added so zoid6 actually loads its unified router; bed CLI has no `--no-autorestart`)
+  - [x] `SyslogIdentifier=zoid6`
+- [x] Create `usr/share/factory/etc/zoid6/zoid6.json` (already existed — zoid6 router config; synced via `factory-sync`)
+- [x] Update `src/Makefile`:
+  - [x] Add `VENV_DIR ?= /var/lib/zoid6/venv`, `VENV_USER ?= zoid6`, `VENV_GROUP ?= zoid6`
+  - [x] Add `install-sysusers` / `uninstall-sysusers` (install to `/usr/lib/sysusers.d/zoid6.conf`, `systemd-sysusers`)
+  - [x] Add `install-venv` (idempotent: create venv if missing, `pip install --upgrade pip build setuptools wheel`; no wheel install — anchor only; depends on `install-sysusers`)
+  - [x] Add `uninstall-venv` (`sudo rm -rf $(VENV_DIR)`)
+  - [x] Add `install-systemd` / `uninstall-systemd` (`sed 's|@VENV_DIR@|$(VENV_DIR)|g'` at install time)
+  - [x] Add `install-etc` / `uninstall-etc` for `/etc/zoid6/zoid6.json` from factory defaults
+  - [x] Add `restorecon` (SELinux `bin_t` fcontext for `$(VENV_DIR)/bin(/.*)?`)
+  - [x] Extend `install-fhs` chain: `install-sysusers install-tmpfiles install-venv install-systemd install-etc` (named `install-fhs` to avoid clobbering the existing editable `install` target used by `deploy-tui`)
+  - [x] Add `uninstall-fhs` chain
+  - [x] Extend `factory-sync` to also sync `zoid6.sysusers`
+  - [x] Add `install-tmpfiles: install-sysusers` dependency (dirs owned by `zoid6:zoid6`)
+- [x] Update root `Makefile`:
+  - [x] Add `install-venv` / `uninstall-venv` / `install-fhs` / `uninstall-fhs` shims delegating to `src/Makefile` (the root `deploy` target is the PHP www deploy and was left untouched)
+
+### deploytool (venv orchestration)
+
+- [ ] Add `VENV_LAYOUT` dict to `src/deploytool/lib.py` mapping each project → `(venv_dir, user, group)`, all pointing at the shared `/var/lib/zoid6/venv` (unmigrated services keep per-user venv entries as placeholders)
+- [ ] Add `get_venv_layout(base)` helper
+- [ ] Add `--venv-dir`, `--venv-user`, `--venv-group` CLI flags to `buildargs()` (per-deploy overrides)
+- [ ] Plumb `VENV_DIR`/`VENV_USER`/`VENV_GROUP` as `make` env-var assignments in `run_make_deploy()`
+- [ ] Add pre-deploy step in `main.py`: for each unique venv triple in the resolved deploy, run `make -C <owner-project> install-venv VENV_DIR=… VENV_USER=… VENV_GROUP=…` once, before the per-project loop
+
+### mistermcfeely (postoffice)
+
+- [ ] Makefile: change `VENV_DIR = /var/lib/postoffice/venv` → `VENV_DIR ?= /var/lib/zoid6/venv`
+- [ ] Makefile: add `VENV_USER ?= zoid6`, `VENV_GROUP ?= zoid6`
+- [ ] Makefile: replace `sudo -u postoffice` with `sudo -u $(VENV_USER)` in `install-venv` / `restorecon`
+- [ ] Template `etc-postoffice/mcfeely-authd.service`: `ExecStart=@VENV_DIR@/bin/mcfeely-authd …` (keep `User=postoffice`, `WorkingDirectory=/var/lib/postoffice`)
+- [ ] Makefile `install-systemd`: `sed 's|@VENV_DIR@|$(VENV_DIR)|g'` when copying the unit
+- [ ] Update `install-venv` help text (shared venv)
+
+### bed
+
+- [ ] Makefile: `VENV_DIR ?= /var/lib/zoid6/venv`, add `VENV_USER ?= zoid6`, `VENV_GROUP ?= zoid6`
+- [ ] Makefile: replace `sudo -u bed` with `sudo -u $(VENV_USER)`
+- [ ] Template `src/bed/daemon/bed.service`: `ExecStart=@VENV_DIR@/bin/bed --config /etc/bed/bed.json`
+- [ ] Makefile `install-systemd`: `sed 's|@VENV_DIR@|$(VENV_DIR)|g'`
+- [ ] Update `bed/FHS.md` with "Shared venv under `zoid6`" section
+
+### Migration (deploy host, post-commit)
+
+- [ ] Stop `mcfeely-authd` and `bed`
+- [ ] Create the shared venv: `make install-sysusers install-tmpfiles install-venv` in `zoid6/src`
+- [ ] Run `deploytool postoffice bed zoid6` to populate the shared venv
+- [ ] Install templated units and `systemctl daemon-reload`
+- [ ] Start `mcfeely-authd`, `bed`, `zoid6`
+- [ ] Verify: `sudo -u bed /var/lib/zoid6/venv/bin/python -c "import postoffice"` (the original goal)
+- [ ] Remove old per-service venvs: `rm -rf /var/lib/postoffice/venv /var/lib/bed/venv`
+- [ ] Spot-check `bed.json` vs `zoid6.json` for port/bind conflicts (both run `bed` from the shared venv)
+
