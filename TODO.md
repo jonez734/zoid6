@@ -1522,25 +1522,28 @@ zoid6 is the anchor package for a single shared venv at `/var/lib/zoid6/venv`, o
 
 ### deploytool (venv orchestration)
 
-- [ ] Add `VENV_LAYOUT` dict to `src/deploytool/lib.py` mapping each project → `(venv_dir, user, group)`, all pointing at the shared `/var/lib/zoid6/venv` (unmigrated services keep per-user venv entries as placeholders)
-- [ ] Add `get_venv_layout(base)` helper
-- [ ] Add `--venv-dir`, `--venv-user`, `--venv-group` CLI flags to `buildargs()` (per-deploy overrides)
-- [ ] Plumb `VENV_DIR`/`VENV_USER`/`VENV_GROUP` as `make` env-var assignments in `run_make_deploy()`
-- [ ] Add pre-deploy step in `main.py`: for each unique venv triple in the resolved deploy, run `make -C <owner-project> install-venv VENV_DIR=… VENV_USER=… VENV_GROUP=…` once, before the per-project loop
+- [x] Add `VENV_LAYOUT` dict to `src/deploytool/lib.py` mapping each project → venv path (registry only; deploytool does not plumb venv vars into `make` — per-project Makefile defaults and `pip` handle venv targeting):
+  - [x] Shared `/var/lib/zoid6/venv`: `zoid6`, `bed`, `mistermcfeely`, `bbsengine6`, `teos`, `murdermotel`, `empyre`, `casino`, `achilles`, `letteredolive`, `zoidoffice`
+  - [x] `atlas` → `/var/lib/atlas/venv` (standalone placeholder)
+  - [x] `backuptools`, `deploytool` → `VENV_USER` — the user's active venv (these tools are not part of zoid6; `getdate_next` and `asimov` also default to `VENV_USER`)
+  - [x] Any unlisted project → `VENV_USER` (default)
+- [x] Add `get_venv_layout(base)` helper; `VENV_USER` sentinel resolves at runtime to the active venv (`VIRTUAL_ENV`, else `sys.prefix` when it differs from `sys.base_prefix`); error if none active
+- [x] No `--venv-dir`/`--venv-user`/`--venv-group` CLI flags and no pre-deploy venv-ensure step (dropped: `pip` targets the active venv automatically)
+- [x] Add `install-venv` / `uninstall-venv` to the `backuptools` and `deploytool` Makefiles (consistency with the zoid6 anchor pattern; default `VENV_DIR` = active venv)
 
 ### mistermcfeely (postoffice)
 
 - [ ] Makefile: change `VENV_DIR = /var/lib/postoffice/venv` → `VENV_DIR ?= /var/lib/zoid6/venv`
-- [ ] Makefile: add `VENV_USER ?= zoid6`, `VENV_GROUP ?= zoid6`
-- [ ] Makefile: replace `sudo -u postoffice` with `sudo -u $(VENV_USER)` in `install-venv` / `restorecon`
+- [ ] Makefile: add `VENV_OWNER ?= zoid6`, `VENV_GROUP ?= zoid6`
+- [ ] Makefile: replace `sudo -u postoffice` with `sudo -u $(VENV_OWNER)` in `install-venv` / `restorecon`
 - [ ] Template `etc-postoffice/mcfeely-authd.service`: `ExecStart=@VENV_DIR@/bin/mcfeely-authd …` (keep `User=postoffice`, `WorkingDirectory=/var/lib/postoffice`)
 - [ ] Makefile `install-systemd`: `sed 's|@VENV_DIR@|$(VENV_DIR)|g'` when copying the unit
 - [ ] Update `install-venv` help text (shared venv)
 
 ### bed
 
-- [ ] Makefile: `VENV_DIR ?= /var/lib/zoid6/venv`, add `VENV_USER ?= zoid6`, `VENV_GROUP ?= zoid6`
-- [ ] Makefile: replace `sudo -u bed` with `sudo -u $(VENV_USER)`
+- [ ] Makefile: `VENV_DIR ?= /var/lib/zoid6/venv`, add `VENV_OWNER ?= zoid6`, `VENV_GROUP ?= zoid6`
+- [ ] Makefile: replace `sudo -u bed` with `sudo -u $(VENV_OWNER)`
 - [ ] Template `src/bed/daemon/bed.service`: `ExecStart=@VENV_DIR@/bin/bed --config /etc/bed/bed.json`
 - [ ] Makefile `install-systemd`: `sed 's|@VENV_DIR@|$(VENV_DIR)|g'`
 - [ ] Update `bed/FHS.md` with "Shared venv under `zoid6`" section

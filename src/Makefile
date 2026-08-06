@@ -19,7 +19,7 @@ UNIT_SRC = $(PACKAGE)/daemon/$(PROJECT).service
 UNIT_DST = /usr/lib/systemd/system/$(PROJECT).service
 
 VENV_DIR ?= /var/lib/zoid6/venv
-VENV_USER ?= zoid6
+VENV_OWNER ?= zoid6
 VENV_GROUP ?= zoid6
 
 .PHONY: all help install install-dev test test-cov test-verbose lint clean uninstall egg-info
@@ -42,7 +42,7 @@ help:
 	@echo "  install-etc   Install /etc/zoid6/zoid6.json from factory defaults"
 	@echo "  install-tmpfiles Install /usr/lib/tmpfiles.d/zoid6.conf"
 	@echo "  install-sysusers Install /usr/lib/sysusers.d/zoid6.conf (creates zoid6 user/group)"
-	@echo "  install-venv  Ensure shared venv at $(VENV_DIR) (owner: $(VENV_USER):$(VENV_GROUP))"
+	@echo "  install-venv  Ensure shared venv at $(VENV_DIR) (owner: $(VENV_OWNER):$(VENV_GROUP))"
 	@echo "  install-systemd Install /usr/lib/systemd/system/zoid6.service (@VENV_DIR@ templated)"
 	@echo "  uninstall-etc Remove /etc/zoid6/zoid6.json"
 	@echo "  uninstall-tmpfiles Remove tmpfiles drop-in"
@@ -158,13 +158,13 @@ uninstall-sysusers:
 
 install-venv: install-sysusers
 	@command -v sudo >/dev/null 2>&1 || { echo "Error: sudo required"; exit 1; }
-	@sudo -u $(VENV_USER) test -d "$(VENV_DIR)" || sudo -u $(VENV_USER) $(PYTHON) -m venv "$(VENV_DIR)"
-	sudo -u $(VENV_USER) $(VENV_DIR)/bin/pip install --upgrade pip
-	sudo -u $(VENV_USER) $(VENV_DIR)/bin/pip install --quiet build setuptools wheel
+	@sudo -u $(VENV_OWNER) test -d "$(VENV_DIR)" || sudo -u $(VENV_OWNER) $(PYTHON) -m venv "$(VENV_DIR)"
+	sudo -u $(VENV_OWNER) $(VENV_DIR)/bin/pip install --upgrade pip
+	sudo -u $(VENV_OWNER) $(VENV_DIR)/bin/pip install --quiet build setuptools wheel
 	@command -v semanage >/dev/null 2>&1 && \
 		sudo semanage fcontext -a -t bin_t "$(VENV_DIR)/bin(/.*)?" 2>/dev/null || true
 	@command -v restorecon >/dev/null 2>&1 && sudo restorecon -R $(VENV_DIR)/bin/ || true
-	@echo "Ensured shared venv at $(VENV_DIR) (owner: $(VENV_USER):$(VENV_GROUP))"
+	@echo "Ensured shared venv at $(VENV_DIR) (owner: $(VENV_OWNER):$(VENV_GROUP))"
 
 uninstall-venv:
 	-sudo rm -rf $(VENV_DIR)
