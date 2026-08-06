@@ -1533,20 +1533,20 @@ zoid6 is the anchor package for a single shared venv at `/var/lib/zoid6/venv`, o
 
 ### mistermcfeely (postoffice)
 
-- [ ] Makefile: change `VENV_DIR = /var/lib/postoffice/venv` → `VENV_DIR ?= /var/lib/zoid6/venv`
-- [ ] Makefile: add `VENV_OWNER ?= zoid6`, `VENV_GROUP ?= zoid6`
-- [ ] Makefile: replace `sudo -u postoffice` with `sudo -u $(VENV_OWNER)` in `install-venv` / `restorecon`
-- [ ] Template `etc-postoffice/mcfeely-authd.service`: `ExecStart=@VENV_DIR@/bin/mcfeely-authd …` (keep `User=postoffice`, `WorkingDirectory=/var/lib/postoffice`)
-- [ ] Makefile `install-systemd`: `sed 's|@VENV_DIR@|$(VENV_DIR)|g'` when copying the unit
-- [ ] Update `install-venv` help text (shared venv)
+- [x] Makefile: change `VENV_DIR = /var/lib/postoffice/venv` → `VENV_DIR ?= /var/lib/zoid6/venv`
+- [x] Makefile: add `VENV_OWNER ?= zoid6`, `VENV_GROUP ?= zoid6`
+- [x] Makefile: replace `sudo -u postoffice` with `sudo -u $(VENV_OWNER)` in `install-venv` / `restorecon`
+- [x] Template `etc-postoffice/mcfeely-authd.service`: `ExecStart=@VENV_DIR@/bin/mcfeely-authd …` (keep `User=postoffice`, `WorkingDirectory=/var/lib/postoffice`)
+- [x] Makefile `install-systemd`: `sed 's|@VENV_DIR@|$(VENV_DIR)|g'` when copying the unit
+- [x] Update `install-venv` help text (shared venv)
 
 ### bed
 
-- [ ] Makefile: `VENV_DIR ?= /var/lib/zoid6/venv`, add `VENV_OWNER ?= zoid6`, `VENV_GROUP ?= zoid6`
-- [ ] Makefile: replace `sudo -u bed` with `sudo -u $(VENV_OWNER)`
-- [ ] Template `src/bed/daemon/bed.service`: `ExecStart=@VENV_DIR@/bin/bed --config /etc/bed/bed.json`
-- [ ] Makefile `install-systemd`: `sed 's|@VENV_DIR@|$(VENV_DIR)|g'`
-- [ ] Update `bed/FHS.md` with "Shared venv under `zoid6`" section
+- [x] Makefile: `VENV_DIR ?= /var/lib/zoid6/venv`, add `VENV_OWNER ?= zoid6`, `VENV_GROUP ?= zoid6`
+- [x] Makefile: replace `sudo -u bed` with `sudo -u $(VENV_OWNER)`
+- [x] Template `src/bed/daemon/bed.service`: `ExecStart=@VENV_DIR@/bin/bed --config /etc/bed/bed.json`
+- [x] Makefile `install-systemd`: `sed 's|@VENV_DIR@|$(VENV_DIR)|g'`
+- [x] Update `bed/FHS.md` with "Shared venv under `zoid6`" section
 
 ### Migration (deploy host, post-commit)
 
