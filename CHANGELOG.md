@@ -76,6 +76,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 The shim logs the resolved `bed.json` path before exec so misconfig
 failures are diagnosable from the systemd journal.
 
+### zoid6: article2 entry in topbar navigation choices
+
+The topbar across every site under `sites/` picks up an
+"article2" link so visitors can reach
+[`article2`](../yummyjam/article2/) without a separate bookmark.
+
 ### zoid6: backuptools entry in topbar navigation choices
 
 The topbar across every site under `sites/` picks up a
