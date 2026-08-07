@@ -35,4 +35,9 @@ prod:
 	$(MAKE) -C skin stage
 	$(RSYNC) config-prod.php $(DOCROOT)config.php
 	$(RSYNC) htaccess-prod $(DOCROOT).htaccess
-	$(RSYNC) $(STAGE) $(PROD)
+	$(RSYNC) \
+		--exclude='templates_c' --exclude='*/templates_c' --exclude='*/templates_c/*' \
+		--exclude='static' --exclude='*/static' --exclude='*/static/*' \
+		--exclude='tmpl/sections' --exclude='*/tmpl/sections' --exclude='*/tmpl/sections/*' \
+		--exclude='skin/css' --exclude='*/skin/css' --exclude='*/skin/css/*' \
+		$(STAGE) $(PROD)
