@@ -75,6 +75,7 @@ function buildchoices($choices=[])
 {
     $choices[] = ["name" => "teos", "title" => "teos", "url" => "/teos/", "desc" => ""];
     $choices[] = ["name" => "achilles", "title" => "a study of sodium glutamates", "url" => "/achilles/", "desc" => ""];
+    $choices[] = ["name" => "article2", "title" => "article2", "url" => "/article2/", "desc" => "article2"];
     $choices[] = ["name" => "asimov", "title" => "asimov: robotics, ai, and augmented reality", "url" => "/asimov/", "desc" => ""];
     // $choices[] = ["name" => "socrates", "title" => "threaded forum", "url" => "https://socrates.zoidtechnologies.com/", "desc" => ""];
     $choices[] = ["name" => "www", "title" => "www site", "url" => "/", "desc" => "www site"];
