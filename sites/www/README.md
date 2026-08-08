@@ -196,14 +196,14 @@ php test_config.php                # Comprehensive validation suite
 
 ### Live Integration Tests
 
-`test_topbar_article2.py` fetches the live `https://zoidtechnologies.com/` homepage, extracts the `<div id="topbar">` block, and asserts that the `article2` link is rendered. It runs as Test 3 in `./run_tests.sh` and is skipped if `python3` is not available.
+`test_topbar_article2.py` checks that the `article2` entry is registered in the topbar navigation source (`php/zoid6.php`'s `buildchoices()`). It runs as Test 3 in `./run_tests.sh` and is skipped if `python3` is not available.
 
 ```bash
 ./test_topbar_article2.py        # standalone
 ./run_tests.sh                   # includes Test 3
 ```
 
-Exit codes: `0` pass, `1` content mismatch (article2 missing from rendered topbar), `2` network failure (cannot reach `https://zoidtechnologies.com/`). Requires network access to the production URL.
+Exit codes: `0` pass, `1` entry missing from source, `2` source file unreadable.
 
 ### Manual Testing
 
