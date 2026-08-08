@@ -194,6 +194,17 @@ php test_config.php                # Comprehensive validation suite
 - ✓ Smarty paths include local and fallback directories
 - ✓ Analytics and logging configured
 
+### Live Integration Tests
+
+`test_topbar_article2.py` fetches the live `https://zoidtechnologies.com/` homepage, extracts the `<div id="topbar">` block, and asserts that the `article2` link is rendered. It runs as Test 3 in `./run_tests.sh` and is skipped if `python3` is not available.
+
+```bash
+./test_topbar_article2.py        # standalone
+./run_tests.sh                   # includes Test 3
+```
+
+Exit codes: `0` pass, `1` content mismatch (article2 missing from rendered topbar), `2` network failure (cannot reach `https://zoidtechnologies.com/`). Requires network access to the production URL.
+
 ### Manual Testing
 
 After deployment, verify the site works:
