@@ -21,6 +21,9 @@ export VENV_DIR ?= /var/lib/zoid6/venv
 export VENV_USER ?= zoid6
 export VENV_GROUP ?= zoid6
 
+export BED_DIR ?= $(CURDIR)/../bed
+export WHEEL_DIR ?= /tmp/zoid6-bed-$$
+
 all:
 
 clean:
@@ -79,13 +82,13 @@ deploy-tui:
 .PHONY: install-venv uninstall-venv install-fhs uninstall-fhs
 
 install-venv:
-	$(MAKE) -C src install-venv VENV_DIR="$(VENV_DIR)" VENV_USER="$(VENV_USER)" VENV_GROUP="$(VENV_GROUP)"
+	$(MAKE) -C src install-venv VENV_DIR="$(VENV_DIR)" VENV_USER="$(VENV_USER)" VENV_GROUP="$(VENV_GROUP)" BED_DIR="$(BED_DIR)" WHEEL_DIR="$(WHEEL_DIR)"
 
 uninstall-venv:
 	$(MAKE) -C src uninstall-venv VENV_DIR="$(VENV_DIR)"
 
 install-fhs:
-	$(MAKE) -C src install-fhs VENV_DIR="$(VENV_DIR)" VENV_USER="$(VENV_USER)" VENV_GROUP="$(VENV_GROUP)"
+	$(MAKE) -C src install-fhs VENV_DIR="$(VENV_DIR)" VENV_USER="$(VENV_USER)" VENV_GROUP="$(VENV_GROUP)" BED_DIR="$(BED_DIR)" WHEEL_DIR="$(WHEEL_DIR)"
 
 uninstall-fhs:
 	$(MAKE) -C src uninstall-fhs VENV_DIR="$(VENV_DIR)"

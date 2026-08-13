@@ -22,6 +22,9 @@ VENV_DIR ?= /var/lib/zoid6/venv
 VENV_OWNER ?= zoid6
 VENV_GROUP ?= zoid6
 
+BED_DIR ?= $(CURDIR)/../bed
+WHEEL_DIR ?= /tmp/zoid6-bed-$$
+
 .PHONY: all help install install-dev test test-cov test-verbose lint clean uninstall egg-info
 .PHONY: build version rename-sdist sign release
 .PHONY: install-etc install-tmpfiles install-fhs uninstall-etc uninstall-tmpfiles factory-sync
@@ -161,10 +164,17 @@ install-venv: install-sysusers
 	@sudo -u $(VENV_OWNER) test -d "$(VENV_DIR)" || sudo -u $(VENV_OWNER) $(PYTHON) -m venv "$(VENV_DIR)"
 	sudo -u $(VENV_OWNER) $(VENV_DIR)/bin/pip install --upgrade pip
 	sudo -u $(VENV_OWNER) $(VENV_DIR)/bin/pip install --quiet build setuptools wheel
+	# zoid6 builds on bed; install the bed wheel so `import bed` works inside this venv.
+	mkdir -p $(WHEEL_DIR)
+	rm -f $(WHEEL_DIR)/*.whl
+	$(MAKE) -C $(BED_DIR) version
+	$(PYTHON) -m build --no-isolation --wheel --outdir $(WHEEL_DIR) $(BED_DIR)
+	sudo -u $(VENV_OWNER) $(VENV_DIR)/bin/pip install --quiet $(WHEEL_DIR)/*.whl
+	rm -rf $(WHEEL_DIR)
 	@command -v semanage >/dev/null 2>&1 && \
 		sudo semanage fcontext -a -t bin_t "$(VENV_DIR)/bin(/.*)?" 2>/dev/null || true
 	@command -v restorecon >/dev/null 2>&1 && sudo restorecon -R $(VENV_DIR)/bin/ || true
-	@echo "Ensured shared venv at $(VENV_DIR) (owner: $(VENV_OWNER):$(VENV_GROUP))"
+	@echo "Ensured venv at $(VENV_DIR) (owner: $(VENV_OWNER):$(VENV_GROUP)) with zoid6 + bed"
 
 uninstall-venv:
 	-sudo rm -rf $(VENV_DIR)
