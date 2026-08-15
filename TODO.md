@@ -1026,7 +1026,7 @@ declaration is enough to keep pip happy during install.
 
 | Service | `modulepath` in `zoid6.json` | Reality |
 |---|---|---|
-| `bank` | `bank.api.handler` | The bank package lives at `bbsengine6/bank/api/handler.py`. As a top-level `bank`, the path is not importable. `MessageRouter._register_module` logs `Failed to import bank: No module named 'bank'` and the casino-side `BankServiceHandler` is the one that actually wires `bank_balance` / `bank_add` / etc. |
+| `bank` | `bank.api.handler` | The bank package lives at `bbsengine6/bank/api/handler.py`. As a top-level `bank`, the path is not importable. `MessageRouter._register_module` logs `Failed to import bank: No module named 'bank'`. The bank messages (`bank_balance` / `bank_add` / etc.) ARE wired on the wire — but by `bed.defaultrouter.DefaultRouter` (`bed/src/bed/defaultrouter.py:14`), **not** by casino's `MessageRouter`. |
 | `channel` | `channel.api.handler` | No `channel` package exists in `bbsengine6`, no top-level `channel/` sibling project, no `channel/api/handler.py` anywhere in the tree. Logs `Failed to import channel: No module named 'channel'` at every startup. |
 
 Net effect: the `bank` and `channel` enabled-true entries are dead
@@ -1048,25 +1048,30 @@ their modules don't exist. A reader of `zoid6.json` reasonably assumes
   itself is unimplemented (see `bbsengine6/TODO.md` Phase 7
   channel work), so flipping the `modulepath` to a not-yet-existing
   path is premature.
-- **The casino's `BankServiceHandler` already covers the
+- **Bed's `DefaultRouter.register_all` already covers the
   bank-balance / transfer message types** (see
-  `casino/src/casino/api/handler.py:1352-1356`). The `bank`
-  entry in `zoid6/zoid6.json` was likely an early placeholder
-  before casino absorbed it. If a real `bbsengine6.bank.api`
-  service is the desired replacement, the `modulepath` should
-  be `bbsengine6.bank.api.handler` and the casino's
-  `BankServiceHandler` should defer to it.
+  `bed/src/bed/defaultrouter.py:14`, registering
+  `bbsengine6.bank.api.handler.BankServiceHandler`; see also
+  `bed/SPEC.md:137`). The `bank` entry in `zoid6/zoid6.json`
+  was likely an early placeholder before bed absorbed the
+  registration role. If a real `bbsengine6.bank.api` service
+  is the desired replacement, the `modulepath` should be
+  `bbsengine6.bank.api.handler` and the JSON's `enabled`
+  flag should match the bed-side reality — i.e., flip the
+  bed router's `bank_balance` wiring off before flipping the
+  JSON's `enabled: true` (last-writer-wins).
 
 ### Fix options
 
 #### Option A — disable both until they exist
 
 Set `bank.enabled` and `channel.enabled` to `false` in
-`zoid6/src/zoid6/data/zoid6.json`. The casino's own
-`BankServiceHandler` continues to register `bank_*` messages;
-nothing changes at runtime. The JSON's `services` section
-remains a complete roadmap of every service zoid6 intends to
-host, but only the ones with working code paths are flipped on.
+`zoid6/src/zoid6/data/zoid6.json`. Bed's
+`DefaultRouter.BankServiceHandler` continues to register
+`bank_*` messages; nothing changes at runtime. The JSON's
+`services` section remains a complete roadmap of every service
+zoid6 intends to host, but only the ones with working code
+paths are flipped on.
 
 - **Pros:** Smallest change. No code touched. Eliminates the
   misleading `enabled: true`. No startup noise.
@@ -1081,9 +1086,10 @@ resolves). `channel` stays disabled until the `channel`
 service is implemented.
 
 - **Pros:** The bank message types are registered from a single
-  source (`bbsengine6.bank.api.handler.BankServiceHandler`).
-  Casino's own `BankServiceHandler` becomes redundant or
-  defers to the bbsengine6 one.
+  source (`bbsengine6.bank.api.handler.BankServiceHandler`,
+  loaded by `bed.defaultrouter.DefaultRouter`). No casino-side
+  handler exists to defer — casino's `MessageRouter` doesn't
+  register bank messages at all.
 - **Cons:** Requires deciding what happens when both register
   `bank_balance` — last writer wins, same as the casino vs.
   bed `auth` collision today. Currently casino's wins because
@@ -1107,8 +1113,10 @@ the casino side can safely defer to it. Equivalent work for
 `channel` does not exist as a module today, so it stays
 disabled until the channel service lands. `bank` is a one-line
 JSON fix to point at `bbsengine6.bank.api.handler`, but only
-land it after deciding whether to keep the casino-side
-`BankServiceHandler` or defer to `bbsengine6.bank.api`.
+land it after deciding whether to keep the bed-side
+`BankServiceHandler` (registered by `DefaultRouter`) as the
+sole source, or also wire `zoid6.json`'s `bank` entry once its
+`modulepath` is fixed (last-writer-wins concern).
 
 ### Tasks
 
@@ -1134,13 +1142,14 @@ land it after deciding whether to keep the casino-side
   channel-service work — when that lands, flip
   `channel.enabled` to `true` and set `channel.modulepath`
   to the real path.
-- [ ] **Open question (defer to casino follow-up):** if
+- [ ] **Open question (defer to zoid6/bed follow-up):** if
   `bbsengine6.bank.api.handler` is the desired single source
-  of truth for bank message types, casino's
-  `BankServiceHandler` (`casino/src/casino/api/handler.py:1352`)
-  should be removed (or made a no-op forwarder). Tracked
-  separately in `casino/TODO.md` under a new
-  "Defer bank to bbsengine6" section.
+  of truth for bank message types, no casino-side change is
+  needed (the casino router doesn't register bank). The zoid6
+  JSON should just point its `bank.modulepath` at
+  `bbsengine6.bank.api.handler` so the registration list
+  reflects the same source bed already uses (see
+  `bed/SPEC.md:137`).
 
 **Future rework cross-reference:** the "Failed to import
 bank" warning at startup will resolve naturally as part of
@@ -1161,11 +1170,19 @@ operator-only.
   log. Update the test to either assert no "Failed to
   import" lines for `bank`/`channel`, or drop the assertion
   entirely.
-- `casino/src/casino/api/handler.py:1352-1356` — casino's
-  `BankServiceHandler` registers the same `bank_*` message
-  types that `bbsengine6.bank.api.handler` would. De-duplication
-  decision lives in `casino/TODO.md`.
+- `casino/src/casino/api/handler.py:1270` (`MessageRouter.register_all`)
+  — casino's router enumerates 7 non-bank services (table, game,
+  bet, chat, slot, yahtzee, tictactoe). It does **not** register
+  a `BankServiceHandler`. The casino/bank cross-cutting concern
+  lives in `casino.services.bank.BankService` (maintenance
+  only) and `casino.commands.bank` (CLI gating via
+  `bbsengine6.bank.access`).
 - `bbsengine6/TODO.md` Phase 7 — channel service design.
+
+**Note:** Bed-registration is the canonical source for bank message
+wiring on the wire. See `bed/SPEC.md:137` for the definitive
+bed-side wiring (`bed.defaultrouter.DefaultRouter` →
+`bbsengine6.bank.api.handler.BankServiceHandler`).
 
 ---
 
@@ -1180,8 +1197,9 @@ namespace. At zoid6 startup, this produces the warning:
 Failed to import bank: No module named 'bank'
 ```
 
-The casino's own `BankServiceHandler` covers the bank
-message types on the wire (visible in the registered
+Bed's `DefaultRouter.BankServiceHandler` covers the bank
+message types on the wire (registered by
+`bed/src/bed/defaultrouter.py:14`; visible in the registered
 services list at startup), so the warning is currently
 non-fatal. But the bank service is `enabled: true` in
 `zoid6.json` and is intended to be loaded by the zoid6
