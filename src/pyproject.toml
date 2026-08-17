@@ -16,10 +16,10 @@ dependencies = [
 where = ["."]
 include = ["zoid6*"]
 
-[project.scripts]
-zoid6 = "zoid6.main:main"
+[tool.setuptools]
+script-files = ["bin/zoid6"]
 
-[tool.setuptools.dynamic]	
+[tool.setuptools.dynamic]
 version = { attr = "zoid6._version.__version__" }
 
 [tool.setuptools.package-data]
@@ -27,5 +27,5 @@ zoid6 = ["data/*.json", "daemon/*.tmpfiles"]
 
 [tool.pytest.ini_options]
 markers = [
-    "integration: marks tests as integration tests (require sibling packages on sys.path)",
+    "integration: marks integration tests (require sibling packages on sys.path)",
 ]

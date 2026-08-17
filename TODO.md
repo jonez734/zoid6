@@ -5,6 +5,76 @@
 - [ ] See `bed/TODO.md` "Bearer token" — adopt `bed.api.auth.AuthService` for BED-mode authentication and reconnect. Replaces per-game `auth` implementations. Zoid6 benefits strongly: dashboard / shared-wallet / chat clients that stay open for hours.
 - [ ] **Override built-in services** — allow zoid6 to replace bed-native services (auth, member) with its own implementations. Add an `"override": true` flag in zoid6.json; when set, zoid6 skips the "must exist" RuntimeError, calls `server.unregister_service()` on the existing service, then loads and registers its own from `modulepath`.
 
+## Console-script shebang alignment (deferred — apply bed/casino/zoid6 pattern)
+
+The bed (`2ab078e`), casino (`0865e23`), and zoid6 (this commit)
+repos have all been migrated to the same pattern: real launcher
+files under `bin/` with `#!/usr/bin/env python3.12`, plus
+`[tool.setuptools] script-files` (no matching `[project.scripts]`).
+This is "Option A" per the shebang-alignment discussion. The
+remaining sibling packages still ship shell-wrappers or stale
+auto-generated `[project.scripts]` entries with hardcoded
+`#!/usr/bin/env python3` (or no shebang at all) and should be
+migrated to the same pattern, in dependency order (zoid6 → bed →
+casino → the rest):
+
+- [ ] **achilles** — 1 console script. Add `bin/achilles`,
+      `[tool.setuptools] script-files`, drop `[project.scripts]`.
+- [ ] **article2** — 1 console script (collides with
+      `yummyjam/article2`'s `article2` script; resolve the
+      collision first by renaming one — likely keep `article2`
+      as the game-name script and rename the other to
+      `article2-cms` or similar). Two `bin/` launchers, two
+      `[tool.setuptools] script-files` entries.
+- [ ] **asimov** — 1 console script.
+- [ ] **backuptools** — 1 console script.
+- [ ] **bbsengine6** — 1 console script (`bed`); collides with
+      `bed/bin/bed`. Resolve the collision by either
+      (a) deprecating `bbsengine6`'s `bed` script (it predates
+      the real `bed` package and is now a duplicate) or
+      (b) renaming it to `bbsengine6-tools` / `bbs-bed` etc.
+      Recommend (a) since `bed` is the canonical entry point.
+- [ ] **deploytool** — 1 console script.
+- [ ] **empyre** — 1 console script.
+- [ ] **mistermcfeely** — 3 console scripts (in
+      `mistermcfeely/src/pyproject.toml`).
+- [ ] **moneyday** — 1 console script.
+- [ ] **murdermotel** — 1 console script.
+- [ ] **paymentflow** — 3 console scripts.
+- [ ] **socrates** — 1 console script (and the
+      `socrates._version` build-error fix from the
+      `## socrates editable install fails` section below is a
+      prerequisite before any packaging change here can be
+      verified end-to-end).
+- [ ] **vulcan/tui** — 1 console script.
+- [ ] **yummyjam/article2** — 1 console script (the second half
+      of the `article2` collision pair above).
+- [ ] **zoidoffice** — 1 console script.
+
+Notes for whoever picks this up:
+
+- **Editable installs** lose the auto-generated launcher
+  entirely per setuptools docs (only `[project.scripts]` fires
+  in editable mode, and we're dropping those). For dev
+  workflows, either (a) run `pip install .` (non-editable) from
+  each repo, or (b) layer 1 the venv shebang like I did for
+  my workflow — patch
+  `/home/opencode/.venv/bin/<script>` to
+  `#!/usr/bin/env python3.12` once after each `pip install -e`.
+- **Two-pyproject collision**: some of these packages have a
+  stale inner `pyproject.toml` (e.g. casino did at
+  `src/pyproject.toml`). Delete the inner one before doing the
+  migration; the outer is canonical. `grep -l
+  "\[project.scripts\]" <pkg>/src/pyproject.toml` is the
+  quick check.
+- **Verification command** (per repo):
+  `/home/opencode/.venv/bin/python3 -m pytest -q` should still
+  pass (the migration doesn't touch runtime code). Then
+  `cd <pkg>/bin && head -1 <script>` should print
+  `#!/usr/bin/env python3.12`.
+
+## BED `Sink` integration with `bbsengine6.io` (cross-project)
+
 ## BED `Sink` integration with `bbsengine6.io` (cross-project)
 
 - [ ] See `bbsengine6/TODO.md` "`bbsengine6.io` sink infrastructure

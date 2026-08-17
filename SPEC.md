@@ -190,7 +190,10 @@ Every BBS module that wants to ride on zoid6 must:
    zoid6 router via the no-kwargs fallback — but it will then
    see a `None` session registry and `_check_access` will reject
    every gameplay op as `not_authenticated` even with a valid
-   token. New modules should accept the kwargs.
+   token. New modules should accept the kwargs. The full
+   contract (kwargs forwarding at the bed/zoid6/casino triangle)
+   lives in `bed/docs/BED_AUTH.md` "Adopting AuthService in a
+   custom router" and `casino/docs/AUTH.md` §6.
 4. In `register_all(server)`, register each message handler via
    `server.register_service(self, ["type_a", "type_b", …])`.
 5. Implement `async handle_message(server, websocket, path, message)`
