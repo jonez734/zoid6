@@ -11,10 +11,33 @@ from zoid6.data import get as data_get, path as data_path
 
 
 class MessageRouter:
-    """Unified MessageRouter that loads all enabled BBS module routers."""
+    """Unified MessageRouter that loads all enabled BBS module routers.
 
-    def __init__(self, args: Any) -> None:
+    Optional ``session_registry``, ``secret``, ``token_store``, and
+    ``instance_id`` kwargs mirror the casino ``MessageRouter`` wiring
+    and are forwarded by ``bed.main.BED.start`` when auth is enabled.
+    zoid6 itself does not consume them (sub-router constructors are
+    called with just ``self.args``), but accepting them keeps the
+    router compatible with the bed startup contract and prevents the
+    ``unexpected keyword argument 'session_registry'`` TypeError.
+    """
+
+    def __init__(
+        self,
+        args: Any,
+        *,
+        session_registry: Any = None,
+        secret: Any = None,
+        token_store: Any = None,
+        instance_id: Any = None,
+        clock: Any = None,
+    ) -> None:
         self.args = args
+        self.session_registry = session_registry
+        self.secret = secret
+        self.token_store = token_store
+        self.instance_id = instance_id
+        self.clock = clock
         self.config = self._load_config()
         self.routers: Dict[str, Any] = {}
 
