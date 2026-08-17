@@ -196,6 +196,75 @@ class TestMessageRouterRegisterModule:
         assert router.routers["casino"] is mock_router_instance
         mock_router_instance.register_all.assert_called_once_with(mock_server)
 
+    def test_register_module_forwards_auth_kwargs(self, mock_args, mock_server):
+        """_register_module forwards session_registry/secret/token_store/instance_id
+        to the sub-router's MessageRouter so handlers like casino can wire their
+        AuthService to BED's SessionRegistry rather than falling back to a fresh
+        CasinoSessionManager that cannot see auth-bound sessions.
+        """
+        from zoid6.api.handler import MessageRouter
+
+        router = MessageRouter(
+            mock_args,
+            session_registry="REG",
+            secret=b"SECRET",
+            token_store="STORE",
+            instance_id="INSTANCE",
+            clock="CLOCK",
+        )
+        with patch("zoid6.api.handler.bbsmodule.load") as mock_load:
+            mock_module = MagicMock()
+            mock_sub_router = MagicMock()
+            mock_module.MessageRouter.return_value = mock_sub_router
+            mock_load.return_value = mock_module
+
+            router._register_module(
+                "casino",
+                {"modulepath": "casino.api.handler", "enabled": True},
+                mock_server,
+            )
+
+        assert mock_module.MessageRouter.call_count == 1
+        _, kwargs = mock_module.MessageRouter.call_args
+        assert kwargs.get("session_registry") == "REG"
+        assert kwargs.get("secret") == b"SECRET"
+        assert kwargs.get("token_store") == "STORE"
+        assert kwargs.get("instance_id") == "INSTANCE"
+        assert kwargs.get("clock") == "CLOCK"
+
+    def test_register_module_falls_back_when_sub_router_rejects_kwargs(
+        self, mock_args, mock_server
+    ):
+        """Legacy sub-routers that only accept (args) get called without kwargs."""
+        from zoid6.api.handler import MessageRouter
+
+        router = MessageRouter(
+            mock_args, session_registry="REG", token_store="STORE"
+        )
+        with patch("zoid6.api.handler.bbsmodule.load") as mock_load:
+            mock_module = MagicMock()
+
+            def _only_takes_args(args):
+                sub = MagicMock()
+                sub.register_all = MagicMock()
+                return sub
+
+            mock_module.MessageRouter.side_effect = _only_takes_args
+            mock_load.return_value = mock_module
+
+            router._register_module(
+                "legacy",
+                {"modulepath": "legacy.module", "enabled": True},
+                mock_server,
+            )
+
+        assert mock_module.MessageRouter.call_count == 2
+        first_args, first_kwargs = mock_module.MessageRouter.call_args_list[0]
+        assert "session_registry" in first_kwargs
+        second_args, second_kwargs = mock_module.MessageRouter.call_args_list[1]
+        assert second_args == (mock_args,)
+        assert second_kwargs == {}
+
 
 class TestGetConfigModuleFunctions:
     """Test module-level helper functions."""

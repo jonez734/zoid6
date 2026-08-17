@@ -86,19 +86,32 @@ $ zoid6 --port 9000 --foreground --debug
 
 `src/zoid6/api/handler.py:MessageRouter`:
 
-- `__init__(args)` — stores `args`, loads config via
-  `bed.config.load_config(args.config_file)`, validates the shape
-  (raises on non-dict / non-dict `services`).
+- `__init__(args, *, session_registry=None, secret=None,
+  token_store=None, instance_id=None, clock=None)` — stores
+  `args` and the auth wiring kwargs (forwarded by
+  `bed.main.BED.start` when auth is enabled; see
+  `bed/docs/BED_AUTH.md` "Adopting AuthService in a custom
+  router"), loads config via `bed.config.load_config(args.config_file)`,
+  validates the shape (raises on non-dict / non-dict `services`).
 - `register_all(server)` — guards that bed's `AuthService` is
   registered first (it is, when bed loads any non-default router),
   then walks `config["services"]` and dispatches each enabled
   module's `MessageRouter` class.
 - `_register_module(name, cfg, server)` — loads the module via
   `bbsengine6.module.load(args, cfg["modulepath"])`, looks up the
-  `MessageRouter` class, instantiates it, and calls
+  `MessageRouter` class, instantiates it with the auth-wiring
+  kwargs (so sub-routers like `casino.api.handler.MessageRouter`
+  see the same `SessionRegistry` and crypto state the outer
+  router received from bed — without this, sub-routers fall back
+  to a private session manager and the first gameplay op after
+  `auth` returns `not_authenticated`), and calls
   `register_all(server)`. Failures (ImportError, missing
-  MessageRouter, generic exception) log via `io.echo(level=...)` and
-  are non-fatal — a single broken module does not stop the daemon.
+  MessageRouter, generic exception, `TypeError` from a legacy
+  sub-router that doesn't accept the kwargs) log via
+  `io.echo(level=...)` and are non-fatal — a single broken module
+  does not stop the daemon. The `TypeError` fallback retries
+  with `RouterClass(args)` so routers that pre-date the kwargs
+  contract still load.
 
 After all modules have been registered, the router asserts that
 `server.get_service("member_profile")` is not `None` — the BBS
@@ -162,18 +175,29 @@ unchanged.
 
 Every BBS module that wants to ride on zoid6 must:
 
-1. Define `MessageRouter` (a class with `__init__(args)` and
-   `register_all(server)`) at the modulepath listed in its `services`
-   entry.
+1. Define `MessageRouter` (a class with `__init__(args, **kwargs)`
+   and `register_all(server)`) at the modulepath listed in its
+   `services` entry.
 2. Accept a positional `args` (the parsed argparse Namespace from
    bed) and store it.
-3. In `register_all(server)`, register each message handler via
+3. Accept the keyword-only auth-wiring kwargs
+   `session_registry`, `secret`, `token_store`, `instance_id`,
+   `clock` (any subset, all default to `None`). Bed forwards them
+   via `MessageRouterClass(args, **router_kwargs)` when auth is
+   enabled; the outer zoid6 router forwards the same kwargs to
+   every sub-router it instantiates (see 3.2). A router that
+   rejects these kwargs with `TypeError` is still loaded by the
+   zoid6 router via the no-kwargs fallback — but it will then
+   see a `None` session registry and `_check_access` will reject
+   every gameplay op as `not_authenticated` even with a valid
+   token. New modules should accept the kwargs.
+4. In `register_all(server)`, register each message handler via
    `server.register_service(self, ["type_a", "type_b", …])`.
-4. Implement `async handle_message(server, websocket, path, message)`
+5. Implement `async handle_message(server, websocket, path, message)`
    on each registered service object. Returning a dict sends it back
    to that client only; returning `None` (or raising) lets the server
    decide what to do.
-5. Not re-register `auth` — bed's `AuthService` owns it. If a game
+6. Not re-register `auth` — bed's `AuthService` owns it. If a game
    needs a custom auth flow, subclass `MonikerAuthRouter` and
    override `register_all` to register the custom handler alongside
    `ping`.

@@ -129,6 +129,15 @@ class MessageRouter:
     def _register_module(self, module_name: str, module_config: Dict[str, Any], server: Any) -> None:
         """Register a single module's services.
 
+        Forwards auth wiring (``session_registry``, ``secret``,
+        ``token_store``, ``instance_id``, ``clock``) to each sub-router
+        so handlers like casino's ``MessageRouter`` can wire their
+        ``AuthService`` to BED's :class:`SessionRegistry` rather than
+        falling back to a fresh in-memory :class:`CasinoSessionManager`
+        that cannot see sessions created by ``bed.api.auth.AuthService``.
+        Falls back to the no-kwargs call if a sub-router rejects the
+        kwargs (legacy routers that only take ``args``).
+
         Failures (ImportError, missing MessageRouter class, register_all
         raising) are logged at error level and the module is skipped.
         register_all() continues with the remaining services so the
@@ -145,10 +154,21 @@ class MessageRouter:
             )
             return
 
+        sub_router_kwargs = dict(
+            session_registry=self.session_registry,
+            secret=self.secret,
+            token_store=self.token_store,
+            instance_id=self.instance_id,
+            clock=self.clock,
+        )
+
         try:
             module = bbsmodule.load(self.args, module_path)
             RouterClass = getattr(module, "MessageRouter")
-            router = RouterClass(self.args)
+            try:
+                router = RouterClass(self.args, **sub_router_kwargs)
+            except TypeError:
+                router = RouterClass(self.args)
             router.register_all(server)
             self.routers[module_name] = router
         except ImportError as e:
