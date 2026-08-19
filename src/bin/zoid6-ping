@@ -1,0 +1,13 @@
+#!/usr/bin/env python3.12
+# zoid6/src/bin/zoid6-ping
+# Send a ping to the bbsengine6 WebSocket daemon.
+#
+# Thin shim around bbsengine6.net.ping.main. zoid6 is a config
+# runner that wraps the bed daemon, so its ping tool targets the
+# same WebSocket endpoint as bedping.
+
+from bbsengine6.net.ping import main
+import sys
+
+if __name__ == "__main__":
+    sys.exit(main(prog="zoid6-ping"))

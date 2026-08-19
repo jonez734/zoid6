@@ -17,7 +17,10 @@ where = ["."]
 include = ["zoid6*"]
 
 [tool.setuptools]
-script-files = ["bin/zoid6"]
+script-files = [
+    "bin/zoid6",
+    "bin/zoid6-ping",
+] 
 
 [tool.setuptools.dynamic]
 version = { attr = "zoid6._version.__version__" }
