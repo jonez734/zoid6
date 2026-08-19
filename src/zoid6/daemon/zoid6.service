@@ -23,8 +23,8 @@ KillMode=mixed
 KillSignal=SIGTERM
 TimeoutStopSec=30s
 
-StandardOutput=journal
-StandardError=journal
+StandardOutput=append:/var/log/zoid6/zoid6.log
+StandardError=inherit
 SyslogIdentifier=zoid6
 
 [Install]
