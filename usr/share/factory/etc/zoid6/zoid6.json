@@ -2,7 +2,8 @@
   "bed": {
     "autorestart": true,
     "restart_delay": 5,
-    "max_restarts": 10
+    "max_restarts": 10,
+    "restart_on_bind_failure": false
   },
   "debug": false,
   "services": {
