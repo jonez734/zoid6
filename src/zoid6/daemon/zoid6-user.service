@@ -1,0 +1,34 @@
+[Unit]
+Description=zoid6 - BBS Engine Router (user-mode)
+Documentation=https://bbsengine.org/
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/.local/zoid6
+
+EnvironmentFile=%h/.local/zoid6/etc/zoid6.env
+
+ExecStart=%h/.local/zoid6/venv/bin/zoid6
+
+ExecReload=/bin/kill -HUP $MAINPID
+
+Restart=on-failure
+RestartSec=5s
+
+KillMode=mixed
+KillSignal=SIGTERM
+TimeoutStopSec=30s
+
+# StandardOutput / StandardError intentionally omitted -- systemd
+# default for user units is the user journal. View with:
+#   journalctl --user -u zoid6 -f
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=%h/.local/zoid6/log %h/.local/zoid6/run %h/.local/zoid6/data
+
+[Install]
+WantedBy=default.target

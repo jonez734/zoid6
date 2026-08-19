@@ -10,7 +10,7 @@ SRC := .
 PACKAGE := zoid6
 
 FACTORY_DIR = $(CURDIR)/../usr/share/factory/etc/$(PROJECT)
-ETC_DIR = /etc/$(PROJECT)
+ETC_DIR ?= /etc/$(PROJECT)
 TMPFILES_SRC = $(PACKAGE)/daemon/$(PROJECT).tmpfiles
 TMPFILES_DST = /usr/lib/tmpfiles.d/$(PROJECT).conf
 SYSUSERS_SRC = $(PACKAGE)/daemon/$(PROJECT).sysusers
@@ -22,8 +22,29 @@ VENV_DIR ?= /var/lib/zoid6/venv
 VENV_OWNER ?= zoid6
 VENV_GROUP ?= zoid6
 
-BED_DIR ?= $(CURDIR)/../bed
-WHEEL_DIR ?= /tmp/zoid6-bed-$$
+BED_DIR ?= $(CURDIR)/../../bed
+WHEEL_DIR ?= $(HOME)/wheel-build/zoid6-current
+GETDATE_DIR ?= $(CURDIR)/../../getdate_next
+BBSENGINE_DIR ?= $(CURDIR)/../../bbsengine6/py
+CASINO_DIR ?= $(CURDIR)/../../casino
+
+# User-writable install prefix (no-sudo flow). Production FHS layout
+# uses /etc/zoid6 + /var/lib/zoid6 + /usr/lib/systemd/system instead;
+# install-sysusers / install-tmpfiles / install-systemd / install-etc
+# are unchanged and still need sudo.
+#
+# These only override the FHS defaults when one of the user-mode targets
+# is the goal; otherwise the FHS targets (install-etc, install-venv,
+# install-systemd, install-fhs) keep using /etc/zoid6 + /var/lib/zoid6.
+ifneq ($(filter install-user start stop status restart install-systemd-user uninstall-systemd-user uninstall-user,$(MAKECMDGOALS)),)
+PREFIX           ?= $(HOME)/.local/zoid6
+VENV_DIR         = $(PREFIX)/venv
+ETC_DIR          = $(PREFIX)/etc
+LOG_DIR          = $(PREFIX)/log
+RUN_DIR          = $(PREFIX)/run
+DATA_DIR         = $(PREFIX)/data
+SYSTEMD_USER_DIR ?= $(HOME)/.config/systemd/user
+endif
 
 .PHONY: all help install install-dev test test-cov test-verbose lint clean uninstall egg-info
 .PHONY: build version rename-sdist sign release
@@ -32,6 +53,8 @@ WHEEL_DIR ?= /tmp/zoid6-bed-$$
 .PHONY: install-venv uninstall-venv restorecon
 .PHONY: install-systemd uninstall-systemd uninstall-fhs
 .PHONY: deploy-tui
+.PHONY: reassign-bootstrap-owners install-user start stop status restart
+.PHONY: install-systemd-user uninstall-systemd-user uninstall-user
 
 all: help
 
@@ -212,3 +235,115 @@ factory-sync:
 	install -m 0644 -o opencode -g opencode $(PACKAGE)/daemon/$(PROJECT).tmpfiles $(FACTORY_DIR)/$(PROJECT).tmpfiles
 	install -m 0644 -o opencode -g opencode $(PACKAGE)/daemon/$(PROJECT).sysusers $(FACTORY_DIR)/$(PROJECT).sysusers
 	@echo "Synced factory defaults from in-tree sources"
+
+
+# ----- no-sudo / user-mode install -------------------------------------------
+#
+# Parallel to the FHS install chain above. Uses $(PREFIX) (default
+# ~/.local/zoid6) for everything so a developer can run `make install-user`
+# without sudo. Production keeps using install-fhs as before.
+
+reassign-bootstrap-owners:
+	@echo "Reassigning public bootstrap SQL functions to current $$USER ..."
+	$(PYTHON) $(PACKAGE)/reassign_bootstrap_owners.py
+
+install-user:
+	@command -v python3 >/dev/null 2>&1 || { echo "Error: python3 not on PATH"; exit 1; }
+	@test -n "$$HOME" || { echo "Error: HOME not set"; exit 1; }
+	@mkdir -p $(PREFIX) $(ETC_DIR) $(LOG_DIR) $(RUN_DIR) $(DATA_DIR)
+	@test -d $(VENV_DIR) || $(PYTHON) -m venv $(VENV_DIR)
+	$(VENV_DIR)/bin/pip install --upgrade pip
+	$(VENV_DIR)/bin/pip install --quiet build setuptools wheel
+	mkdir -p $(WHEEL_DIR)
+	rm -f $(WHEEL_DIR)/*.whl
+	$(MAKE) -C $(GETDATE_DIR) version
+	# Use `pip wheel` not `python -m build --wheel`: setuptools 80+ in
+	# `python -m build` fails on this filesystem with EPERM during the
+	# install_egg_info → dist-info rename; `pip wheel` sidesteps it.
+	$(PYTHON) -m pip wheel --no-deps --no-build-isolation --no-clean --wheel-dir $(WHEEL_DIR) $(GETDATE_DIR)
+	$(MAKE) -C $(BBSENGINE_DIR) version
+	$(PYTHON) -m pip wheel --no-deps --no-build-isolation --no-clean --wheel-dir $(WHEEL_DIR) $(BBSENGINE_DIR)
+	$(MAKE) -C $(BED_DIR) version
+	$(PYTHON) -m pip wheel --no-deps --no-build-isolation --no-clean --wheel-dir $(WHEEL_DIR) $(BED_DIR)
+	$(MAKE) -C $(CASINO_DIR) version
+	$(PYTHON) -m pip wheel --no-deps --no-build-isolation --no-clean --wheel-dir $(WHEEL_DIR) $(CASINO_DIR)
+	$(MAKE) version
+	$(PYTHON) -m pip wheel --no-deps --no-build-isolation --no-clean --wheel-dir $(WHEEL_DIR) $(CURDIR)
+	$(VENV_DIR)/bin/pip install --quiet $(WHEEL_DIR)/*.whl
+	rm -rf $(WHEEL_DIR)
+	# Undeclared runtime dep of casino (lib.py imports PIL). Not in
+	# pyproject.toml so pip won't pull it; install explicitly.
+	$(VENV_DIR)/bin/pip install --quiet pillow
+	@test -f $(ETC_DIR)/zoid6.json || install -m 0644 $(PACKAGE)/data/zoid6.json $(ETC_DIR)/zoid6.json
+	@test -f $(ETC_DIR)/zoid6.env  || { \
+	    { printf 'PREFIX=%s\nVENV_DIR=%s\nLOG_DIR=%s\nRUN_DIR=%s\n' \
+	        '$(PREFIX)' '$(VENV_DIR)' '$(LOG_DIR)' '$(RUN_DIR)'; \
+	      echo 'BED_DATABASE_USER=$${USER}'; \
+	    } > $(ETC_DIR)/zoid6.env; \
+	    chmod 0644 $(ETC_DIR)/zoid6.env; }
+	@echo "User-mode install complete at $(PREFIX)"
+	@echo "Quick start (no sudo):"
+	@echo "  make start                     # foreground-daemon via nohup, PID file"
+	@echo "  make stop"
+	@echo "Or as a systemd user unit (also no sudo):"
+	@echo "  make install-systemd-user && systemctl --user enable --now zoid6"
+
+start: install-user
+	@test ! -f $(RUN_DIR)/zoid6.pid || { \
+	    PID=$$(cat $(RUN_DIR)/zoid6.pid); \
+	    if kill -0 $$PID 2>/dev/null; then \
+	        echo "zoid6 already running (pid $$PID)"; exit 1; \
+	    else \
+	        echo "stale pidfile, removing"; rm -f $(RUN_DIR)/zoid6.pid; \
+	    fi; }
+	# Autorestart is read from the config ("bed": {"autorestart": true}),
+	# not a CLI flag. zoid6's argparse does not define --no-autorestart.
+	# Chain `&` and `echo $!` on one line so Make doesn't fork a new
+	# shell between them (which would lose $! to an empty value).
+	nohup $(VENV_DIR)/bin/zoid6 \
+	    --config $(ETC_DIR)/zoid6.json \
+	    --router zoid6.api.handler.MessageRouter \
+	    > $(LOG_DIR)/zoid6.log 2>&1 & echo $$! > $(RUN_DIR)/zoid6.pid
+	@echo "zoid6 started (pid $$(cat $(RUN_DIR)/zoid6.pid)) — log: $(LOG_DIR)/zoid6.log"
+
+stop:
+	@test -f $(RUN_DIR)/zoid6.pid || { echo "zoid6 not running (no pidfile)"; exit 0; }
+	@PID=$$(cat $(RUN_DIR)/zoid6.pid); \
+	    if kill -0 $$PID 2>/dev/null; then \
+	        kill -TERM $$PID; \
+	        for i in 1 2 3 4 5; do kill -0 $$PID 2>/dev/null || break; sleep 1; done; \
+	        kill -KILL $$PID 2>/dev/null || true; \
+	    fi
+	rm -f $(RUN_DIR)/zoid6.pid
+	@echo "zoid6 stopped"
+
+status:
+	@test -f $(RUN_DIR)/zoid6.pid && PID=$$(cat $(RUN_DIR)/zoid6.pid) || { echo "not running"; exit 1; }
+	@kill -0 $$PID 2>/dev/null && echo "running (pid $$PID)" || { echo "stale pidfile (pid $$PID)"; exit 1; }
+
+restart: stop start
+
+install-systemd-user: install-user
+	@mkdir -p $(SYSTEMD_USER_DIR)
+	# Template %h/.local/zoid6 to $(PREFIX) so the unit matches wherever
+	# install-user landed (default %h/.local/zoid6 or overridden PREFIX).
+	sed 's|%h/\.local/zoid6|$(PREFIX)|g' $(PACKAGE)/daemon/zoid6-user.service \
+	    > $(SYSTEMD_USER_DIR)/zoid6.service
+	chmod 0644 $(SYSTEMD_USER_DIR)/zoid6.service
+	# Best-effort: daemon-reload only matters when a user systemd is
+	# running (interactive login session). On headless servers or in
+	# container namespaces without $DBUS_SESSION_BUS_ADDRESS, skip.
+	-systemctl --user daemon-reload 2>/dev/null || true
+	@echo "Installed $(SYSTEMD_USER_DIR)/zoid6.service (user unit)"
+	@echo "Enable + start:  systemctl --user enable --now zoid6"
+	@echo "Boot persistence: loginctl enable-linger $$USER  (one-time, needs root)"
+
+uninstall-systemd-user:
+	-systemctl --user disable --now zoid6 2>/dev/null || true
+	-rm -f $(SYSTEMD_USER_DIR)/zoid6.service
+	-systemctl --user daemon-reload 2>/dev/null || true
+	@echo "Removed $(SYSTEMD_USER_DIR)/zoid6.service"
+
+uninstall-user:
+	-rm -rf $(PREFIX)
+	@echo "Removed $(PREFIX)"
