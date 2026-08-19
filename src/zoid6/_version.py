@@ -1,3 +1,3 @@
-__version__ = "0.0.1.dev202608182237"
-__datestamp__ = "202608182237"
-__githash__ = "3c354272bbd23722"
+__version__ = "0.0.1.dev202608191724"
+__datestamp__ = "202608191724"
+__githash__ = "9ea43e993c32eff9"
