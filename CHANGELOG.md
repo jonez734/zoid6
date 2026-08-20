@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### zoid6: `deploy-prod` Makefile target + `zoid6.prod` deploytool sub-target
+
+- `zoid6/src/Makefile` adds `deploy-prod: install-fhs` (alias
+  for the existing sudo umbrella). Added to `.PHONY` and the
+  `help` block.
+- `zoid6/Makefile` (top-level) adds a `deploy-prod` shim
+  delegating to `src/Makefile:deploy-prod`, mirroring the
+  existing `install-fhs` shim.
+- `deploytool/src/deploytool/lib.py` `TARGETS["zoid6"]` is now
+  `["www", "tui", "prod"]` — `prod` is opt-in (auto-dropped
+  for `deploy zoid6` per `lib.py:296`, same rule as
+  `bed.prod`).
+- `zoid6.tui` is unchanged: `deploy-tui: install` →
+  `pip install -e .` against the active venv (non-sudo).
+  `zoid6.prod` is the sudo umbrella:
+  `deploy-prod: install-fhs` → sysusers + tmpfiles + venv +
+  systemd + /etc/zoid6.
+- See `zoid6/TODO.md` "## `zoid6.tui` (non-sudo) /
+  `zoid6.prod` (sudo) deploy split" for the rationale.
+
 ### zoid6: out-of-band reassign script targets zoid6 role
 
 - `src/zoid6/reassign_bootstrap_owners.py` `TARGET` is now
