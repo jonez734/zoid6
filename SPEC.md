@@ -320,6 +320,31 @@ because the user, venv, and lifecycle all belong to bed.
   casino `io.input*()` prompt color templates, not zoid6 skin
   conventions. It belongs in the `casino` repo.
 
+### Database lifecycle
+
+`zoid6` does not own database creation. The router reads
+`zoid6.json:database.name` (default `zoid6`) and assumes the
+named database already exists. If it does not, the operator
+runs `python -m bbsengine6.startup --databasename zoid6`
+first; that command opens a pool against the `postgres`
+maintenance DB and runs `checkcreatedb` → `checkdatabase`
+in stage_zero (`bbsengine6/py/src/bbsengine6/backend/`),
+which `CREATE DATABASE`s the target if missing and then
+loads the `engine.*` schema. After `bbsengine6.startup`
+returns True, the `zoid6` daemon can be started and will
+talk to the now-present DB.
+
+A `zoid6.startup` module is intentionally **not** planned.
+Adding one would duplicate the privilege probe
+(`checkcreatedb`) and the create-if-missing logic
+(`checkdatabase`) outside the package that owns the
+`engine.*` schema, and would create two owners for "is the
+BBS DB ready?" — easy to drift. If a future change wants
+to fold DB bootstrap into the router's startup sequence,
+do it by extending `bbsengine6.startup` and calling it
+from `zoid6.main` before `bed.main`, not by adding a new
+`zoid6.startup` package.
+
 ## 10. Authoritative file index
 
 | Path                                            | Role                                      |
