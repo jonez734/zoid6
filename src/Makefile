@@ -88,7 +88,7 @@ help:
 	@echo "  rename-sdist  Rename built sdist to include -src suffix"
 	@echo "  sign          GPG-detach-sign every artifact in $(OUTDIR)"
 	@echo "  release       clean + version + build + rename-sdist + sign"
-	@echo "  deploy-tui    install (editable); does NOT build/sign artifacts"
+	@echo "  deploy-tui    install from wheel in $(OUTDIR); DEPLOY_EDITABLE=1 makes it editable"
 	@echo "  deploy-prod   install-fhs (sudo umbrella: sysusers + tmpfiles + venv + systemd + etc)"
 
 install: version
@@ -150,7 +150,26 @@ sign:
 
 release: clean version build rename-sdist sign
 
-deploy-tui: install
+# DEPLOY_EDITABLE is set by `deploytool --editable`. When unset,
+# deploy-tui installs zoid6 from the freshly-built wheel in
+# $(OUTDIR). When set, it installs editable from the source tree
+# (matches the previous `deploy-tui: install` shape, which was
+# always editable via `pip install -e .`). Picking the newest wheel
+# via `ls -t | head -1` so the recipe is robust to multiple wheels
+# accumulating in OUTDIR over time (Phase 0 lands wheels there).
+DEPLOY_EDITABLE ?=
+deploy-tui: build
+ifeq ($(DEPLOY_EDITABLE),1)
+	$(PIP) install --no-cache-dir -e .
+	-rm -rf *.egg-info
+else
+	@WHEEL=$$(ls -t $(OUTDIR)/$(PROJECT)-*.whl 2>/dev/null | head -1); \
+	if [ -z "$$WHEEL" ]; then \
+		echo "no wheel matching $(PROJECT)-*.whl in $(OUTDIR)" >&2; \
+		exit 1; \
+	fi; \
+	$(PIP) install --no-cache-dir $$WHEEL
+endif
 
 # sudo umbrella — everything `install-fhs` does (sysusers, tmpfiles,
 # venv, systemd, /etc/zoid6). The deploytool `zoid6.prod` sub-target
