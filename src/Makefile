@@ -24,7 +24,6 @@ VENV_GROUP ?= zoid6
 
 BED_DIR ?= $(CURDIR)/../../bed
 WHEEL_DIR ?= $(HOME)/wheel-build/zoid6-current
-GETDATE_DIR ?= $(CURDIR)/../../getdate_next
 BBSENGINE_DIR ?= $(CURDIR)/../../bbsengine6/py
 CASINO_DIR ?= $(CURDIR)/../../casino
 
@@ -263,11 +262,6 @@ install-user:
 	$(VENV_DIR)/bin/pip install --quiet build setuptools wheel
 	mkdir -p $(WHEEL_DIR)
 	rm -f $(WHEEL_DIR)/*.whl
-	$(MAKE) -C $(GETDATE_DIR) version
-	# Use `pip wheel` not `python -m build --wheel`: setuptools 80+ in
-	# `python -m build` fails on this filesystem with EPERM during the
-	# install_egg_info → dist-info rename; `pip wheel` sidesteps it.
-	$(PYTHON) -m pip wheel --no-deps --no-build-isolation --no-clean --wheel-dir $(WHEEL_DIR) $(GETDATE_DIR)
 	$(MAKE) -C $(BBSENGINE_DIR) version
 	$(PYTHON) -m pip wheel --no-deps --no-build-isolation --no-clean --wheel-dir $(WHEEL_DIR) $(BBSENGINE_DIR)
 	$(MAKE) -C $(BED_DIR) version

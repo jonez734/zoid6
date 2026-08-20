@@ -1992,6 +1992,62 @@ Migration (per package):
       the section above, set `OUTDIR = /srv/repo/$(PROJECT)/`
       (not `dist/`) from the start.
 
+## PREPARE_BUILD standardization (cross-project)
+
+Every project whose Makefile invokes `python -m build` needs a
+`PREPARE_BUILD` macro in front of that invocation, mirroring
+`bed/Makefile:163-185`: rename a foreign-owned `build/` (or
+`py/build/`, etc.) to `build.stale.$$` and `chmod 1775` the
+replacement. Without it, a `build/` left behind by another user
+(e.g. `jam`) causes setuptools to EPERM on the `chown` it does
+when populating `dist-info/`. Mode `1775` (sticky + group write,
+**no setgid**) is intentional: sticky prevents file stomping,
+group write lets other `opencode`-group members rebuild, and the
+absence of setgid stops setuptools' `shutil.copystat` from
+propagating setgid onto `dist-info/` (which EPERMs in the
+SELinux + NoNewPrivs container).
+
+Status, per project:
+
+- [x] **bed** — macro at `bed/Makefile:163-185`, called from
+      `build` / `install-venv` / `deploy-venv` and from each
+      dep build (`$(BBSENGINE_DIR)`, `$(CURDIR)`).
+      (`$(GETDATE_DIR)` was removed — getdate_next is now resolved
+      as a transitive pip dep of bbsengine6.)
+- [ ] **getdate_next** — has a stub at
+      `getdate_next/Makefile:32` (`mkdir -p build && chmod g-s
+      build`) that does NOT handle the foreign-owned case. If
+      `build/` is owned by `jam`, this stub will EPERM and
+      `python -m build` will fail. Upgrade to match the bed
+      pattern. (No `TODO.md` in this project; tracked here.)
+- [ ] **bbsengine6** — see `bbsengine6/TODO.md` "PREPARE_BUILD
+      protection for in-tree `py/build/`". Current `build/` is
+      `jam:opencode 2775` (foreign-owned AND setgid, both bugs).
+- [ ] **empyre** — see `empyre/TODO.md` "Build infrastructure".
+      `deploy` target runs `python -m build` from project root.
+- [ ] **mistermcfeely** — see `mistermcfeely/TODO.md` "Build
+      infrastructure". `install-venv` runs `python -m build`
+      twice (against `$(BBSENGINE_DIR)`, `$(CURDIR)`);
+      needs PREPARE_BUILD on both. (`$(GETDATE_DIR)` was removed
+      — getdate_next is now resolved as a transitive pip dep of
+      bbsengine6.)
+- [ ] **asimov** — see `asimov/TODO.md` "Build infrastructure".
+      Separate pre-existing bug: no `pyproject.toml` at root or
+      under `src/asimov/`, so `python -m build` is currently
+      broken regardless. Fix layout first, then PREPARE_BUILD.
+- [ ] **vulcan/tui** — `vulcan/tui/Makefile:8` invokes
+      `python -m build` against `vulcan/tui/` (which has a
+      `pyproject.toml`, so the build target is live). Needs
+      PREPARE_BUILD. (No `TODO.md` in this project; tracked
+      here.)
+
+Zoid6 itself is exempt: `zoid6/src/Makefile:267-269` documents
+that zoid6 uses `pip wheel` rather than `python -m build`
+because setuptools 80+ has a separate EPERM issue on
+`install_egg_info` → `dist-info` rename in this filesystem.
+Don't migrate zoid6 onto `python -m build` until that's
+resolved upstream.
+
 Shared setup (one-time, on the deploy host):
 
 - [ ] Confirm `/srv/repo` exists, group-owned by `repo`, mode
