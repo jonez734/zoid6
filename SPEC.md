@@ -324,15 +324,36 @@ because the user, venv, and lifecycle all belong to bed.
 
 `zoid6` does not own database creation. The router reads
 `zoid6.json:database.name` (default `zoid6`) and assumes the
-named database already exists. If it does not, the operator
-runs `python -m bbsengine6.startup --databasename zoid6`
-first; that command opens a pool against the `postgres`
+named database is reachable.
+
+**Self-heal (2026-08-20):** `bbsengine6.startup.main` now runs
+a pre-flight that bootstraps the target database on first
+invocation. When `python -m zoid6.main` (or any caller of
+`bed.main.ensure_startup`) runs against a host where the
+target DB has never been created, `bbsengine6.startup.main`
+opens an admin pool against the `postgres` maintenance DB,
+dispatches `stage_zero` (which calls `checkcreatedb` →
+`checkdatabase` from `bbsengine6/py/src/bbsengine6/backend/`,
+creating the DB if missing), and then dispatches `stage_one`
+against a fresh target-DB pool. The operator therefore does
+NOT have to run `python -m bbsengine6.startup` first; the
+two-step order is still recommended in deployment scripts
+for clarity, but is no longer required.
+
+Manual bootstrap is still the recommended path on production
+hosts:
+
+```
+python -m bbsengine6.startup --databasename zoid6
+python -m zoid6.main
+```
+
+The first command opens a pool against the `postgres`
 maintenance DB and runs `checkcreatedb` → `checkdatabase`
-in stage_zero (`bbsengine6/py/src/bbsengine6/backend/`),
-which `CREATE DATABASE`s the target if missing and then
-loads the `engine.*` schema. After `bbsengine6.startup`
-returns True, the `zoid6` daemon can be started and will
-talk to the now-present DB.
+in stage_zero, which `CREATE DATABASE`s the target if
+missing and then loads the `engine.*` schema. After
+`bbsengine6.startup` returns True, the `zoid6` daemon can
+be started and will talk to the now-present DB.
 
 A `zoid6.startup` module is intentionally **not** planned.
 Adding one would duplicate the privilege probe

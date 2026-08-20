@@ -1328,21 +1328,23 @@ The two responsibilities are separated by design (see
 
 ### Tasks
 
-- [ ] If a missing-DB error surfaces from the `zoid6` startup path
-  (i.e. `python -m zoid6.main` invoked against a host where `zoid6`
-  has never been bootstrapped), the fix is to invoke
-  `python -m bbsengine6.startup` *first*, not to add a
-  `zoid6.startup` shim. Add a one-line note to the zoid6 README
-  (`zoid6/README.md`) and to `usr/share/factory/etc/zoid6/zoid6.tmpfiles`'s
-  adjacent docstring recommending the two-step order.
 - [x] Verified: `bbsengine6.backend.checkdatabase` already creates
   the DB if missing. No `zoid6.startup` module is planned. (2026-08-19)
+- [x] `bbsengine6.startup.main` now self-heals on first invocation
+  by running a pre-flight against the `postgres` maintenance DB
+  before any stage runs. `python -m zoid6.main` on a fresh host
+  bootstraps the target DB on the first call to `bed.main.ensure_startup`,
+  so the explicit two-step order (`python -m bbsengine6.startup` first,
+  then `python -m zoid6.main`) is now best-effort guidance rather
+  than a hard requirement. The two-step order is still recommended
+  in deployment scripts for clarity; see `zoid6/SPEC.md §9` for
+  the updated lifecycle description. (2026-08-20)
 
 ### Cross-references
 
 - `bbsengine6/TODO.md` — "Make `python -m bbsengine6.startup`
-  self-heal when the target database does not yet exist" (the
-  outer-pool fix in `startup/main.py:118-144`).
+  self-heal when the target database does not yet exist" (done
+  2026-08-20 — pre-flight in `startup/main.py`).
 - `bbsengine6/py/src/bbsengine6/backend/checkdatabase.py:33-61`
   — existing create-if-missing logic.
 - `bbsengine6/py/src/bbsengine6/backend/checkcreatedb.py:38-86`
