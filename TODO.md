@@ -1859,11 +1859,14 @@ file that was just built":
       and `deploy-venv` both run `python3 -m build --wheel` and
       `pip install` the resulting wheel), but the venv dirs
       (`/var/lib/bed/venv`, `/tmp/bed-$$`) and the
-      multi-wheel dependency dance (getdate_next + bbsengine6 +
-      bed) are bed-specific. Trim the top-level `bed/Makefile`
-      so the primary `install: build` target matches deploytool
-      (install the just-built `bed-*.whl` into the active venv
-      with `pip install --no-deps`), and keep the
+      multi-wheel dependency dance (bbsengine6 + bed) are
+      bed-specific. (getdate_next is no longer in this set —
+      pip resolves it as a transitive runtime dep of
+      bbsengine6 via `bbsengine6/py/pyproject.toml`.) Trim the
+      top-level `bed/Makefile` so the primary `install: build`
+      target matches deploytool (install the just-built
+      `bed-*.whl` into the active venv with
+      `pip install --no-deps`), and keep the
       `install-venv` / `deploy-venv` targets as the prod /
       shared-venv wrappers. Add `deploy-tui: install` alias.
 - [ ] **bbsengine6** — `bbsengine6/Makefile` `deploy-tui` is
