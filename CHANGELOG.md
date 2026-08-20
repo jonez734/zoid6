@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### zoid6: config resolver is the canonical pattern (env > FHS > bundled)
+
+`zoid6/src/zoid6/main.py:_resolve_config_path()` is the
+intentional, supported config-resolution chain for the `zoid6`
+console script:
+
+1. `$ZOID6_CONFIG` env var (override; e.g. testing, sandbox)
+2. `/etc/zoid6/zoid6.json` (FHS-installed; production path)
+3. the packaged `src/zoid6/data/zoid6.json` shipped in the wheel
+   (dev-box path; no `sudo install-etc` required)
+
+The resolver landed in `7ffb7c0` ("zoid6: run from venv via
+pyproject console script", 2026-08-03) and is already documented
+in `README.md` (Quick start) and `SPEC.md` (§1, §3.1). This
+CHANGELOG entry records the design intent so future contributors
+don't "fix" the no-config case by reintroducing a `--config`
+required-arg path. See `TODO.md` "## Config resolver (env > FHS
+> bundled)" for the cross-monorepo rationale and the bed-side
+counterpart (`bed/src/bed/_configpath.py:resolve_config_path`,
+added in commit `0ba05b2`).
+
 ### zoid6: `deploy-prod` Makefile target + `zoid6.prod` deploytool sub-target
 
 - `zoid6/src/Makefile` adds `deploy-prod: install-fhs` (alias

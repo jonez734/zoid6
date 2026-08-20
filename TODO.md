@@ -1695,6 +1695,50 @@ zoid6 is the anchor package for a single shared venv at `/var/lib/zoid6/venv`, o
 - [ ] Remove old per-service venvs: `rm -rf /var/lib/postoffice/venv /var/lib/bed/venv`
 - [ ] Spot-check `bed.json` vs `zoid6.json` for port/bind conflicts (both run `bed` from the shared venv)
 
+## Config resolver (env > FHS > bundled)
+
+`zoid6/src/zoid6/main.py:_resolve_config_path()` is the canonical,
+intentional config-resolution chain for the `zoid6` console script:
+
+1. `$ZOID6_CONFIG` env var (override; e.g. testing, sandboxed runs)
+2. `/etc/zoid6/zoid6.json` (FHS-installed config; the production
+   path on systemd hosts where `make install-etc` has run)
+3. the packaged `src/zoid6/data/zoid6.json` shipped in the wheel
+   (the dev-box path; no `sudo install-etc` required)
+
+The resolver landed in `7ffb7c0` ("zoid6: run from venv via
+pyproject console script") and has been the design intent since.
+This section records it as the canonical fallback so a future
+contributor doesn't "fix" the no-config case by making `--config`
+required again. The resolver is also documented in `README.md`
+(Quick start, lines 30–41) and `SPEC.md` (§1, §3.1).
+
+### Cross-reference to bed
+
+The same pattern lives in
+[`bed/src/bed/_configpath.py:resolve_config_path`](../bed/src/bed/_configpath.py)
+(added in commit `0ba05b2` "feat(bed): --config resolves to
+wheel-shipped default when no flag is passed"). bed exposes the
+chain explicitly because bed's `--config` flag is mandatory at
+the CLI layer; zoid6 hides it because the `zoid6` console script
+is the public entry point and should never prompt for a config
+path.
+
+### Why this matters
+
+The `zoid6.tui` deploy target (`make -C zoid6/src deploy-tui` →
+`install` → `pip install -e .`) is non-sudo **specifically
+because** the resolver falls back to the packaged default. Without
+the resolver, dev installs would crash at first invocation with
+`No such file: /etc/zoid6/zoid6.json`. With it, `pip install -e .`
+is a complete no-sudo dev workflow — matching the cross-monorepo
+"devenv can run every service without `sudo install-etc`" goal.
+
+`zoid6.prod` (the sudo umbrella) still installs
+`/etc/zoid6/zoid6.json` via `make install-etc` so operators can
+customise the config without rebuilding the wheel — the resolver
+just makes the no-customisation case work without sudo.
+
 ## `zoid6.tui` (non-sudo) / `zoid6.prod` (sudo) deploy split
 
 ### Problem

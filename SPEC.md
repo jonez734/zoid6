@@ -51,7 +51,9 @@ empyre / …
 `zoid6.main.main` is essentially `bed.main.main --router
 zoid6.api.handler.MessageRouter --config /etc/zoid6/zoid6.json` with
 an env-var override (`$ZOID6_CONFIG`) and a packaged default
-fallback.
+fallback. The same resolver pattern lives in
+[`bed/src/bed/_configpath.py:resolve_config_path`](../bed/src/bed/_configpath.py)
+(added in commit `0ba05b2` for bed, mirroring the zoid6 design).
 
 ## 2. Status
 
