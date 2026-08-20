@@ -52,7 +52,7 @@ endif
 .PHONY: install-sysusers uninstall-sysusers
 .PHONY: install-venv uninstall-venv restorecon
 .PHONY: install-systemd uninstall-systemd uninstall-fhs
-.PHONY: deploy-tui
+.PHONY: deploy-tui deploy-prod
 .PHONY: reassign-bootstrap-owners install-user start stop status restart
 .PHONY: install-systemd-user uninstall-systemd-user uninstall-user
 
@@ -90,6 +90,7 @@ help:
 	@echo "  sign          GPG-detach-sign every artifact in $(OUTDIR)"
 	@echo "  release       clean + version + build + rename-sdist + sign"
 	@echo "  deploy-tui    install (editable); does NOT build/sign artifacts"
+	@echo "  deploy-prod   install-fhs (sudo umbrella: sysusers + tmpfiles + venv + systemd + etc)"
 
 install: version
 	$(PIP) install --no-cache-dir -e $(SRC)
@@ -151,6 +152,12 @@ sign:
 release: clean version build rename-sdist sign
 
 deploy-tui: install
+
+# sudo umbrella — everything `install-fhs` does (sysusers, tmpfiles,
+# venv, systemd, /etc/zoid6). The deploytool `zoid6.prod` sub-target
+# resolves to this. Keep this an alias so `make deploy-prod` and
+# `make install-fhs` stay interchangeable.
+deploy-prod: install-fhs
 
 install-etc:
 	sudo install -d -m 0755 -o root -g root $(ETC_DIR)

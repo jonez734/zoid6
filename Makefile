@@ -63,7 +63,7 @@ parsedown-deploy:
 php-deploy:
 	$(MAKE) -C php stage
 
-.PHONY: markdown parsedown-deploy php-deploy deploy deploy-www deploy-tui
+.PHONY: markdown parsedown-deploy php-deploy deploy deploy-www deploy-tui deploy-prod
 
 deploy:
 	$(MAKE) -C shared stage
@@ -78,6 +78,9 @@ deploy-www:
 
 deploy-tui:
 	$(MAKE) -C src deploy-tui
+
+deploy-prod:
+	$(MAKE) -C src deploy-prod VENV_DIR="$(VENV_DIR)" VENV_USER="$(VENV_USER)" VENV_GROUP="$(VENV_GROUP)" BED_DIR="$(BED_DIR)" WHEEL_DIR="$(WHEEL_DIR)"
 
 .PHONY: install-venv uninstall-venv install-fhs uninstall-fhs
 
