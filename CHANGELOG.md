@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### deploy-tui: install from `/srv/repo/zoid6/` wheel by default; `DEPLOY_EDITABLE=1` for editable
+
+Part of the cross-monorepo Phase 1 work in `deploytool`'s
+`--editable` flag (see `deploytool/CHANGELOG.md` `[Unreleased]`).
+zoid6's `deploy-tui` target now matches the pattern shared by
+`bbsengine6`, `bed`, `casino`, and `deploytool`.
+
+Before: `zoid6/src/Makefile deploy-tui: install` called
+top-level `install`, which was `$(PIP) install --no-cache-dir -e $(SRC)` —
+**always** editable, never went through `/srv/repo/zoid6/`.
+
+After:
+
+- Default: `deploy-tui: build` then `pip install $WHEEL`,
+  where `$WHEEL` is the most-recently-built wheel under
+  `/srv/repo/zoid6/zoid6-*.whl` picked via `ls -t | head -1`.
+- `DEPLOY_EDITABLE=1` (set by `deploytool --editable`):
+  `pip install --no-cache-dir -e .` from the project root,
+  with `rm -rf *.egg-info` to wipe stale absolute paths in
+  `SOURCES.txt`.
+
+**Behavior change**: `zoid6.tui` deployments run without
+`--editable` now install from a wheel rather than editable
+from source. The previous shape was always editable; the new
+default is "install from wheel." `zoid6.prod` (which delegates
+to `install-fhs` → `/var/lib/zoid6/venv`) is unaffected by
+`DEPLOY_EDITABLE` — that's still the sudo-umbrella flow.
+
+Verified: `make -n -C zoid6/src deploy-tui` shows
+`pip install /srv/repo/zoid6/zoid6-*.whl`; the same with
+`DEPLOY_EDITABLE=1` shows `pip install -e .`.
+
 ### zoid6: config resolver is the canonical pattern (env > FHS > bundled)
 
 `zoid6/src/zoid6/main.py:_resolve_config_path()` is the
