@@ -1306,6 +1306,52 @@ on each other.
 
 ---
 
+## Database lifecycle is owned by bbsengine6, not zoid6
+
+`bbsengine6.startup` (`python -m bbsengine6.startup`) runs
+`stage_zero → checkcreatedb → checkdatabase`, which already handles
+"target database does not exist yet" by opening a pool against the
+`postgres` maintenance DB and issuing `CREATE DATABASE "<args.databasename>"`
+(`bbsengine6/py/src/bbsengine6/backend/checkdatabase.py:33-61`).
+This means zoid6 does **not** need its own `zoid6.startup` module
+that creates the `zoid6` database.
+
+The two responsibilities are separated by design (see
+`zoid6/SPEC.md §9`):
+
+- **bbsengine6** owns DB lifecycle: connect, create if missing,
+  schema, grants, privileges.
+- **zoid6** owns routing and config: `zoid6.json:database.name`
+  picks which DB the router talks to; the router assumes that DB
+  is already bootstrapped (or that `python -m bbsengine6.startup`
+  has just been run).
+
+### Tasks
+
+- [ ] If a missing-DB error surfaces from the `zoid6` startup path
+  (i.e. `python -m zoid6.main` invoked against a host where `zoid6`
+  has never been bootstrapped), the fix is to invoke
+  `python -m bbsengine6.startup` *first*, not to add a
+  `zoid6.startup` shim. Add a one-line note to the zoid6 README
+  (`zoid6/README.md`) and to `usr/share/factory/etc/zoid6/zoid6.tmpfiles`'s
+  adjacent docstring recommending the two-step order.
+- [x] Verified: `bbsengine6.backend.checkdatabase` already creates
+  the DB if missing. No `zoid6.startup` module is planned. (2026-08-19)
+
+### Cross-references
+
+- `bbsengine6/TODO.md` — "Make `python -m bbsengine6.startup`
+  self-heal when the target database does not yet exist" (the
+  outer-pool fix in `startup/main.py:118-144`).
+- `bbsengine6/py/src/bbsengine6/backend/checkdatabase.py:33-61`
+  — existing create-if-missing logic.
+- `bbsengine6/py/src/bbsengine6/backend/checkcreatedb.py:38-86`
+  — privilege probe that runs before the create attempt.
+- `zoid6/SPEC.md §9` — "Database schema — bbsengine6 ships the
+  `engine.*` schema and all migrations; this repo ships none."
+
+---
+
 ## `zoid6.api.handler.MessageRouter` does not register `list_services`
 
 ### Problem
