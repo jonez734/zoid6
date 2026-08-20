@@ -2017,12 +2017,16 @@ Status, per project:
       dep build (`$(BBSENGINE_DIR)`, `$(CURDIR)`).
       (`$(GETDATE_DIR)` was removed — getdate_next is now resolved
       as a transitive pip dep of bbsengine6.)
-- [ ] **getdate_next** — has a stub at
+- [x] **getdate_next** — has a stub at
       `getdate_next/Makefile:32` (`mkdir -p build && chmod g-s
       build`) that does NOT handle the foreign-owned case. If
       `build/` is owned by `jam`, this stub will EPERM and
       `python -m build` will fail. Upgrade to match the bed
       pattern. (No `TODO.md` in this project; tracked here.)
+      **Done 2026-08-20**: replaced with the bed-pattern
+      `PREPARE_BUILD` (foreign-owned rename + `chmod 1775`).
+      `deploytool/tests/test_deploy_getdate_next_tui.py` pins
+      both invariants.
 - [ ] **bbsengine6** — see `bbsengine6/TODO.md` "PREPARE_BUILD
       protection for in-tree `py/build/`". Current `build/` is
       `jam:opencode 2775` (foreign-owned AND setgid, both bugs).
