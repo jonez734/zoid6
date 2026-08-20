@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### zoid6: out-of-band reassign script targets zoid6 role
+
+- `src/zoid6/reassign_bootstrap_owners.py` `TARGET` is now
+  `"zoid6"` (was `"opencode"`).
+- The script now creates the `zoid6` role if missing
+  (`NOSUPERUSER NOCREATEDB NOCREATEROLE NOLOGIN INHERIT`) before
+  iterating over the SECURITY DEFINER helpers, so a fresh dev DB
+  can be migrated to the new ownership model without first running
+  `bbsengine6`'s full `python -m bbsengine6.startup` sequence.
+- `src/Makefile` `reassign-bootstrap-owners` echo updated to
+  reflect the new target role.
+
+This change aligns the out-of-band migration script with the
+canonical owner of the five `public.*` SECURITY DEFINER helpers
+(`manage_schema_priv`, `manage_database_priv`, `manage_role_privs`,
+`manage_secondary_role`, `get_role_privs`) that
+`bbsengine6.database.verify_function_owner` now requires. See
+`bbsengine6/TODO_zoid6_role.md` for the follow-up that drops
+`"postgres"` from the allow-list next release.
+
 ### zoid6: rename config file from `bed.json` to `zoid6.json`
 
 - `src/zoid6/data/bed.json` → `src/zoid6/data/zoid6.json`

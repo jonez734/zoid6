@@ -244,7 +244,7 @@ factory-sync:
 # without sudo. Production keeps using install-fhs as before.
 
 reassign-bootstrap-owners:
-	@echo "Reassigning public bootstrap SQL functions to current $$USER ..."
+	@echo "Reassigning public bootstrap SQL functions to role 'zoid6' (creates role if missing) ..."
 	$(PYTHON) $(PACKAGE)/reassign_bootstrap_owners.py
 
 install-user:
