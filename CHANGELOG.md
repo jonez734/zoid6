@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### fix(zoid6): build depends on clean to wipe stale SOURCES.txt absolute paths
+
+`src/Makefile:132` `build` now declares `clean` as a prerequisite
+(in addition to `version`). The `clean` target removes `build/`,
+`zoid6.egg-info/`, and the various `__pycache__` /
+`.pytest_cache` / `.ruff_cache` / `.mypy_cache` directories
+before each `python -m build` invocation.
+
+**Why:** setuptools' `egg_info` re-reads the existing
+`zoid6.egg-info/SOURCES.txt` on every build and merges its
+entries into the new manifest. If the existing SOURCES.txt
+contains absolute paths (e.g. from a prior run with a stale
+or hand-edited manifest), setuptools rejects the new manifest
+with:
+
+```
+error: Error: setup script specifies an absolute path:
+    /home/opencode/data/work/zoid6/src/zoid6/__init__.py
+
+setup() arguments must *always* be /-separated paths relative to the
+setup.py directory, *never* absolute paths.
+```
+
+Wiping `zoid6.egg-info/` (and `build/`) before each `make build`
+makes the absolute-path failure mode unreachable — the manifest
+is regenerated from scratch with relative paths every time.
+
+`make build` (and downstream `make deploy-tui`) now runs the
+full `clean` cycle on every invocation; the cost is one
+incremental rebuild per deploy rather than reusing any cached
+artifacts. Verified: `deploy zoid6.tui` completes all green
+from a freshly-cleaned `src/` tree.
+
 ### deploy-tui: install from `/srv/repo/zoid6/` wheel by default; `DEPLOY_EDITABLE=1` for editable
 
 Part of the cross-monorepo Phase 1 work in `deploytool`'s
