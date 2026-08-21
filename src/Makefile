@@ -129,7 +129,7 @@ version:
 	@echo '__githash__ = "'`git log -1 --format='%H' 2>/dev/null | cut -c 1-16`'"' >> $(PROJECT)/_version.py
 	@cat $(PROJECT)/_version.py
 
-build: version
+build: clean version
 	$(PYTHON) -m build --outdir $(OUTDIR)
 
 rename-sdist:
