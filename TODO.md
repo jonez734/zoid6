@@ -2048,12 +2048,25 @@ Status, per project:
       PREPARE_BUILD. (No `TODO.md` in this project; tracked
       here.)
 
-Zoid6 itself is exempt: `zoid6/src/Makefile:267-269` documents
-that zoid6 uses `pip wheel` rather than `python -m build`
-because setuptools 80+ has a separate EPERM issue on
-`install_egg_info` → `dist-info` rename in this filesystem.
-Don't migrate zoid6 onto `python -m build` until that's
-resolved upstream.
+Zoid6 itself is exempt from the `PREPARE_BUILD` macro:
+`zoid6/src/Makefile:285-291` `install-user` uses `pip wheel`
+rather than `python -m build` for the per-package wheel build,
+and `zoid6/src/Makefile:132-133` `build` (the primary wheel
+producer consumed by `deploy-tui`) declares `clean` as a
+prerequisite, so a stale `build/` or `zoid6.egg-info/` is
+wiped before every `python -m build` invocation. The clean
+dep sidesteps the setuptools SOURCES.txt absolute-path failure
+mode that surfaces when `zoid6.egg-info/SOURCES.txt` carries
+forward absolute paths from a prior run.
+
+The setuptools 80+ `install_egg_info` → `dist-info` EPERM
+issue (kernel rejecting SGID preservation in the SELinux +
+NoNewPrivs container) is **separate** from the SOURCES.txt
+fix and may still surface on hosts with stricter SGID
+enforcement. If it does, drop `python -m build` down to
+`pip wheel --no-deps --no-build-isolation --no-clean` (the
+shape already used by `install-user`) for the affected
+target only.
 
 Shared setup (one-time, on the deploy host):
 
