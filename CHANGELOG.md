@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### build: add `PREPARE_BUILD` macro to `src/Makefile`
+
+`zoid6/src/Makefile` lacked the `PREPARE_BUILD` helper that
+`bed/Makefile:189-194`, `getdate_next/Makefile:32-36`, and
+`casino/Makefile:75-110` (this release) already have. Without it,
+the freshly-mkdir'd `build/` inherits the parent directory's
+setgid bit (mode `2775`), and setuptools' `shutil.copystat`
+mirrors that mode onto the new dist-info directory during
+`bdist_wheel` — which then EPERMs the subsequent chmod in
+SELinux-enforcing + NoNewPrivs containers (we lack `CAP_FSETID`).
+
+The macro is identical to `bed/Makefile:189-194`, parameterized
+over `$(1)`, and called from the `build` target with
+`$(CURDIR)`.
+
+The TODO list previously marked `src/Makefile` exempt from
+PREPARE_BUILD because `install` is `pip install -e .` (no
+`python -m build`). But the `build` target still runs `python
+-m build`, so the EPERM cascade applies to it. The macro is added
+here as defense-in-depth so a future `make build` (or `make
+deploy-tui` which chains into `build`) can't regress on the
+EPERM.
+
+Tracked in `zoid6/TODO.md` "PREPARE_BUILD standardization
+(cross-project)" — that checkbox is now ticked.
+
 ### fix(zoid6): build depends on clean to wipe stale SOURCES.txt absolute paths
 
 `src/Makefile:132` `build` now declares `clean` as a prerequisite
