@@ -2090,3 +2090,142 @@ Verification (after the migration, on the deploy host):
       `/srv/repo/<pkg>/` and installs it into the active venv
       in one shot — the canonical dev-loop workflow.
 
+## Password column hardening — legacy MD5-crypt migration (`@since 20260822`)
+
+**Context (2026-08-22 incident).** `engine.__member.password` for
+`jam` was holding a 34-char MD5-crypt hash (`$1$AUNKK0aN$...`,
+prefix `$1$`) that survived an earlier `setpassword.py` run.
+`checkpassword` issues `crypt('12345', stored)` which uses the
+stored prefix to select the algorithm; with a `$1$` prefix that's
+MD5-crypt, not bcrypt, so the comparison fails for any plaintext
+that wasn't the one originally hashed. `bed auth login` returned
+`Invalid moniker or password` consistently against this hash.
+After re-running `setpassword.py` against the row, the column now
+holds a proper bcrypt hash (length 60, prefix `$2a$`) and login
+succeeds. The three follow-ups below are the cleanup so this
+doesn't reoccur.
+
+### [ ] Find and migrate any other legacy MD5-crypt hashes
+
+Any other `engine.__member` row that was written by a pre-bcrypt
+code path will reproduce the same symptom for that user. The
+discovery query:
+
+      ```sql
+      SELECT moniker
+        FROM engine.__member
+       WHERE password IS NOT NULL
+         AND password ~ '^\$1\$';
+      ```
+
+Each match needs either:
+
+- (a) the member runs `setpassword.py <moniker> <newpassword>` to
+      self-rotate, OR
+- (b) a privileged bulk migration that wraps the existing
+      plaintext in a bcrypt hash — but we don't have the plaintext
+      for MD5-crypt rows, so this path is *not viable*; the legacy
+      password must be considered lost and re-set by the user.
+
+Resolution: zero rows match the regex. Pin a regression test in
+`bbsengine6/py/tests/test_member_legacy_hash_audit.py` that runs
+the query against the test DB (or skips with a clear marker if no
+live DB) and asserts `len(rows) == 0`. The audit query itself
+should be a documented module-level function in
+`bbsengine6/member/lib.py` (e.g. `audit_password_column()`) so
+both the test and any future CLI tool can call it.
+
+### [ ] Identify what wrote the MD5-crypt hash in the first place
+
+A `$1$` hash in `engine.__member.password` is incompatible with
+the Python-side `setpassword` (which writes bcrypt via
+`crypt($1, gen_salt('bf'))` at `bbsengine6/member/lib.py:842`).
+The most likely writers, in priority order:
+
+- **`/srv/backups/work/zoid6/php/engine/`** — the legacy PHP
+  bbsengine. PHP path predates the Python port and historically
+  used MD5-crypt; if any PHP migration or restore ever ran
+  against this DB, that's the vector. Search for `crypt(`,
+  `md5(`, `password_hash` in PHP files.
+- **`bbsengine6/sql/migrate_*.sql`** — every migration file.
+  Grep `password` (case-insensitive) in `bbsengine6/sql/` and
+  flag anything that writes `engine.__member.password` directly
+  rather than via `setpassword`.
+- **`bbsengine6/console/member.py:463`** — calls `setpassword`,
+  so it should already write bcrypt; confirm there's no fallback
+  branch that writes a literal hash.
+- **Backup-restore / round-trip paths** — any tool that
+  serializes and restores a member row should be either
+  drop-and-reload (with the member re-setting the password) or
+  transparent-rehash (rare and risky). Grep `backup`,
+  `restore`, `dump` in `bbsengine6/scripts/` and
+  `bbsengine6/backend/`.
+
+Resolution: a one-paragraph comment at the top of
+`bbsengine6/sql/member.sql` stating that `password` MUST be a
+bcrypt hash (`$2a$` / `$2b$` / `$2y$` prefix, length 60) and
+listing the writers that are known to violate that. Plus a
+CHECK constraint or trigger that rejects `$1$` writes going
+forward:
+
+      ```sql
+      -- Reject legacy MD5-crypt writes. Run once after the
+      -- migration audit (item 1) is clean.
+      alter table engine.__member
+        add constraint chk_member_password_bcrypt
+        check (password is null or password ~ '^\$2[abxy]\$');
+      ```
+
+The constraint belongs in a new file `bbsengine6/sql/manage_password_format.sql`
+that's `\i`-included from `bbsengine6.sql` AFTER the member
+table is created. Naming convention matches the existing
+`sql/manage_role_privs.sql` precedent.
+
+### [ ] Clean up the stale editable-install `.pth` files
+
+`/home/jam/.venv/lib/python3.12/site-packages/` has five
+`__editable__.zoid6-*.pth` files from previous `pip install -e`
+runs (timestamps: 202608131710, 202608200826, 202608200902,
+202608201240, 202608201703). Each one imports a unique finder
+module that registers `_EditableFinder` against
+`sys.meta_path`. The finder's `install()` is idempotent (only
+appends if not already present), so they don't break anything
+today — but:
+
+- `pip uninstall zoid6` will leave stale state in
+  `sys.path`/`.pth` files that confuse subsequent `pip
+  install` and `pip-tools` operations.
+- Running `pip list` shows `zoid6 0.0.1.dev202608201703` even
+  though the underlying source tree has been edited since
+  202608201703.
+- Future contributors who follow the "editable install" pattern
+  from this README will end up with the same five-file pile.
+
+Resolution: consolidate to one editable install.
+
+      ```bash
+      # Capture which version is currently active so we can
+      # verify nothing changes semantically:
+      pip show zoid6 | grep -E '^(Version|Location)'
+      python -c "import zoid6; print(zoid6.__file__)"
+
+      # Remove the stale .pth files and the dist-info:
+      pip uninstall -y zoid6
+      rm -f /home/jam/.venv/lib/python3.12/site-packages/__editable__.zoid6-*.pth
+      rm -f /home/jam/.venv/lib/python3.12/site-packages/__editable___zoid6_*_finder.py
+      rm -f /home/jam/.venv/lib/python3.12/site-packages/__pycache__/__editable___zoid6_*.pyc
+      rm -rf /home/jam/.venv/lib/python3.12/site-packages/zoid6-*.dist-info
+
+      # Reinstall editable from the live source tree:
+      pip install -e /home/opencode/data/work/zoid6
+      pip show zoid6 | grep -E '^(Version|Location)'
+      python -c "import zoid6; print(zoid6.__file__)"
+      ```
+
+Verification: only one `__editable__.zoid6-*.pth` file remains,
+`python -c "import zoid6.main; print(zoid6.main.__file__)"` still
+prints `/home/opencode/data/work/zoid6/src/zoid6/main.py`, and
+`zoid6` launches successfully. Repeat for any sibling package
+(`bed`, `casino`, `bbsengine6`) that shows the same five-file
+pile — same root cause, same fix.
+
