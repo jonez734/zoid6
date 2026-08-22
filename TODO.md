@@ -2255,10 +2255,11 @@ probes to diagnose. Successful auths render with the green
 `level="ok"` prefix so a healthy auth path is visually
 distinct from a silently-broken one.
 
-Cross-ref: this section's items 1-3 ("find and migrate any
-other legacy MD5-crypt hashes", "identify what wrote the
-MD5-crypt hash", "clean up the stale editable-install `.pth`
-files"). The audit function is the runtime complement to those
+Cross-ref: this section's items 1-2 ("find and migrate any other
+legacy MD5-crypt hashes", "identify what wrote the
+MD5-crypt hash"),
+plus the standalone "Clean up stale editable-install `.pth` files"
+section. The audit function is the runtime complement to those
 one-shot scans — if a future code path reintroduces a `$1$`
 hash, the audit logs the warning at the next auth attempt
 instead of waiting for the operator to rediscover the
