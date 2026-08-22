@@ -2105,7 +2105,13 @@ holds a proper bcrypt hash (length 60, prefix `$2a$`) and login
 succeeds. The three follow-ups below are the cleanup so this
 doesn't reoccur.
 
-### [ ] Find and migrate any other legacy MD5-crypt hashes
+**Status (closed 2026-08-22):** all three items implemented across
+`bbsengine6` (schema authority) and `zoid6` (operator workflow).
+See `bbsengine6/TODO.md` for the schema-side cross-reference and
+`bbsengine6/CHANGELOG.md` "[Unreleased] feat(bbsengine6): password
+column hardening" for the implementation details.
+
+### [x] Find and migrate any other legacy MD5-crypt hashes
 
 Any other `engine.__member` row that was written by a pre-bcrypt
 code path will reproduce the same symptom for that user. The
@@ -2135,7 +2141,7 @@ should be a documented module-level function in
 `bbsengine6/member/lib.py` (e.g. `audit_password_column()`) so
 both the test and any future CLI tool can call it.
 
-### [ ] Identify what wrote the MD5-crypt hash in the first place
+### [x] Identify what wrote the MD5-crypt hash in the first place
 
 A `$1$` hash in `engine.__member.password` is incompatible with
 the Python-side `setpassword` (which writes bcrypt via
@@ -2181,7 +2187,7 @@ that's `\i`-included from `bbsengine6.sql` AFTER the member
 table is created. Naming convention matches the existing
 `sql/manage_role_privs.sql` precedent.
 
-### [ ] Auth-time password-field sanity check + diagnostic logging
+### [x] Auth-time password-field sanity check + diagnostic logging
 
 When `member.checkpassword` runs (called from `bed auth login`,
 `casino`'s auth prompt, `bed auth reconnect`, etc.) it queries

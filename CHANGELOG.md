@@ -7,6 +7,73 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### feat(bbsengine6): password column hardening — legacy MD5-crypt audit + bcrypt CHECK constraint
+
+Resolves the three checkboxes in `zoid6/TODO.md` "Password column
+hardening — legacy MD5-crypt migration" via `bbsengine6` (the schema
+authority) and one operator-facing audit helper that surfaces the
+2026-08-22 incident symptom on every auth attempt.
+
+**Why:** the 2026-08-22 `bed auth login` incident took four `psql`
+probes to diagnose because `checkpassword` silently returned `False`
+when the stored password was a `$1$` MD5-crypt hash instead of the
+expected bcrypt. Three follow-ups close the gap:
+
+1. **One-shot audit** — `bbsengine6.member.audit_password_column(args)`
+   returns the list of monikers holding a legacy `$1$` hash. Test pin:
+   `bbsengine6/py/tests/test_member_legacy_hash_audit.py` (6 unit cases
+   + 1 live-DB regression pin asserting `len(rows) == 0`). Operator
+   workflow: run the helper against the live `zoid6` DB, migrate each
+   result via `bbsengine6/scripts/setpassword.py <moniker> <newpassword>`
+   (legacy plaintext is lost; members must re-set their password).
+
+2. **Writer audit + bcrypt CHECK constraint** — `bbsengine6/sql/member.sql`
+   now documents the bcrypt-only invariant in a top-of-file comment.
+   `bbsengine6/sql/manage_password_format.sql` (new; `\i`-included from
+   `bbsengine6/sql/bbsengine6.sql` after `member.sql`) adds
+   `chk_member_password_bcrypt` on `engine.__member.password`:
+   `password ~ '^\$2[abxy]\$'`. Any future INSERT/UPDATE with a non-
+   bcrypt prefix (including `$1$`) fails at write time. The constraint
+   is `DROP CONSTRAINT IF EXISTS` then `ADD CONSTRAINT` so re-running
+   `bbsengine6.sql` against an existing DB is a no-op.
+
+3. **Per-auth audit** — `bbsengine6.member.audit_password_hash(args,
+   moniker, **kwargs)` reads `engine.member.password` for the moniker
+   and returns a `PasswordHashAudit` namedtuple
+   (`present, non_empty, prefix, is_bcrypt, is_md5crypt, length_ok`).
+   Wired into `member.checkpassword` immediately before the bcrypt
+   round-trip SELECT, so every auth attempt (bed `auth login` / `auth
+   reconnect`, casino auth prompt, future entry points) emits one
+   diagnostic line:
+   - bcrypt OK → `level="ok"` (green-bg prefix per
+     `bbsengine6/io/echo.py:1317`)
+   - `$1$` legacy → `level="warning"` with hash prefix
+   - NULL / empty / non-bcrypt prefix / wrong length →
+     `level="warning"` with the specific reason
+   
+   On `is_md5crypt=True` the audit logs the warning AND the round-trip
+   proceeds (legacy plaintext might still match the MD5 hash; the
+   warning is the operator signal, not a hard reject).
+
+Test pin: `bbsengine6/py/tests/test_member_audit_password_hash.py`
+(16 unit cases — 6 parametrized per the TODO matrix + 4 specific cases
++ 6 wire-up tests covering `checkpassword`'s audit invocation). All
+22 unit tests pass; existing tests (test_console_member_add_edit.py,
+test_auth_password_e2e.py, test_password_hash_scrypt.py,
+test_member_verify_found.py) unchanged.
+
+The 2026-08-22 incident scenario is now reproduced as
+`TestCheckpasswordCallsAudit::test_checkpassword_invokes_audit_on_md5_hash_and_continues`:
+stored `$1$` hash, plaintext doesn't match, `checkpassword` returns
+`False` AND emits the `W: jam password is MD5-crypt ($1$AUNKK0aN$...),
+migrate to bcrypt` diagnostic the operator would have seen on the
+first failed login.
+
+Cross-ref: `bbsengine6/TODO.md` (back-reference added) and
+`zoid6/TODO.md` "Password column hardening" (all three checkboxes
+now ticked, with the audit-and-migrate workflow split between the two
+repos per the TODO note).
+
 ### build: add `PREPARE_BUILD` macro to `src/Makefile`
 
 `zoid6/src/Makefile` lacked the `PREPARE_BUILD` helper that
