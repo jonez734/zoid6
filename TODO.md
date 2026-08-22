@@ -2265,51 +2265,61 @@ hash, the audit logs the warning at the next auth attempt
 instead of waiting for the operator to rediscover the
 symptom.
 
-### [ ] Clean up the stale editable-install `.pth` files
+## Clean up stale editable-install `.pth` files (`@since 20260822`)
 
-`/home/jam/.venv/lib/python3.12/site-packages/` has five
-`__editable__.zoid6-*.pth` files from previous `pip install -e`
-runs (timestamps: 202608131710, 202608200826, 202608200902,
-202608201240, 202608201703). Each one imports a unique finder
-module that registers `_EditableFinder` against
-`sys.meta_path`. The finder's `install()` is idempotent (only
-appends if not already present), so they don't break anything
-today — but:
+**Context (2026-08-22 incident).** `/home/jam/.venv/lib/python3.12/site-packages/`
+holds five `__editable__.zoid6-*.pth` files from previous `pip install -e` runs
+(timestamps: 202608131710, 202608200826, 202608200902, 202608201240,
+202608201703). Each one imports a unique finder module that registers
+`_EditableFinder` against `sys.meta_path`. The finder's `install()` is idempotent
+(only appends if not already present), so they don't break anything today — but:
 
-- `pip uninstall zoid6` will leave stale state in
-  `sys.path`/`.pth` files that confuse subsequent `pip
-  install` and `pip-tools` operations.
-- Running `pip list` shows `zoid6 0.0.1.dev202608201703` even
-  though the underlying source tree has been edited since
-  202608201703.
-- Future contributors who follow the "editable install" pattern
-  from this README will end up with the same five-file pile.
+- `pip uninstall zoid6` will leave stale state in `sys.path`/`.pth` files that
+  confuse subsequent `pip install` and `pip-tools` operations.
+- Running `pip list` shows `zoid6 0.0.1.dev202608201703` even though the
+  underlying source tree has been edited since 202608201703.
+- Future contributors who follow the "editable install" pattern from this
+  README will end up with the same five-file pile.
 
-Resolution: consolidate to one editable install.
+Sibling packages (`bed`, `casino`, `bbsengine6`) likely show the same pattern —
+same root cause, same fix.
+
+### [ ] Consolidate to a single editable install per package
+
+For each affected package (`zoid6`, and any of `bed`/`casino`/`bbsengine6`
+showing the same five-file pile):
 
       ```bash
       # Capture which version is currently active so we can
       # verify nothing changes semantically:
-      pip show zoid6 | grep -E '^(Version|Location)'
-      python -c "import zoid6; print(zoid6.__file__)"
+      pip show <pkg> | grep -E '^(Version|Location)'
+      python -c "import <pkg>; print(<pkg>.__file__)"
 
       # Remove the stale .pth files and the dist-info:
-      pip uninstall -y zoid6
-      rm -f /home/jam/.venv/lib/python3.12/site-packages/__editable__.zoid6-*.pth
-      rm -f /home/jam/.venv/lib/python3.12/site-packages/__editable___zoid6_*_finder.py
-      rm -f /home/jam/.venv/lib/python3.12/site-packages/__pycache__/__editable___zoid6_*.pyc
-      rm -rf /home/jam/.venv/lib/python3.12/site-packages/zoid6-*.dist-info
+      pip uninstall -y <pkg>
+      rm -f /home/jam/.venv/lib/python3.12/site-packages/__editable__.<pkg>-*.pth
+      rm -f /home/jam/.venv/lib/python3.12/site-packages/__editable___<pkg>_*_finder.py
+      rm -f /home/jam/.venv/lib/python3.12/site-packages/__pycache__/__editable___<pkg>*.pyc
+      rm -rf /home/jam/.venv/lib/python3.12/site-packages/<pkg>-*.dist-info
 
       # Reinstall editable from the live source tree:
-      pip install -e /home/opencode/data/work/zoid6
-      pip show zoid6 | grep -E '^(Version|Location)'
-      python -c "import zoid6; print(zoid6.__file__)"
+      pip install -e /home/opencode/data/work/<pkg>
+      pip show <pkg> | grep -E '^(Version|Location)'
+      python -c "import <pkg>; print(<pkg>.__file__)"
       ```
 
-Verification: only one `__editable__.zoid6-*.pth` file remains,
-`python -c "import zoid6.main; print(zoid6.main.__file__)"` still
-prints `/home/opencode/data/work/zoid6/src/zoid6/main.py`, and
-`zoid6` launches successfully. Repeat for any sibling package
-(`bed`, `casino`, `bbsengine6`) that shows the same five-file
-pile — same root cause, same fix.
+Resolution: only one `__editable__.<pkg>-*.pth` file remains per package; `pip
+list` shows the current editable version; `python -c "import <pkg>.main;
+print(<pkg>.main.__file__)"` still points at the live source tree; `<pkg>`
+launches successfully.
+
+Verification:
+
+- [ ] `ls /home/jam/.venv/lib/python3.12/site-packages/__editable__.zoid6-*.pth`
+      returns exactly one file per affected package.
+- [ ] `python -c "import zoid6.main; print(zoid6.main.__file__)"` prints
+      `/home/opencode/data/work/zoid6/src/zoid6/main.py`.
+- [ ] `zoid6` (and each remediated sibling) launches without import errors.
+- [ ] Repeat for `bed`, `casino`, `bbsengine6` if any show the same five-file
+      pile — same root cause, same fix.
 
