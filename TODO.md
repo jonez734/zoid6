@@ -2181,6 +2181,89 @@ that's `\i`-included from `bbsengine6.sql` AFTER the member
 table is created. Naming convention matches the existing
 `sql/manage_role_privs.sql` precedent.
 
+### [ ] Auth-time password-field sanity check + diagnostic logging
+
+When `member.checkpassword` runs (called from `bed auth login`,
+`casino`'s auth prompt, `bed auth reconnect`, etc.) it queries
+`engine.member.password` and runs the bcrypt round-trip silently.
+If the column holds an unexpected value (NULL, empty string,
+non-bcrypt prefix, length mismatch, malformed hash) the round-
+trip returns no rows and `_handle_auth` returns `Invalid moniker
+or password` with no hint of the actual problem — the operator
+only sees the same failure mode as a wrong password. The
+2026-08-22 incident took four `psql` probes to diagnose because
+of this silence.
+
+Add a `audit_password_hash(args, moniker, **kwargs)` helper in
+`bbsengine6/member/lib.py` that:
+
+  - SELECTs `engine.member.password` for the moniker.
+  - Returns a structured report (namedtuple `PasswordHashAudit`
+    with `present`, `non_empty`, `prefix`, `is_bcrypt`,
+    `is_md5crypt`, `length_ok`).
+  - `is_bcrypt`: prefix matches `^\$2[abxy]\$` (PG `crypt()`
+    recognises `$2a$`, `$2b$`, `$2y$` as bcrypt; all are
+    length 60).
+  - `is_md5crypt`: prefix matches `^\$1\$` — the 2026-08-22
+    incident trigger; legacy, must migrate.
+  - Emits `io.echo(..., level="warning")` for any `False` health
+    flag (`present`, `non_empty`, `is_bcrypt`, `length_ok`) or
+    any `True` `is_md5crypt` flag. Operator-actionable signals.
+  - Emits `io.echo(..., level="ok")` on the success path.
+    `level="ok"` (alias `level="success"` per
+    `bbsengine6/io/echo.py:1317`) renders with a green-background
+    prefix and no letter — distinguishable from `level="warning"`
+    at a glance, always visible (not gated by `--debug`; both
+    `echo.py:1309-1318` and `output.py:381-388` render debug
+    unconditionally). The distinction vs `level="debug"` is
+    visual (positive vs investigative), not visibility-based.
+
+Wire the audit into `member.checkpassword` (option A — covers
+every caller including `bed auth login`, `bed auth reconnect`,
+`casino`, and any future entry point):
+
+  - `member.checkpassword` calls
+    `audit_password_hash(args, moniker)` *before* the bcrypt
+    round-trip SELECT.
+  - On `is_md5crypt=True` it logs the warning AND continues to
+    the round-trip anyway (don't refuse auth — the existing
+    plaintext might still MD5-match the legacy hash; the warning
+    is the operator signal to migrate, not a hard reject).
+  - On all flags healthy, emit `level="ok"` so the operator
+    sees a positive confirmation in the auth log without
+    needing `--debug`.
+
+Tests: `bbsengine6/py/tests/test_member_audit_password_hash.py`,
+parametrized over (moniker, password value, expected flags,
+expected log level). Minimum cases:
+
+  - bcrypt hash → all flags True, `level="ok"` log only
+  - MD5-crypt hash → `is_md5crypt=True` + `level="warning"` log
+  - NULL → `present=False` + `level="warning"` log
+  - empty string → `non_empty=False` + `level="warning"` log
+  - 34-char non-prefixed text → `is_bcrypt=False`,
+    `length_ok=False` + `level="warning"` log
+  - 60-char text without `$2` prefix → `is_bcrypt=False` +
+    `level="warning"` log
+
+Resolution: every `member.checkpassword` caller logs a one-line
+diagnostic on every auth attempt. The 2026-08-22 incident would
+have produced a single
+`W: jam password is MD5-crypt ($1$AUNKK0aN$...), migrate to bcrypt`
+line at the first failed login instead of needing four `psql`
+probes to diagnose. Successful auths render with the green
+`level="ok"` prefix so a healthy auth path is visually
+distinct from a silently-broken one.
+
+Cross-ref: this section's items 1-3 ("find and migrate any
+other legacy MD5-crypt hashes", "identify what wrote the
+MD5-crypt hash", "clean up the stale editable-install `.pth`
+files"). The audit function is the runtime complement to those
+one-shot scans — if a future code path reintroduces a `$1$`
+hash, the audit logs the warning at the next auth attempt
+instead of waiting for the operator to rediscover the
+symptom.
+
 ### [ ] Clean up the stale editable-install `.pth` files
 
 `/home/jam/.venv/lib/python3.12/site-packages/` has five
