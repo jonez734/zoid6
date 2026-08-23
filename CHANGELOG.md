@@ -74,6 +74,51 @@ Cross-ref: `bbsengine6/TODO.md` (back-reference added) and
 now ticked, with the audit-and-migrate workflow split between the two
 repos per the TODO note).
 
+### feat(bbsengine6.startup): install chk_member_password_bcrypt + audit at every bootstrap
+
+The 2026-08-22 hardening (above) only lands the constraint if an
+operator manually runs `psql \\i bbsengine6.sql` against the target
+DB — `bbsengine6.startup` itself does not load the umbrella
+`bbsengine6.sql` file (its stage loops load individual SQL files
+via `database.importsql()` driven by the checkclass / checkfunction
+lists, neither of which references `manage_password_format.sql`).
+
+This follow-up wires the install + audit into `bbsengine6.startup`
+itself so the constraint lands automatically on every bootstrap:
+
+* New `bbsengine6.backend.checkpasswordformat` module — installs
+  `chk_member_password_bcrypt` via `database.importsql()` inside a
+  SAVEPOINT (idempotent: `manage_password_format.sql` itself uses
+  `DROP CONSTRAINT IF EXISTS` + `ADD CONSTRAINT`), then calls
+  `bbsengine6.member.audit_password_column` on the same connection.
+  Wired into `backend/stage_one.py`'s module tuple immediately
+  after `checkclasses`, so the engine schema and `engine.__member`
+  table are already in place when the constraint lands.
+* New `bbsengine6.database.constraintexists` helper — schema-filtered
+  lookup against `pg_constraint` + `pg_namespace`, mirroring the
+  shape of `classexists` / `functionexists` / `typeexists` /
+  `schemaexists`.
+* New `bbsengine6.backend.lib.checkpasswordformat` entry point.
+* New tests: `tests/test_checkpasswordformat.py` (11 cases pinning
+  install + audit) + `tests/test_database_helpers.py` (5 cases
+  pinning `constraintexists`). All 16 pass.
+
+For operators: no manual `psql \\i bbsengine6.sql` re-run required.
+The audit log line on a clean column reads
+`audit_password_column: 0 row(s) with $1$ hash in engine.__member`
+(level="ok", green-bg prefix). On a DB with stale legacy hashes the
+audit emits a `level="warning"` line listing the affected monikers —
+the same signal as the live-DB regression pin in
+`test_member_legacy_hash_audit.py`.
+
+Cross-repo close-out: 7 casino test fixtures (which were writing
+raw `gen_salt('md5')` INSERTs and stomping bcrypt from
+`setpassword.py`) have been migrated to use
+`bbsengine6.member.setpassword`. The orphan
+`casino/src/casino/sql/test_data.sql` has been deleted. See
+`casino/CHANGELOG.md` [Unreleased] and `casino/TODO.md` "Test
+fixture migration: `gen_salt('md5')` → `gen_salt('bf')`".
+
 ### build: add `PREPARE_BUILD` macro to `src/Makefile`
 
 `zoid6/src/Makefile` lacked the `PREPARE_BUILD` helper that
