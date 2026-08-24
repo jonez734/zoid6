@@ -86,5 +86,10 @@
     "host": "localhost",
     "port": 5432,
     "dsn": "host=localhost port=5432 dbname=zoid6"
+  },
+  "websocket": {
+    "ping_interval": 60,
+    "ping_timeout": 600,
+    "_comment": "WebSocket keepalive (seconds), forwarded to websockets.serve() by bed.main.BED.__init__. The websockets library default of 20s/20s is too aggressive for terminal clients (casino_client) whose main loop interleaves blocking stdin reads — pings go unanswered during those reads, the server hits the 20s timeout, and the next client send gets ConnectionClosedError 1011. 60s/600s gives the operator 10 minutes between actions before the server considers the connection dead."
   }
 }
