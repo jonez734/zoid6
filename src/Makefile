@@ -210,6 +210,11 @@ else
 		exit 1; \
 	fi; \
 	$(PIP) install --no-cache-dir $$WHEEL
+	# TODO(verify-install): after this `pip install` of $$WHEEL,
+	# compare the wheel's METADATA Version against `pip show zoid6`.
+	# See zoidoffice/src/Makefile's VERIFY_INSTALL variable for the
+	# reference implementation. Editable branch (DEPLOY_EDITABLE=1,
+	# line 204) installs from source, not a wheel, so no check.
 endif
 
 # sudo umbrella — everything `install-fhs` does (sysusers, tmpfiles,
@@ -259,6 +264,13 @@ install-venv: install-sysusers
 	$(MAKE) -C $(BED_DIR) version
 	$(PYTHON) -m build --no-isolation --wheel --outdir $(WHEEL_DIR) $(BED_DIR)
 	sudo -u $(VENV_OWNER) $(VENV_DIR)/bin/pip install --quiet $(WHEEL_DIR)/*.whl
+	# TODO(verify-install): this `sudo -u <owner> pip install` of the
+	# bed wheel runs as VENV_OWNER, not the active operator, so the
+	# verify check has to be either (a) re-sudoed to inspect the owner
+	# venv, or (b) accept that silent no-ops here won't be caught from
+	# this Makefile. Compare against `pip show bed` (the wheel just
+	# installed is a bed wheel, not zoid6). See zoidoffice/src/Makefile's
+	# VERIFY_INSTALL variable for the operator-side reference.
 	rm -rf $(WHEEL_DIR)
 	@command -v semanage >/dev/null 2>&1 && \
 		sudo semanage fcontext -a -t bin_t "$(VENV_DIR)/bin(/.*)?" 2>/dev/null || true
@@ -331,6 +343,14 @@ install-user:
 	$(MAKE) version
 	$(PYTHON) -m pip wheel --no-deps --no-build-isolation --no-clean --wheel-dir $(WHEEL_DIR) $(CURDIR)
 	$(VENV_DIR)/bin/pip install --quiet $(WHEEL_DIR)/*.whl
+	# TODO(verify-install): after this batch `pip install` of
+	# $(WHEEL_DIR)/*.whl (bbsengine6 + bed + casino + zoid6), verify
+	# each package's installed version against its wheel's METADATA:
+	#   pip show bbsengine6, pip show bed, pip show casino, pip show zoid6
+	# The wildcard install is silent (`--quiet`), which makes silent
+	# no-ops even harder to detect. See zoidoffice/src/Makefile's
+	# VERIFY_INSTALL variable for the operator-side reference; this
+	# recipe's verify would need to loop over the four packages.
 	rm -rf $(WHEEL_DIR)
 	# Undeclared runtime dep of casino (lib.py imports PIL). Not in
 	# pyproject.toml so pip won't pull it; install explicitly.
