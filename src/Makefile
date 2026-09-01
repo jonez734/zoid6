@@ -92,10 +92,10 @@ help:
 	@echo "  deploy-prod   install-fhs (sudo umbrella: sysusers + tmpfiles + venv + systemd + etc)"
 
 install: version
-	$(PIP) install --no-cache-dir -e $(SRC)
+	$(PIP) install $(PIP_UPGRADE_FLAG) --no-cache-dir -e $(SRC)
 
 install-dev: install
-	$(PIP) install pytest pytest-cov
+	$(PIP) install $(PIP_UPGRADE_FLAG) pytest pytest-cov
 
 test:
 	cd $(SRC) && $(PYTEST) $(PACKAGE)/tests -v
@@ -110,7 +110,7 @@ lint:
 	$(PYTHON) -m pyflakes $(PACKAGE) || true
 
 egg-info:
-	$(PIP) install -e $(SRC) --no-deps --force-reinstall --no-build-isolation
+	$(PIP) install $(PIP_UPGRADE_FLAG) -e $(SRC) --no-deps --force-reinstall --no-build-isolation
 
 uninstall:
 	$(PIP) uninstall -y $(PACKAGE)
@@ -199,9 +199,17 @@ release: clean version build rename-sdist sign
 # via `ls -t | head -1` so the recipe is robust to multiple wheels
 # accumulating in OUTDIR over time (Phase 0 lands wheels there).
 DEPLOY_EDITABLE ?=
+
+# DEPLOY_UPGRADE is set by `deploytool --upgrade` (default true) and
+# unset by `--no-upgrade`. When "1", every `pip install` in this
+# Makefile (except `pip install --upgrade pip`, which always upgrades
+# pip itself — stale pip breaks everything downstream) passes
+# `--upgrade`. Empty = prior no-op-if-version-matches behavior.
+DEPLOY_UPGRADE ?=
+PIP_UPGRADE_FLAG := $(if $(filter 1,$(DEPLOY_UPGRADE)),--upgrade,)
 deploy-tui: build
 ifeq ($(DEPLOY_EDITABLE),1)
-	$(PIP) install --no-cache-dir -e .
+	$(PIP) install $(PIP_UPGRADE_FLAG) --no-cache-dir -e .
 	-rm -rf *.egg-info
 else
 	@WHEEL=$$(ls -t $(OUTDIR)/$(PROJECT)-*.whl 2>/dev/null | head -1); \
@@ -209,7 +217,7 @@ else
 		echo "no wheel matching $(PROJECT)-*.whl in $(OUTDIR)" >&2; \
 		exit 1; \
 	fi; \
-	$(PIP) install --no-cache-dir $$WHEEL
+	$(PIP) install $(PIP_UPGRADE_FLAG) --no-cache-dir $$WHEEL
 	# TODO(verify-install): after this `pip install` of $$WHEEL,
 	# compare the wheel's METADATA Version against `pip show zoid6`.
 	# See zoidoffice/src/Makefile's VERIFY_INSTALL variable for the
@@ -257,13 +265,13 @@ install-venv: install-sysusers
 	@command -v sudo >/dev/null 2>&1 || { echo "Error: sudo required"; exit 1; }
 	@sudo -u $(VENV_OWNER) test -d "$(VENV_DIR)" || sudo -u $(VENV_OWNER) $(PYTHON) -m venv "$(VENV_DIR)"
 	sudo -u $(VENV_OWNER) $(VENV_DIR)/bin/pip install --upgrade pip
-	sudo -u $(VENV_OWNER) $(VENV_DIR)/bin/pip install --quiet build setuptools wheel
+	sudo -u $(VENV_OWNER) $(VENV_DIR)/bin/pip install $(PIP_UPGRADE_FLAG) --quiet build setuptools wheel
 	# zoid6 builds on bed; install the bed wheel so `import bed` works inside this venv.
 	mkdir -p $(WHEEL_DIR)
 	rm -f $(WHEEL_DIR)/*.whl
 	$(MAKE) -C $(BED_DIR) version
 	$(PYTHON) -m build --no-isolation --wheel --outdir $(WHEEL_DIR) $(BED_DIR)
-	sudo -u $(VENV_OWNER) $(VENV_DIR)/bin/pip install --quiet $(WHEEL_DIR)/*.whl
+	sudo -u $(VENV_OWNER) $(VENV_DIR)/bin/pip install $(PIP_UPGRADE_FLAG) --quiet $(WHEEL_DIR)/*.whl
 	# TODO(verify-install): this `sudo -u <owner> pip install` of the
 	# bed wheel runs as VENV_OWNER, not the active operator, so the
 	# verify check has to be either (a) re-sudoed to inspect the owner
@@ -331,7 +339,7 @@ install-user:
 	@mkdir -p $(PREFIX) $(ETC_DIR) $(LOG_DIR) $(RUN_DIR) $(DATA_DIR)
 	@test -d $(VENV_DIR) || $(PYTHON) -m venv $(VENV_DIR)
 	$(VENV_DIR)/bin/pip install --upgrade pip
-	$(VENV_DIR)/bin/pip install --quiet build setuptools wheel
+	$(VENV_DIR)/bin/pip install $(PIP_UPGRADE_FLAG) --quiet build setuptools wheel
 	mkdir -p $(WHEEL_DIR)
 	rm -f $(WHEEL_DIR)/*.whl
 	$(MAKE) -C $(BBSENGINE_DIR) version
@@ -342,7 +350,7 @@ install-user:
 	$(PYTHON) -m pip wheel --no-deps --no-build-isolation --no-clean --wheel-dir $(WHEEL_DIR) $(CASINO_DIR)
 	$(MAKE) version
 	$(PYTHON) -m pip wheel --no-deps --no-build-isolation --no-clean --wheel-dir $(WHEEL_DIR) $(CURDIR)
-	$(VENV_DIR)/bin/pip install --quiet $(WHEEL_DIR)/*.whl
+	$(VENV_DIR)/bin/pip install $(PIP_UPGRADE_FLAG) --quiet $(WHEEL_DIR)/*.whl
 	# TODO(verify-install): after this batch `pip install` of
 	# $(WHEEL_DIR)/*.whl (bbsengine6 + bed + casino + zoid6), verify
 	# each package's installed version against its wheel's METADATA:
@@ -354,7 +362,7 @@ install-user:
 	rm -rf $(WHEEL_DIR)
 	# Undeclared runtime dep of casino (lib.py imports PIL). Not in
 	# pyproject.toml so pip won't pull it; install explicitly.
-	$(VENV_DIR)/bin/pip install --quiet pillow
+	$(VENV_DIR)/bin/pip install $(PIP_UPGRADE_FLAG) --quiet pillow
 	@test -f $(ETC_DIR)/zoid6.json || install -m 0644 $(PACKAGE)/data/zoid6.json $(ETC_DIR)/zoid6.json
 	@test -f $(ETC_DIR)/zoid6.env  || { \
 	    { printf 'PREFIX=%s\nVENV_DIR=%s\nLOG_DIR=%s\nRUN_DIR=%s\n' \
