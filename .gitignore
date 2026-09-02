@@ -9,3 +9,11 @@ dist/
 .ruff_cache/
 .mypy_cache/
 .sass-cache/
+
+# Skin / art assets (deployed via Makefile rsync, not committed)
+shared/skin/art/*.png
+shared/skin/art/*.jpg
+shared/skin/art/*.otf
+sites/static/skin/art/*.png
+sites/static/skin/art/*.jpg
+sites/static/skin/art/*.otf
