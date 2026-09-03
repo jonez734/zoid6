@@ -4,13 +4,13 @@
 > / bbsengine.org stack.**
 
 `zoid6` is a Python package that ships a single `MessageRouter` which
-loads every BBS module (`member`, `bank`, `channel`, `casino`,
-`postoffice`, …) into one WebSocket server, plus the legacy PHP
-framework that powers the `www.zoidtechnologies.com` and `engine.bbsengine.org`
-websites. It is the glue layer between [`bbsengine6`](../bbsengine6/) (the
-engine), [`bed`](../bed/) (the daemon), and the BBS games (currently
-[`casino`](../casino/), with `empyre`, `murdermotel`, and `mistermcfeely`
-on the roadmap).
+loads every BBS module (`member`, `bank`, `channel`, `casino`, …) into
+one WebSocket server, plus the legacy PHP framework that powers the
+`www.zoidtechnologies.com` and `engine.bbsengine.org` websites. It is
+the glue layer between [`bbsengine6`](../bbsengine6/) (the engine),
+[`bed`](../bed/) (the daemon), and the BBS games (currently
+[`casino`](../casino/), with `empyre` and `murdermotel` on the
+roadmap).
 
 > **See [`SPEC.md`](SPEC.md)** for the full entry-point specification:
 > the router, the configuration schema, the per-site PHP framework, and
@@ -152,10 +152,8 @@ The shipped config enables:
 | `bank`      | `bbsengine6.bank.api.handler`         | balance / transfers / history         |
 | `channel`   | `bbsengine6.channel.api.handler`      | pub/sub messaging                     |
 | `casino`    | `casino.api.handler`                  | blackjack / poker / yahtzee           |
-| `postoffice`| `postoffice.api.handler`              | IMAP mail polling + notifications     |
 | `empyre`    | `empyre.api.handler`                  | (not yet implemented)                 |
 | `murdermotel` | `murdermotel.api.handler`           | (not yet implemented)                 |
-| `mistermcfeely` | `mistermcfeely.api.handler`        | (not yet implemented)                 |
 
 The `casino` block in `zoid6.json` is more detailed than the rest — it
 configures the per-game actions (`hit`, `stand`, `double`, `split`,

@@ -166,9 +166,9 @@ The `services` block is the router's input. Per-module knobs are
 free-form but `casino` uses an opinionated sub-schema
 (`table_service.*`, `game_service.*`, `chat_service.*`,
 `bet_service`, `games`). The bundled config enables `member`,
-`bank`, `channel`, `casino`, `postoffice`. `auth` is documented but
-disabled — bed handles auth natively. `empyre`, `murdermotel`, and
-`mistermcfeely` are documented placeholders pending implementation.
+`bank`, `channel`, `casino`. `auth` is documented but
+disabled — bed handles auth natively. `empyre` and `murdermotel`
+are documented placeholders pending implementation.
 
 `bind` and `database` are bed-level knobs that flow through
 unchanged.
@@ -313,8 +313,8 @@ because the user, venv, and lifecycle all belong to bed.
 - **Message wire protocol** — bbsengine6 defines it; games implement
   handlers against it.
 - **Individual game logic** — each game (`casino`, future
-  `empyre`/`murdermotel`/`mistermcfeely`) ships its own
-  `MessageRouter`. zoid6 only loads and registers.
+  `empyre`/`murdermotel`) ships its own `MessageRouter`. zoid6 only
+  loads and registers.
 - **The PHP framework is frozen.** No new features planned. Sites
   that need new functionality should consume `bbsengine6.php` and the
   Smarty plugin set directly rather than growing `zoid6.php`.

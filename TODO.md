@@ -36,8 +36,6 @@ casino → the rest):
       Recommend (a) since `bed` is the canonical entry point.
 - [ ] **deploytool** — 1 console script.
 - [ ] **empyre** — 1 console script.
-- [ ] **mistermcfeely** — 3 console scripts (in
-      `mistermcfeely/src/pyproject.toml`).
 - [ ] **moneyday** — 1 console script.
 - [ ] **murdermotel** — 1 console script.
 - [ ] **paymentflow** — 3 console scripts.
@@ -77,7 +75,7 @@ Notes for whoever picks this up:
 
 ## Overview
 
-Create a modular architecture where each BBS module (casino, empyre, murdermotel, postoffice, bank) can run independently or together via a unified router.
+Create a modular architecture where each BBS module (casino, empyre, murdermotel, bank) can run independently or together via a unified router.
 
 ## Architecture
 
@@ -112,15 +110,10 @@ The `bed` daemon loads a router class dynamically via the `--router` argument. E
 - [X] Remove `casino/src/casino/tests/test_bed.py`
 - [X] Remove config functions from `casino/src/casino/config.py` (keep only casino-specific)
 - [X] Keep `casino/src/casino/api/handler.py` as-is
-- [X] Fix `test_postoffice_config.py` tests that relied on removed functions
 - [ ] Known failing tests (pre-existing, not Phase 2 related):
   - `test_blackjack_flow.py::TestBlackjackFullFlow::*` (10 tests) - database not running
   - `test_commands.py::TestSubcommandResolution::test_game_resolve_ambiguous`
   - `test_new_features_integration.py::TestSurrenderDisabled::test_surrender_disabled`
-  - `test_postoffice_background_task.py` (2 tests) - database/mocking issues
-  - `test_postoffice_imap_polling.py` (5 tests) - database/mocking issues
-  - `test_postoffice_manual_check.py` (2 tests) - database/mocking issues
-  - `test_postoffice_notification.py` (8 tests) - database/mocking issues
   - `test_table_maint.py::TestListTables::test_list_tables_includes_status` - DAL bug
 
 ### Phase 3: bbsengine6 Updates
@@ -150,14 +143,6 @@ The `bed` daemon loads a router class dynamically via the `--router` argument. E
 - [X] Keep existing `__init__.py` intact (existing BBS functionality)
 - [X] Create `empyre/pyproject.toml` if needed
 - [X] Create empyre test files
-
-### Phase 5: mistermcfeely Package (postoffice) (ADD)
-
-- [X] Add `mistermcfeely/src/postoffice/api/__init__.py` - exists, add if needed
-- [X] Add `mistermcfeely/src/postoffice/api/handler.py` - MessageRouter for postoffice
-- [X] Move `casino/services/postoffice.py` to `mistermcfeely/services/` (already in mistermcfeely/src/postoffice/service.py)
-- [X] Create `mistermcfeely/pyproject.toml` if needed (already exists)
-- [ ] Create mistermcfeely test files
 
 ### Phase 6: murdermotel Package (ADD)
 
@@ -341,7 +326,6 @@ The `bed` daemon loads a router class dynamically via the `--router` argument. E
 - [ ] Test each module's services respond correctly
 - [ ] Test channel pub/sub across modules
 - [ ] Test bank transfers between casino and member accounts
-- [ ] Test postoffice mail delivery
 
 ### Test Fixtures & Cleanup
 - [ ] Create shared fixtures for WebSocket server setup/teardown
@@ -428,10 +412,6 @@ For each project below, check for use of `log_event()` (any module-defined wrapp
 **empyre:**
 - [x] Check for `log_event`/`log_entry` usage (confirmed clean: 0 matches)
 
-**mistermcfeely:**
-- [x] Check for `log_event` usage (confirmed clean: 0 matches)
-- [x] Note: `audit_log.py` and `password_auth.py` use `log_entry_fn` callback parameter (DI for `bbsengine6.logentry`) — keep as-is, different pattern
-
 **murdermotel:**
 - [x] Check for `log_event`/`log_entry` usage (confirmed clean: 0 matches)
 
@@ -452,8 +432,7 @@ For each project below, check for use of `log_event()` (any module-defined wrapp
 - [x] Format: `[module] action key=value key=value free_text`
 - [x] Backward compatibility preserved
 - [x] `bbsengine6/bank/bank.py` refactored: `log_event()` removed, all 12 call sites use `logentry()` directly
-- [x] All modules verified clean of `log_event`/`log_entry` definitions (casino, empyre, mistermcfeely, murdermotel, bed, zoid6, asimov, asb)
-- [x] `mistermcfeely` keeps `log_entry_fn` callback DI pattern (intentional, different from `log_event` wrapper)
+- [x] All modules verified clean of `log_event`/`log_entry` definitions (casino, empyre, murdermotel, bed, zoid6, asimov, asb)
 - [x] All bank tests pass (25 passed)
 
 ---
@@ -502,7 +481,6 @@ For each project below, check for use of `log_event()` (any module-defined wrapp
 # Run individual modules
 bed --router casino.api.handler.MessageRouter
 bed --router empyre.api.handler.MessageRouter
-bed --router mistermcfeely.api.handler.MessageRouter
 bed --router murdermotel.api.handler.MessageRouter
 bed --router bbsengine6.bank.api.handler.MessageRouter
 
@@ -1170,10 +1148,9 @@ sole source, or also wire `zoid6.json`'s `bank` entry once its
   confirming the `Failed to import bank` / `Failed to import
   channel` lines are gone from the startup log.
 - [ ] **Update `zoid6/src/zoid6/tests/test_config.py`** — the
-  `test_disabled_services_skipped` assertion list (line 121)
-  currently only includes `auth`, `member`, `empyre`,
-  `murdermotel`, `mistermcfeely`, `postoffice`. Add `bank` and
-  `channel` to the list when Option A lands.
+  `test_disabled_services_skipped` assertion list currently only
+  includes `auth`, `member`, `empyre`, `murdermotel`. Add `bank`
+  and `channel` to the list when Option A lands.
 - [ ] **Update `zoid6/src/zoid6/tests/test_bed_startup.py`**
   `test_register_all_loads_every_enabled_service` and
   `test_register_all_does_not_load_disabled_services` — they
@@ -1594,7 +1571,7 @@ awaits `self.server.stop()` and releases the port.
 
 ## Shared venv under `zoid6` (single venv for all bbsengine6 services)
 
-zoid6 is the anchor package for a single shared venv at `/var/lib/zoid6/venv`, owned by a `zoid6` system user/group. All bbsengine6 services (bed, postoffice, casino, empyre, murdermotel, etc.) are installed into it so any service user can `import` any package. `deploytool` owns the topology — per-project Makefiles do not hard-code venv paths.
+zoid6 is the anchor package for a single shared venv at `/var/lib/zoid6/venv`, owned by a `zoid6` system user/group. All bbsengine6 services (bed, casino, empyre, murdermotel, etc.) are installed into it so any service user can `import` any package. `deploytool` owns the topology — per-project Makefiles do not hard-code venv paths.
 
 ### Foundation (zoid6 repo)
 
@@ -1602,7 +1579,6 @@ zoid6 is the anchor package for a single shared venv at `/var/lib/zoid6/venv`, o
   - [x] `u zoid6 - "zoid6 BBS Router" /var/lib/zoid6 -`
   - [x] `g zoid6 - -`
   - [x] `m bed zoid6` (bridge: bed service user joins the zoid6 group)
-  - [x] `m postoffice zoid6` (bridge: postoffice service user joins the zoid6 group)
 - [x] Replace `src/zoid6/daemon/zoid6.tmpfiles` with full layout:
   - [x] `d /etc/zoid6 0755 root root - -`
   - [x] `d /var/lib/zoid6 0755 zoid6 zoid6 - -`
@@ -1631,22 +1607,13 @@ zoid6 is the anchor package for a single shared venv at `/var/lib/zoid6/venv`, o
 ### deploytool (venv orchestration)
 
 - [x] Add `VENV_LAYOUT` dict to `src/deploytool/lib.py` mapping each project → venv path (registry only; deploytool does not plumb venv vars into `make` — per-project Makefile defaults and `pip` handle venv targeting):
-  - [x] Shared `/var/lib/zoid6/venv`: `zoid6`, `bed`, `mistermcfeely`, `bbsengine6`, `teos`, `murdermotel`, `empyre`, `casino`, `achilles`, `letteredolive`, `zoidoffice`
+  - [x] Shared `/var/lib/zoid6/venv`: `zoid6`, `bed`, `bbsengine6`, `teos`, `murdermotel`, `empyre`, `casino`, `achilles`, `letteredolive`, `zoidoffice`
   - [x] `atlas` → `/var/lib/atlas/venv` (standalone placeholder)
   - [x] `backuptools`, `deploytool` → `VENV_USER` — the user's active venv (these tools are not part of zoid6; `getdate_next` and `asimov` also default to `VENV_USER`)
   - [x] Any unlisted project → `VENV_USER` (default)
 - [x] Add `get_venv_layout(base)` helper; `VENV_USER` sentinel resolves at runtime to the active venv (`VIRTUAL_ENV`, else `sys.prefix` when it differs from `sys.base_prefix`); error if none active
 - [x] No `--venv-dir`/`--venv-user`/`--venv-group` CLI flags and no pre-deploy venv-ensure step (dropped: `pip` targets the active venv automatically)
 - [x] Add `install-venv` / `uninstall-venv` to the `backuptools` and `deploytool` Makefiles (consistency with the zoid6 anchor pattern; default `VENV_DIR` = active venv)
-
-### mistermcfeely (postoffice)
-
-- [x] Makefile: change `VENV_DIR = /var/lib/postoffice/venv` → `VENV_DIR ?= /var/lib/zoid6/venv`
-- [x] Makefile: add `VENV_OWNER ?= zoid6`, `VENV_GROUP ?= zoid6`
-- [x] Makefile: replace `sudo -u postoffice` with `sudo -u $(VENV_OWNER)` in `install-venv` / `restorecon`
-- [x] Template `etc-postoffice/mcfeely-authd.service`: `ExecStart=@VENV_DIR@/bin/mcfeely-authd …` (keep `User=postoffice`, `WorkingDirectory=/var/lib/postoffice`)
-- [x] Makefile `install-systemd`: `sed 's|@VENV_DIR@|$(VENV_DIR)|g'` when copying the unit
-- [x] Update `install-venv` help text (shared venv)
 
 ### bed
 
@@ -1658,13 +1625,13 @@ zoid6 is the anchor package for a single shared venv at `/var/lib/zoid6/venv`, o
 
 ### Migration (deploy host, post-commit)
 
-- [ ] Stop `mcfeely-authd` and `bed`
+- [ ] Stop `bed`
 - [ ] Create the shared venv: `make install-sysusers install-tmpfiles install-venv` in `zoid6/src`
-- [ ] Run `deploytool postoffice bed zoid6` to populate the shared venv
+- [ ] Run `deploytool bed zoid6` to populate the shared venv
 - [ ] Install templated units and `systemctl daemon-reload`
-- [ ] Start `mcfeely-authd`, `bed`, `zoid6`
-- [ ] Verify: `sudo -u bed /var/lib/zoid6/venv/bin/python -c "import postoffice"` (the original goal)
-- [ ] Remove old per-service venvs: `rm -rf /var/lib/postoffice/venv /var/lib/bed/venv`
+- [ ] Start `bed`, `zoid6`
+- [ ] Verify: `sudo -u bed /var/lib/zoid6/venv/bin/python -c "import bbsengine6"` (the original goal)
+- [ ] Remove old per-service venvs: `rm -rf /var/lib/bed/venv`
 - [ ] Spot-check `bed.json` vs `zoid6.json` for port/bind conflicts (both run `bed` from the shared venv)
 
 ## Config resolver (env > FHS > bundled)
@@ -1859,13 +1826,6 @@ file that was just built":
       prod wrappers. Confirm top-level `zoid6/Makefile`
       `deploy-tui: $(MAKE) -C src deploy-tui` still works after
       the swap.
-- [ ] **postoffice** (if/when it has a Makefile) — apply the
-      same pattern: `install: build` + `pip install --no-deps
-      dist/postoffice-*.whl` + `deploy-tui: install` alias.
-- [ ] **mistermcfeely** — `mistermcfeely/src/pyproject.toml`
-      ships 3 console scripts; the Makefile (if any) should
-      follow the same `build → install --no-deps → deploy-tui`
-      chain for each of the 3 entry points.
 - [ ] **paymentflow** — 3 console scripts in
       `paymentflow/src/pyproject.toml`; same migration.
 - [ ] **achilles**, **asimov**, **backuptools**, **moneyday**,
@@ -1959,9 +1919,8 @@ Migration (per package):
 - [ ] **zoid6** — already uses `OUTDIR = /srv/repo/$(PROJECT)/`
       in both the top-level `zoid6/Makefile` and
       `zoid6/src/Makefile`; no change needed.
-- [ ] **postoffice**, **mistermcfeely**, **paymentflow**,
-      **achilles**, **asimov**, **backuptools**, **moneyday**,
-      **murdermotel**, **socrates**, **vulcan/tui**,
+- [ ] **paymentflow**, **achilles**, **asimov**, **backuptools**,
+      **moneyday**, **murdermotel**, **socrates**, **vulcan/tui**,
       **yummyjam/article2**, **zoidoffice** — when each is
       migrated to the deploytool `install: build` pattern per
       the section above, set `OUTDIR = /srv/repo/$(PROJECT)/`
@@ -2004,12 +1963,6 @@ Status, per project:
       `jam:opencode 2775` (foreign-owned AND setgid, both bugs).
 - [ ] **empyre** — see `empyre/TODO.md` "Build infrastructure".
       `deploy` target runs `python -m build` from project root.
-- [ ] **mistermcfeely** — see `mistermcfeely/TODO.md` "Build
-      infrastructure". `install-venv` runs `python -m build`
-      twice (against `$(BBSENGINE_DIR)`, `$(CURDIR)`);
-      needs PREPARE_BUILD on both. (`$(GETDATE_DIR)` was removed
-      — getdate_next is now resolved as a transitive pip dep of
-      bbsengine6.)
 - [ ] **asimov** — see `asimov/TODO.md` "Build infrastructure".
       Separate pre-existing bug: no `pyproject.toml` at root or
       under `src/asimov/`, so `python -m build` is currently

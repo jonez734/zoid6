@@ -91,33 +91,20 @@ class TestConfigServices:
         assert "murdermotel" in services
         assert services["murdermotel"]["modulepath"] == "murdermotel.api.handler"
 
-    def test_mistermcfeely_service_present(self, services):
-        """Mistermcfeely service is defined in default config."""
-        assert "mistermcfeely" in services
-        assert (
-            services["mistermcfeely"]["modulepath"] == "mistermcfeely.api.handler"
-        )
-
-    def test_postoffice_service_present(self, services):
-        """Postoffice service is defined in default config."""
-        assert "postoffice" in services
-        assert services["postoffice"]["modulepath"] == "postoffice.api.handler"
-
     def test_disabled_services_skipped(self, services):
-        """empyre, murdermotel, mistermcfeely, and auth are disabled by default.
+        """empyre, murdermotel, and auth are disabled by default.
 
         auth is disabled because bed AuthService (bed/api/auth.py) handles
         authentication natively before any router loads.  The auth entry
         in zoid6.json is a documentation placeholder — its modulepath
         ('auth.api.handler') does not resolve as a top-level module.
 
-        member, channel, and postoffice are now enabled as standalone
-        services with their own handler modules.
+        member and channel are enabled as standalone services with their
+        own handler modules.
         """
         for name in (
             "empyre",
             "murdermotel",
-            "mistermcfeely",
             "auth",
         ):
             assert services[name]["enabled"] is False, f"{name} should be disabled"

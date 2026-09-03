@@ -8,7 +8,7 @@ zoid6.api.handler.MessageRouter.register_all. They prove that:
   * every enabled service in zoid6.json gets loaded via bbsmodule.load and has
     its MessageRouter.register_all(server) invoked,
   * every disabled service is skipped,
-  * per-service extras (casino sub-config, postoffice poll_interval, etc.)
+  * per-service extras (casino sub-config, channel extras, etc.)
     survive the round-trip into MessageRouter.config,
   * placeholder services (auth, member, channel) stay disabled, and
   * at the integration level, a real bbsengine6.net.WebSocketServer actually
@@ -87,14 +87,16 @@ class TestBedJsonStartup:
 
         Catches typos and missing-on-sys.path entries before bed ever
         starts. Modules that are explicitly marked unimportable in
-        zoid6.json (e.g. ``postoffice`` until it ships) are skipped.
+        zoid6.json (placeholder entries pending implementation) are
+        skipped.
         """
         from bbsengine6.module import is_importable
         from zoid6.api.handler import get_enabled_services
 
-        # postoffice is enabled but its module is not yet importable.
-        # The test asserts the importable ones, not the placeholder.
-        _KNOWN_UNIMPORTABLE = {"postoffice"}
+        # Placeholder entries in zoid6.json are enabled but their
+        # modules are not yet importable. The test asserts the
+        # importable ones, not the placeholders.
+        _KNOWN_UNIMPORTABLE = set()
 
         cfg = _load_config()
         services = {
@@ -430,28 +432,6 @@ class TestBedJsonStartup:
         assert casino["chat_service"]["global_chat"] is True
         assert casino["chat_service"]["emote"] is True
 
-    def test_postoffice_extras_loaded(self, mock_args):
-        """postoffice's poll_interval and mailboxes round-trip into config."""
-        from zoid6.api.handler import MessageRouter
-
-        router = MessageRouter(mock_args)
-        po = router.config["services"]["postoffice"]
-        assert po["poll_interval"] == 30
-        assert po["mailboxes"] == []
-
-    def test_postoffice_marked_optional_in_config(self):
-        """postoffice is enabled but its module is not currently
-        importable in the standard test environment. It must be
-        marked ``required: false`` in zoid6.json so its missing module
-        does not abort the daemon."""
-        cfg = _load_config()
-        po = cfg["services"]["postoffice"]
-        assert po.get("enabled") is True
-        assert po.get("required") is False, (
-            f"postoffice must be required=false so a missing or broken "
-            f"postoffice module does not take the daemon down; got {po!r}"
-        )
-
     def test_placeholder_services_disabled(self, mock_args):
         """empyre, murdermotel, and auth are placeholders and must stay
         disabled.
@@ -464,7 +444,7 @@ class TestBedJsonStartup:
         in zoid6.json is a documentation placeholder — its modulepath
         ('auth.api.handler') does not resolve as a top-level module.
 
-        member, channel, and postoffice are now enabled as standalone
+        member and channel are enabled as standalone
         services with their own handler modules.
         """
         from zoid6.api.handler import MessageRouter
@@ -689,7 +669,7 @@ class TestBedStartupIntegration:
         services = server.list_services()
         # Spot-check a representative slice of casino's registered types.
         # Casino now only registers its own game/auth/chat services.
-        # bank, channel, member, and postoffice are standalone modules.
+        # bank, channel, and member are standalone modules.
         expected_subset = {
             "list_tables", "join_table", "leave_table",
             "hit", "stand", "double", "split", "surrender",
@@ -708,7 +688,7 @@ class TestBedStartupIntegration:
     # Services that are enabled in zoid6.json but whose module lives outside
     # the sibling-repo sys.path.  auth is disabled (bed handles it natively)
     # so it does not appear in the parametrized enabled set at all.
-    _KNOWN_UNIMPORTABLE = {"postoffice"}
+    _KNOWN_UNIMPORTABLE = set()
 
     @pytest.mark.parametrize(
         "service_name",
@@ -723,11 +703,11 @@ class TestBedStartupIntegration:
     def test_enabled_service_imports_cleanly(self, service_name):
         """Every enabled service's modulepath imports without error and has MessageRouter.
 
-        Known-unimportable services (postoffice lives in the mistermcfeely
-        repo which may not be installed) are skipped with a clear message
-        so they don't mask regressions in the real modules.  auth is
-        disabled in zoid6.json (bed handles it natively) so it never
-        appears in this parametrized set.
+        Known-unimportable services (whose modules live in sibling repos
+        that may not be installed) are skipped with a clear message so
+        they don't mask regressions in the real modules.  auth is disabled
+        in zoid6.json (bed handles it natively) so it never appears in
+        this parametrized set.
         """
         import importlib
 
