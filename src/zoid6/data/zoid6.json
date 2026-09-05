@@ -26,7 +26,18 @@
     "channel": {
       "enabled": true,
       "modulepath": "bbsengine6.channel.api.handler",
-      "description": "Channel service (pub/sub messaging, channels)"
+      "description": "Channel service (pub/sub messaging, channels)",
+      "admin_handler": {
+        "enabled": true,
+        "verbs": [
+          "channel_create",
+          "channel_list",
+          "channel_get",
+          "channel_set_announce_only",
+          "channel_add_announcer",
+          "channel_remove_announcer"
+        ]
+      }
     },
     "casino": {
       "enabled": true,
