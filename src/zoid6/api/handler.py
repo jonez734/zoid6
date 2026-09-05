@@ -160,6 +160,13 @@ class MessageRouter:
             token_store=self.token_store,
             instance_id=self.instance_id,
             clock=self.clock,
+            # Forward the module's config subtree so routers that care
+            # about per-module settings (e.g. the channel auto_seed
+            # list, admin_handler flag) can read it without re-parsing
+            # the whole JSON. Routers that don't take ``config`` are
+            # unaffected because the try/except TypeError fallback below
+            # drops back to the bare ``RouterClass(self.args)`` call.
+            config=module_config,
         )
 
         try:
@@ -168,6 +175,9 @@ class MessageRouter:
             try:
                 router = RouterClass(self.args, **sub_router_kwargs)
             except TypeError:
+                # Router's __init__ doesn't accept one or more of the
+                # kwargs (typically an older router missing ``config``);
+                # fall back to the bare call.
                 router = RouterClass(self.args)
             router.register_all(server)
             self.routers[module_name] = router
