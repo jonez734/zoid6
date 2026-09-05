@@ -74,6 +74,23 @@ Cross-ref: `bbsengine6/TODO.md` (back-reference added) and
 now ticked, with the audit-and-migrate workflow split between the two
 repos per the TODO note).
 
+### feat(zoid6): forward `module_config` to sub-routers + channel admin handler
+
+`MessageRouter._register_module` (in `zoid6.api.handler`) now
+forwards `config=module_config` to sub-router constructors.
+Routers that don't accept the kwarg fall back to the bare
+`RouterClass(self.args)` call via the existing `TypeError`
+fallback — older routers are unaffected.
+
+The `services.channel` entry in `zoid6.json` gained an
+`admin_handler` sub-key with `enabled: true` and the verb list
+(`channel_create`, `channel_list`, `channel_get`,
+`channel_set_announce_only`, `channel_add_announcer`,
+`channel_remove_announcer`). With this opt-in, deployments using
+zoid6.json expose the WS-side admin handler alongside the
+subscription handler. Operators are still expected to use
+`con channel-*` instead of the WS verbs.
+
 ### feat(bbsengine6.startup): install chk_member_password_bcrypt + audit at every bootstrap
 
 The 2026-08-22 hardening (above) only lands the constraint if an
