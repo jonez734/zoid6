@@ -77,7 +77,7 @@ class blurbpage
     $data = [];
     $data["blurb"] = $blurb;
     $data["breadcrumbs"] = $breadcrumbs;
-    \bbsengine6\util\logentry("inside sites/www/php/blurb.php")
+    \bbsengine6\util\logentry("inside sites/www/php/blurb.php");
 
     \bbsengine6\displaypage($data, "blurb.tmpl");
 

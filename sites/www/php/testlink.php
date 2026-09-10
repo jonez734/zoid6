@@ -10,7 +10,7 @@ $page->addBodyContent("<a href='/testlink.php' class='zoidweb'>test</a>");
 $pageprotocol = getpageprotocol();
 if ($pageprotocol === "enhanced")
 {
-    print encodejson($page->toHTML())
+    print encodejson($page->toHTML());
 }
 elseif ($pageprotocol === "standard")
 {
