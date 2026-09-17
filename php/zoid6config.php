@@ -36,8 +36,21 @@ if (defined('\config\SMARTYPLUGINSDIR')) {
 if (!defined("ENGINEURL")) define("ENGINEURL", "/engine/");
 if (!defined("ENGINESKINURL")) define("ENGINESKINURL", "/engine/skin/");
 if (!defined("SHAREDSKINURL")) define("SHAREDSKINURL", "/shared/skin/");
-define("config\TEOSURL", "/teos/");
-define("TEOSURL", \config\TEOSURL);
+// TEOSURL: env wins. The bbsengine.org handbook vhost publishes
+// TEOSURL=/handbook/<v>/ via its htaccess-prod SetEnv so the
+// handbook directory listing and breadcrumbs resolve to
+// /handbook/<v>/specs/... instead of the teos default. Sites
+// that don't set the env var (zoidtechnologies.com teos vhost,
+// every other zoid6 consumer) keep the legacy "/teos/" default.
+if (!defined("config\\TEOSURL")) {
+  $env_teosurl = getenv("TEOSURL");
+  if (is_string($env_teosurl) && $env_teosurl !== "") {
+    define("config\\TEOSURL", $env_teosurl);
+  } else {
+    define("config\\TEOSURL", "/teos/");
+  }
+}
+if (!defined("TEOSURL")) define("TEOSURL", \config\TEOSURL);
 
 // TeOS filesystem path - single source of truth
 define("config\TEOSDIR", "/srv/www/vhosts/zoidtechnologies.com/html/teos/");
