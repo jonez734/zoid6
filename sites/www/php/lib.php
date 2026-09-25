@@ -200,7 +200,6 @@ function getsmarty($options=null)
   $options["compileid"] = LOGENTRYPREFIX;
   return _getsmarty($options);
 }
-*/
 
 /** 
  * @since 20140726
