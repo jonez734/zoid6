@@ -38,16 +38,19 @@ define("config\SMARTYPLUGINSDIR", [
     0 => \config\VHOSTDIR . "smarty/",
     1 => "/srv/www/zoid6/smarty/"
 ]);
-define("config\SMARTYTEMPLATESDIR", [
-    0 => \config\VHOSTDIR . "skin/tmpl/",           // www-specific templates (new structure)
-    1 => \config\VHOSTDIR . "tmpl/",                // www-specific templates (legacy structure)
-    2 => "/srv/www/vhosts/zoidtechnologies.com/html/shared/skin/tmpl/",        // Shared zoid6 templates
-    3 => "/srv/www/vhosts/zoidtechnologies.com/html/shared/skin/tmpl/",        // zoid6 project templates
-    4 => "/srv/www/bbsengine6/skin/tmpl/"           // bbsengine6 framework templates (fallback)
-]);
 
-// Now include zoid6config.php to create global aliases
+// @since 2026-09-24 — load zoid6config.php first (transitively loads
+// bbsengine6config.php, defining config\SHAREDTMPLDIR) before the
+// SMARTY* defines that reference it.
 require_once('zoid6config.php');
+
+// @since 2026-09-24 — simplified (bbsengine6/skin/tmpl/ auto-appended;
+// duplicate shared-skin-tmpl dedup'd).
+define("config\SMARTYTEMPLATESDIR", [
+    0 => \config\VHOSTDIR . "skin/tmpl/",
+    1 => \config\VHOSTDIR . "tmpl/",
+    2 => \config\SHAREDTMPLDIR,
+]);
 
 // Logging and analytics
 define("config\LOGENTRYPREFIX", "wwwdev");

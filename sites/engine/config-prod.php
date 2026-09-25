@@ -14,7 +14,17 @@ define("SKINURL", SITEURL . "skin/");
 
 define("config\SMARTYCOMPILEDTEMPLATESDIR", VHOSTDIR . "templates_c");
 define("config\SMARTYPLUGINSDIR", [ 0 => VHOSTDIR . "smarty/"]);
-define("config\SMARTYTEMPLATESDIR", [ 0 => DOCUMENTROOT . "skin/tmpl/", 1 => "/srv/www/zoid6/shared/skin/tmpl/", 2 => "/srv/www/bbsengine6/skin/tmpl/"]);
+
+// @since 2026-09-24 — load bbsengine6config.php FIRST to pick up
+// config\SHAREDTMPLDIR (single source of truth for the cross-app
+// shared tmpl path) before the SMARTY* defines that reference it.
+require_once('/srv/www/bbsengine6/php/bbsengine6config.php');
+
+// @since 2026-09-24 — simplified (bbsengine6/skin/tmpl/ auto-appended).
+define("config\SMARTYTEMPLATESDIR", [
+    0 => DOCUMENTROOT . "skin/tmpl/",
+    1 => \config\SHAREDTMPLDIR,
+]);
 
 define("config\SESSIONCOOKIEEXPIRE", 60*60*12);
 define("config\SESSIONCOOKIEDOMAIN", "zoidtechnologies.com");
