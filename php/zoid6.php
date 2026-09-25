@@ -661,19 +661,12 @@ function buildlinkactions($memberid, $data)
 }
 
 /**
- * local version of getsmarty() that sets up plugin dirs, template dirs, etc
- *
- * @since 20140710
+ * @since 2026-09-24 — \zoid6\getsmarty() removed. It was unused
+ * (no callers in any repo) and referenced _getsmarty(), a function
+ * not defined in zoid6 (broken in isolation). bbsengine6\getsmarty()
+ * is the canonical Smarty factory; vhost configs set SMARTY*
+ * constants that it reads via \config\* namespaced constants.
  */
-function getsmarty($options=null)
-{
-  $options = [];
-  $options["pluginsdir"] = [SMARTYPLUGINSDIR, "/srv/www/zoid6/smarty/"];
-  $options["templatedir"] = SMARTYTEMPLATESDIR;
-  $options["compiledir"] = SMARTYCOMPILEDTEMPLATESDIR;
-  $options["compileid"] = LOGENTRYPREFIX;
-  return _getsmarty($options);
-}
 
 
 /**
