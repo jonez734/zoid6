@@ -169,11 +169,25 @@ function register(string $priority, callable $hook): void {
 }
 
 /**
- * Canonical zoid6 template-dir contribution: shared/skin/tmpl/.
- * Self-registered at PRIORITY_ENGINE in this file.
+ * Canonical zoid6 template-dir contribution. Self-registered at
+ * PRIORITY_ENGINE in this file.
+ *
+ * @since 2026-09-26 — the original return value
+ * (/srv/www/zoid6/shared/skin/tmpl/) pointed at a path that did
+ * not exist on the zoidtechnologies.com vhost layout; live
+ * shared templates live under the vhost's html/shared/skin/tmpl/
+ * (the same path \config\SHAREDTMPLDIR points to in
+ * bbsengine6config.php). Returning the wrong path made the
+ * registry silently shadow the correct one and broke every
+ * vhost that dropped the explicit \config\SHAREDTMPLDIR
+ * reference in its SMARTYTEMPLATESDIR.
+ *
+ * Sites with a different shared-tmpl layout should override
+ * this via a hook registered at PRIORITY_APP before bbsengine6
+ * loads, or by defining a custom hook in their vhost config.
  */
 function extra(): array {
-    return ["/srv/www/zoid6/shared/skin/tmpl/"];
+    return ["/srv/www/vhosts/zoidtechnologies.com/html/shared/skin/tmpl/"];
 }
 
 /**
