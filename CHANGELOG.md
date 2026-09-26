@@ -7,6 +7,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### feat(template): \zoid6\template namespace + \zoid6\plugin_extra()
+
+Companion change to the bbsengine6 template/plugin registry
+refactor. Two new public symbols:
+
+```
+\zoid6\template
+├── PRIORITY_APP, PRIORITY_APP_INTEGRATION, PRIORITY_ENGINE
+├── _registry() (private)
+├── register(priority, hook)
+├── extra()                  → ["/srv/www/zoid6/shared/skin/tmpl/"]
+└── normalize(raw)           [wrapper → \bbsengine6\template\normalize]
+
+\zoid6\plugin_extra()        → ["/srv/www/zoid6/smarty/"]
+```
+
+`\zoid6\template` mirrors `\bbsengine6\template`'s shape so
+the two are intentionally symmetric. The namespace exposes the
+priority-enum registry and the canonical `extra()` contribution;
+`normalize()` is a thin wrapper that delegates to the
+canonical in `\bbsengine6\template` with this namespace's
+registry and engine-fallback path.
+
+bbsengine6config.php auto-registers both at
+`PRIORITY_APP_INTEGRATION` when zoid6config.php loads (i.e.
+when the vhost's config-prod.php does
+`require_once('zoid6config.php')` before engine.php loads
+bbsengine6config.php). The same opt-in pattern as the
+existing `\bbsengine6\menu\buildchoices` shim: no hard
+dependency on zoid6.
+
+**Loading order.** `\bbsengine6\template\normalize()` is
+called by `\zoid6\template\normalize()` via the
+canonical-form delegation. bbsengine6 must be loaded before
+any caller invokes `\zoid6\template\normalize()`. The
+existing load order (vhost config-prod.php requires
+zoid6config.php which transitively loads bbsengine6config.php
+via engine.php) satisfies this.
+
+**File restructured.** The pre-existing zoid6config.php
+global-namespace content is now wrapped in an explicit
+`namespace { ... }` block. A new `namespace zoid6 { ... }`
+block holds `\zoid6\plugin_extra()`. A new `namespace
+zoid6\template { ... }` block holds the registry and
+resolver. The `?>` closer remains at the bottom of the
+file.
+
+No public-facing behavior changes for vhosts that already
+load zoid6config.php: their `SMARTYTEMPLATESDIR` and
+`SMARTYPLUGINSDIR` resolution flows through the new
+registry automatically. Vhosts that don't load zoid6 are
+unaffected.
+
 ### feat(bbsengine6): password column hardening — legacy MD5-crypt audit + bcrypt CHECK constraint
 
 Resolves the three checkboxes in `zoid6/TODO.md` "Password column
