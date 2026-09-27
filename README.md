@@ -90,7 +90,9 @@ zoid6/
 │   ├── zoid6.php                Monolithic lib (config + sidebar + captcha +
 │   │                            access control + notify + post + breadcrumb)
 │   ├── zoid6config.php          Smarty constant aliases + CAPTCHA env
-│   ├── zoid6constants.php       ACHILLESURL constant
+│   ├── zoid6constants.php       FONTAWESOMEURL, GOOGLEANALYTICSACCOUNT,
+│   │                            ACHILLESURL (app-level/third-party constants;
+│   │                            loaded transitively via zoid6config.php)
 │   ├── bootstrap.php            include-path setup
 │   ├── libagora.php             agora / amznitem domain
 │   ├── librepo.php              project domain

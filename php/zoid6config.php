@@ -27,6 +27,18 @@
 
 namespace {
 
+// @since 2026-09-27 — pull in app-level constants (FONTAWESOMEURL,
+// GOOGLEANALYTICSACCOUNT, ACHILLESURL) so every vhost that loads
+// zoid6config.php picks them up automatically. Previously these
+// lived in zoid6.php, which the engine router bypasses — engine-
+// routed pages rendered <script src=""> for FONTAWESOMEURL and FA
+// icons failed to load. Loading via zoid6config.php guarantees they
+// are defined for engine-rendered pages too, without any entry point
+// having to add a separate require. zoid6constants.php's defines are
+// each guarded with `if (!defined())` so vhost overrides in
+// config-prod.php continue to win.
+require_once(__DIR__ . "/zoid6constants.php");
+
 // Global aliases for backward compatibility with code that doesn't use namespace
 // Only define if the config constants exist (some callers may not have them)
 if (defined('\config\SMARTYTEMPLATESDIR')) {

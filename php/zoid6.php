@@ -11,7 +11,7 @@ namespace config {
  * @since 20200423
  * 7
  */
-define("GOOGLEANALYTICSACCOUNT", "UA-23705021-1");
+// GOOGLEANALYTICSACCOUNT moved to zoid6constants.php on 2026-09-27
 
 define("IMAGESURL", "//zoidtechnologies.com/static/");
 
@@ -59,7 +59,7 @@ define("STATICJAVASCRIPTURL", \ENGINEURL. "js/");
 // @since 20141203
 // removed 2018aug15
 // @since 20251223
-define("FONTAWESOMEURL", "https://kit.fontawesome.com/684c5b77b8.js");
+// FONTAWESOMEURL moved to zoid6constants.php on 2026-09-27
 
 date_default_timezone_set("America/New_York");
 
