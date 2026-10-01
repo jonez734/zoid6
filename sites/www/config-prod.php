@@ -37,15 +37,14 @@ define("config\SHAREDSKINURL", "/shared/skin/");
 // the vhost self-documenting and survives any future change to
 // zoid6config.php's load order. Required so \config\SHAREDTMPLDIR
 // (defined at the top of bbsengine6config.php) is available
-// before the SMARTYTEMPLATESDIR array at line 51 references it.
+// before the SMARTYTEMPLATESDIR array below references it.
 //
-// The 2026-09-24 docblock above the zoid6config.php require_once
-// below claimed that zoid6config.php transitively loaded
-// bbsengine6config.php. That assumption was incorrect until the
-// 2026-10-01 fix landed the require at the top of zoid6config.php.
-// Prior to that, this vhost (and any other vhost that relied on
-// the comment) would 500 with "Undefined constant
-// \config\SHAREDTMPLDIR" at the SMARTYTEMPLATESDIR define below.
+// The 2026-09-24 docblock that previously sat above the
+// zoid6config.php require_once was incorrect — it claimed
+// zoid6config.php transitively loaded bbsengine6config.php, but
+// the require was missing until ff6be4f landed today. Replaced
+// with a corrected comment that points at this commit and ff6be4f
+// for the full history.
 //
 // Bare require_once resolves via include_path. add_include_paths()
 // above already prepends /srv/www/bbsengine6/php/, so the
@@ -53,9 +52,18 @@ define("config\SHAREDSKINURL", "/shared/skin/");
 // a single install layout).
 require_once("bbsengine6config.php");
 
-require_once('zoid6config.php');
-
 // Path array allows fallback search: site-specific → shared → framework
+// @since 2026-10-01 — moved ABOVE the zoid6config.php require. The
+// zoid6config.php SMARTY-alias block creates the bare
+// `SMARTYTEMPLATESDIR` global from \config\SMARTYTEMPLATESDIR,
+// guarded by `if (defined('\config\SMARTYTEMPLATESDIR'))`. If the
+// namespaced define lands AFTER zoid6config.php loads (which the
+// previous order did), the bare alias is never created — and
+// index.php:109's `var_export(SMARTYTEMPLATESDIR, true)` 500s with
+// "Undefined constant SMARTYTEMPLATESDIR". Defining here, while
+// bbsengine6config.php is fresh in the include chain, lets
+// zoid6config.php see the namespaced constant and create the
+// bare alias.
 define("config\SMARTYCOMPILEDTEMPLATESDIR", \config\VHOSTDIR . "templates_c");
 define("config\SMARTYPLUGINSDIR", [
     0 => \config\VHOSTDIR . "smarty/",
@@ -69,6 +77,8 @@ define("config\SMARTYTEMPLATESDIR", [
     1 => \config\VHOSTDIR . "tmpl/",                // www-specific templates (legacy structure)
     2 => \config\SHAREDTMPLDIR,                    // Shared zoid6 templates
 ]);
+
+require_once('zoid6config.php');
 
 // Logging and analytics
 define("config\LOGENTRYPREFIX", "wwwprod");
