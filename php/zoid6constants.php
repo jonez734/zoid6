@@ -43,11 +43,6 @@ namespace zoid6\constants
     if (!defined("GOOGLEANALYTICSACCOUNT"))
         define("GOOGLEANALYTICSACCOUNT", "UA-23705021-1");
 
-    // Achilles site URL — used by zoid6/sites/www/php/lib.php and
-    // shared/skin/tmpl menu rendering. (Was already here, kept in
-    // place during this refactor.)
-    if (!defined("ACHILLESURL"))
-        define("ACHILLESURL", "https://achilles.zoidtechnologies.com/");
 };
 
 ?>
