@@ -27,6 +27,28 @@
 
 namespace {
 
+// @since 2026-10-01 — make the docblock at lines 137-140 finally
+// true. bbsengine6config.php defines \config\SHAREDTMPLDIR (the
+// shared template dir), \config\SYSTEMDSN, \config\LOGENTRYPREFIX
+// defaults, and the \bbsengine6\template + \bbsengine6\template
+// \plugin registries. vhosts that load zoid6config.php before
+// defining \config\SMARTYTEMPLATESDIR need this transitive load
+// so the array literal at vhost config.php:51 doesn't fatal with
+// "Undefined constant \config\SHAREDTMPLDIR". teos/config.php
+// already does an explicit require of the same file at line 36;
+// this is the library-side counterpart that removes the
+// per-vhost repetition.
+//
+// Resolved via include_path so the file works regardless of
+// where bbsengine6 is installed on disk. Every zoid6 site
+// config adds /srv/www/bbsengine6/php/ to include_path (via
+// \bbsengine6\util\add_include_paths() or its predecessor);
+// CLI test harnesses and partial deploys that don't can add
+// it themselves before loading zoid6config.php, or set
+// BBSENGINE_ROOT (consumed by bootstrap.php) for the default
+// include_path prepend.
+require_once("bbsengine6config.php");
+
 // @since 2026-09-27 — pull in app-level constants (FONTAWESOMEURL,
 // GOOGLEANALYTICSACCOUNT, ACHILLESURL) so every vhost that loads
 // zoid6config.php picks them up automatically. Previously these
