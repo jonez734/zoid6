@@ -32,10 +32,9 @@ clean:
 	$(MAKE) -C shared clean
 	$(MAKE) -C markdown clean
 
-prod: shared markdown parsedown-deploy
+prod: shared markdown parsedown-deploy php-deploy-prod
 #	python -m areyousure || (echo "aborted $$?"; exit 1)
 	mkdir -p $(STAGE)
-	$(MAKE) -C php stage
 	$(MAKE) -C smarty stage
 	$(MAKE) -C markdown stage
 	$(RSYNC) $(STAGE) $(PROD)
@@ -63,11 +62,14 @@ parsedown-deploy:
 php-deploy:
 	$(MAKE) -C php stage
 
-.PHONY: markdown parsedown-deploy php-deploy deploy deploy-www deploy-tui deploy-prod
+php-deploy-prod: php-deploy
+	$(RSYNC) $(STAGE)php/ $(PROD)php/
+
+.PHONY: markdown parsedown-deploy php-deploy php-deploy-prod deploy deploy-www deploy-tui deploy-prod
 
 deploy:
 	$(MAKE) -C shared stage
-	$(MAKE) php-deploy
+	$(MAKE) php-deploy-prod
 	mkdir -p $(STAGE)smarty/
 	$(RSYNC) smarty/*.php $(STAGE)smarty/
 	$(RSYNC) --delete $(STAGEDOCROOT)shared/ $(PRODDOCROOT)shared/
