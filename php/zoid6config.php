@@ -63,20 +63,12 @@ require_once(__DIR__ . "/zoid6constants.php");
 
 // Global aliases for backward compatibility with code that doesn't use namespace
 // Only define if the config constants exist (some callers may not have them)
-if (defined('\config\SMARTYTEMPLATESDIR')) {
-    define("SMARTYTEMPLATESDIR", \config\SMARTYTEMPLATESDIR);
-}
-if (defined('\config\SMARTYCOMPILEDTEMPLATESDIR')) {
-    define("SMARTYCOMPILEDTEMPLATESDIR", \config\SMARTYCOMPILEDTEMPLATESDIR);
-}
-if (defined('\config\SMARTYPLUGINSDIR')) {
-    $plugins = \config\SMARTYPLUGINSDIR;
-    $bbsengine6smarty = "/srv/www/bbsengine6/smarty/";
-    if (is_array($plugins) && !in_array($bbsengine6smarty, $plugins)) {
-        $plugins[] = $bbsengine6smarty;
-    }
-    define("SMARTYPLUGINSDIR", $plugins);
-}
+// @since 2026-10-01 — delegated to \zoid6\refresh_smarty_aliases()
+// (defined in the namespace zoid6 block below). The function is
+// idempotent and can be called again later if a vhost defines the
+// namespaced SMARTY* constants after zoid6config.php has loaded —
+// that's the late-binding contract documented at the function.
+\zoid6\refresh_smarty_aliases();
 
 // Shared URL constants - used by all zoid6 sites
 if (!defined("ENGINEURL")) define("ENGINEURL", "/engine/");
@@ -127,6 +119,53 @@ define("RECAPTCHA_SECRET_KEY", \config\RECAPTCHA_SECRET_KEY);
 } // namespace
 
 namespace zoid6 {
+
+/**
+ * @since 2026-10-01 — \zoid6\refresh_smarty_aliases()
+ *
+ * Recreate the bare SMARTY* global aliases
+ * (`SMARTYTEMPLATESDIR`, `SMARTYCOMPILEDTEMPLATESDIR`,
+ * `SMARTYPLUGINSDIR`) from their namespaced \config\* counterparts,
+ * guarded with `if (defined('\config\X') && !defined('X'))` so
+ * re-invocations are no-ops.
+ *
+ * Background: the eager alias block at the top of this file
+ * (originally lines 66-78) creates these globals once at load
+ * time, guarded by `if (defined('\config\X'))`. If a vhost's
+ * namespaced defines run AFTER zoid6config.php loads (which the
+ * 2026-09-24 teos layout does and which the 2026-09-24 www
+ * layout originally did), the bare alias is never created and
+ * legacy callers like index.php:109's
+ * `var_export(SMARTYTEMPLATESDIR, true)` 500 with "Undefined
+ * constant SMARTYTEMPLATESDIR".
+ *
+ * Late-binding contract: vhosts that define the namespaced
+ * SMARTY* AFTER `require_once('zoid6config.php')` should call
+ * this function immediately after those defines. Vhosts that
+ * define the namespaced SMARTY* BEFORE the zoid6config.php
+ * require don't need to call it (the eager call at the top of
+ * zoid6config.php handles them).
+ *
+ * Idempotent — safe to call multiple times in the same request,
+ * including both at config-load and at first-use of the bare
+ * alias.
+ */
+function refresh_smarty_aliases(): void {
+    if (defined('\config\SMARTYTEMPLATESDIR') && !defined('SMARTYTEMPLATESDIR')) {
+        define('SMARTYTEMPLATESDIR', \config\SMARTYTEMPLATESDIR);
+    }
+    if (defined('\config\SMARTYCOMPILEDTEMPLATESDIR') && !defined('SMARTYCOMPILEDTEMPLATESDIR')) {
+        define('SMARTYCOMPILEDTEMPLATESDIR', \config\SMARTYCOMPILEDTEMPLATESDIR);
+    }
+    if (defined('\config\SMARTYPLUGINSDIR') && !defined('SMARTYPLUGINSDIR')) {
+        $plugins = \config\SMARTYPLUGINSDIR;
+        $bbsengine6smarty = "/srv/www/bbsengine6/smarty/";
+        if (is_array($plugins) && !in_array($bbsengine6smarty, $plugins)) {
+            $plugins[] = $bbsengine6smarty;
+        }
+        define('SMARTYPLUGINSDIR', $plugins);
+    }
+}
 
 /**
  * \zoid6\plugin_extra() — zoid6's canonical Smarty plugin-dir
