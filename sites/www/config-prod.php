@@ -52,23 +52,20 @@ define("config\SHAREDSKINURL", "/shared/skin/");
 // a single install layout).
 require_once("bbsengine6config.php");
 
+// @since 2026-10-01 — reordered to match teos's layout: SMARTY*
+// defines and the refresh call now come AFTER
+// require_once('zoid6config.php'). Earlier revisions put them
+// before so zoid6config.php's eager alias block could see them
+// at load time, but that required calling
+// \zoid6\refresh_smarty_aliases() before the function was
+// defined (it lives inside zoid6config.php), which 500s with
+// "Call to undefined function". Teos's layout — same as this
+// commit — puts SMARTY* defines after the zoid6config.php
+// require and uses the explicit refresh call as the canonical
+// late-binding entry point.
+require_once('zoid6config.php');
+
 // Path array allows fallback search: site-specific → shared → framework
-// @since 2026-10-01 — moved ABOVE the zoid6config.php require. The
-// zoid6config.php SMARTY-alias block creates the bare
-// `SMARTYTEMPLATESDIR` global from \config\SMARTYTEMPLATESDIR,
-// guarded by `if (defined('\config\SMARTYTEMPLATESDIR'))`. If the
-// namespaced define lands AFTER zoid6config.php loads (which the
-// previous order did), the bare alias is never created — and
-// index.php:109's `var_export(SMARTYTEMPLATESDIR, true)` 500s with
-// "Undefined constant SMARTYTEMPLATESDIR". Defining here, while
-// bbsengine6config.php is fresh in the include chain, lets
-// zoid6config.php see the namespaced constant and create the
-// bare alias.
-define("config\SMARTYCOMPILEDTEMPLATESDIR", \config\VHOSTDIR . "templates_c");
-define("config\SMARTYPLUGINSDIR", [
-    0 => \config\VHOSTDIR . "smarty/",
-    1 => "/srv/www/zoid6/smarty/"
-]);
 // @since 2026-09-24 — simplified: 3 entries (bbsengine6/skin/tmpl/
 // is auto-appended by bbsengine6config.php as the engine fallback;
 // duplicate shared-skin-tmpl entry at old index 3 dedup'd).
@@ -77,22 +74,21 @@ define("config\SMARTYTEMPLATESDIR", [
     1 => \config\VHOSTDIR . "tmpl/",                // www-specific templates (legacy structure)
     2 => \config\SHAREDTMPLDIR,                    // Shared zoid6 templates
 ]);
+define("config\SMARTYCOMPILEDTEMPLATESDIR", \config\VHOSTDIR . "templates_c");
+define("config\SMARTYPLUGINSDIR", [
+    0 => \config\VHOSTDIR . "smarty/",
+    1 => "/srv/www/zoid6/smarty/"
+]);
 
-// @since 2026-10-01 — explicit refresh of bare SMARTY* aliases
-// after the namespaced defines above. Belt-and-suspenders: the
-// reorder (lines 56-66) already puts these defines BEFORE the
-// zoid6config.php require, so the eager alias block in that
-// file catches them. The explicit refresh call is a no-op in
-// the current layout but remains correct if a future edit
-// moves these defines back to after the zoid6config.php
-// require (the original 2026-09-24 layout), or if a future
-// zoid6config.php refactor changes the eager block. Idempotent
-// (guarded with !defined()). The fresh \zoid6\refresh_smarty_aliases()
-// API is the canonical late-binding entry point; see
-// zoid6/php/zoid6config.php for the docblock.
+// @since 2026-10-01 — refresh bare SMARTY* aliases from the
+// namespaced defines above. zoid6config.php's eager alias block
+// ran before these defines were in place (see the layout note
+// above), so the bare aliases need to be created here. This
+// call must come AFTER require_once('zoid6config.php') because
+// the function is defined inside zoid6config.php. Idempotent
+// (guarded with !defined() in the function body). Mirrors
+// teos's identical pattern.
 \zoid6\refresh_smarty_aliases();
-
-require_once('zoid6config.php');
 
 // Logging and analytics
 define("config\LOGENTRYPREFIX", "wwwprod");
