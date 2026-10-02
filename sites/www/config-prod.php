@@ -78,6 +78,20 @@ define("config\SMARTYTEMPLATESDIR", [
     2 => \config\SHAREDTMPLDIR,                    // Shared zoid6 templates
 ]);
 
+// @since 2026-10-01 — explicit refresh of bare SMARTY* aliases
+// after the namespaced defines above. Belt-and-suspenders: the
+// reorder (lines 56-66) already puts these defines BEFORE the
+// zoid6config.php require, so the eager alias block in that
+// file catches them. The explicit refresh call is a no-op in
+// the current layout but remains correct if a future edit
+// moves these defines back to after the zoid6config.php
+// require (the original 2026-09-24 layout), or if a future
+// zoid6config.php refactor changes the eager block. Idempotent
+// (guarded with !defined()). The fresh \zoid6\refresh_smarty_aliases()
+// API is the canonical late-binding entry point; see
+// zoid6/php/zoid6config.php for the docblock.
+\zoid6\refresh_smarty_aliases();
+
 require_once('zoid6config.php');
 
 // Logging and analytics
