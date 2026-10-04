@@ -7,6 +7,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### docs(zoid6): cross-reference the 2026-10-03 bbsengine6 env() REDIRECT_<key> fix
+
+The teos vhost (zoidtechnologies.com) was rendering
+`NEEDINFO:TEOSLABEL.buildbreadcrumbs.100` as the "You are here"
+breadcrumb root label on every `<vhost>/<uri>/` page, even
+though `teos/www/htaccess-prod` declares `SetEnv TEOSLABEL teos`
+and the engine reads it via `\bbsengine6\util\env('TEOSLABEL', ...)`.
+
+Root cause (full breakdown in inner bbsengine6
+`CHANGELOG.md` `[Unreleased]` and `bbsengine6/ROBUSTNESS_REVIEW.md`
+Phase 9 / Finding 9.1): mod_rewrite's internal redirect from
+`/<uri>` to `/engine/router.php?uri=<uri>` re-evaluates
+per-directory config for `/engine/`. The teos htaccess is **not**
+in scope at `/engine/` (the vhost has no `html/engine/.htaccess`),
+so the `SetEnv` value survives only as `REDIRECT_TEOSLABEL`.
+The handbook vhost never showed the bug because its docroot
+htaccess (`bbsengine6/www/org/htaccess-prod`) sits at the docroot
+(`RewriteBase /`) and governs `/engine/` too.
+
+`\zoid6\util\env()` was not changed in this commit, but the
+sibling `\config\TEOSURL` and `\config\TEOSDIR` constants set by
+`zoid6/php/zoid6config.php` are now the **tier-2 fallback** behind
+the new `\bbsengine6\util\getenv_redirect()` walk inside
+`\bbsengine6\util\env()`. The constants continue to do the work
+they always did (CLI tests, partial deploys without vhost htaccess,
+etc.) and now sit one tier behind a REDIRECT_<key>-aware reader.
+`bbsengine6\util\vhost_label()` was updated to route through
+`env('TEOSLABEL')` so `bbsengine6\blurb\getlabel()` and
+`engine/router.php::router_buildBreadcrumbs` see the same var.
+Zoid6's own `zoid6/php/zoid6config.php:80-95` and the
+`\config\*` namespace constants it sets are unchanged.
+
+No code changes in this repo. This entry exists to cross-link
+the bbsengine6 fix and to remind operators that the zoid6
+constants remain a tier-2 fallback behind env() (not the primary
+read path). The regression guard for this contract is
+`bbsengine6/php/test_env.php` (+11 REDIRECT_ cases) and
+`bbsengine6/php/test_router.php` Test 6e + new Test 6e.1; the
+end-to-end harness lives at `bbsengine6/teos/www/test_htaccess_setenv_reaches_php.sh`.
+
 ### feat(template): \zoid6\template namespace + \zoid6\plugin_extra()
 
 Companion change to the bbsengine6 template/plugin registry
