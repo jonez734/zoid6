@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### feat(smarty): extend |datestamp modifier with full Python strftime vocabulary + %O per-user TZ opt-in
+
+The `|datestamp` Smarty modifier was previously a 3-line shim that
+called `date(\config\DATEFORMAT, $string)` with no strftime
+translation. The format string was passed straight to `date()`,
+which produced broken output for any strftime format containing
+tokens other than PHP `date()`'s letters.
+
+Replaced the shim with a token-aware walker that matches
+bbsengine6's modifier:
+
+- Supports the full Python strftime vocabulary: `%Y %y %m %b %B %d
+  %j %H %I %l %M %S %p %P %Z %z %:z %a %A %%`.
+- Adds `%O` opt-in token for achilles per-user timezone offset
+  (reads `$_SESSION['localtimezoneoffset']`, renders `±HH:MM`).
+- Signature: `smarty_modifier_datestamp($timestamp, $format = null)`.
+  Format arg optional; bare modifier reads `\config\DATEFORMAT`
+  (falls back to bare `DATEFORMAT`, then `%Y-%m-%d %H:%M`).
+- Bare letters in the format string pass through literally (strftime
+  convention); multi-character tokens like `%:z` are matched before
+  their single-letter prefixes.
+
+Test coverage: `zoid6/php/test_datestamp_modifier.php` — 38 tests
+covering every common-subset token, the default-format fallback,
+the `%O` opt-in, edge cases, and the token-aware walker.
+
+Spec: `bbsengine6/handbook/specs/datestamp.md` (the authoritative
+reference, written in bbsengine6 because it documents both the
+Python and PHP surfaces).
+
+Sibling change in bbsengine6: the engine's modifier (which had
+been using a 11-entry strftime→date translation table) was
+rewritten with the same walker and now supports the same
+vocabulary.
+
 ### docs(zoid6): cross-reference the 2026-10-03 bbsengine6 env() REDIRECT_<key> fix
 
 The teos vhost (zoidtechnologies.com) was rendering

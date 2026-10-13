@@ -225,7 +225,7 @@ PHP `include_path`.
 |-----------------------|----------------------------------------------------|
 | `function.fa.php`     | Font Awesome icon helper                           |
 | `modifier.ago.php`    | "x minutes ago" relative time                      |
-| `modifier.datestamp.php` | Format a date stamp                             |
+| `modifier.datestamp.php` | Format a date stamp (full Python strftime vocabulary + `%O` achilles-specific per-user timezone opt-in; see `bbsengine6/handbook/specs/datestamp.md`) |
 | `modifier.filesize.php` | Pretty-print file sizes                          |
 | `modifier.fromnow.php` | "in x minutes" forward-relative time              |
 | `modifier.linkurl.php` | Shorten / rewrite URLs                            |

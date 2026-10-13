@@ -101,6 +101,9 @@ zoid6/
 │
 ├── smarty/                      Smarty plugins (fa, ago, datestamp,
 │                                filesize, fromnow, linkurl, summarize)
+│   (datestamp supports the full Python strftime vocabulary plus
+│    the %O opt-in for per-user timezone offset; see
+│    bbsengine6/handbook/specs/datestamp.md)
 ├── markdown/                    Vendored Parsedown + MarkdownExtra
 ├── scss/                        Forest-green palette variables
 │   └── _zoid6vars.scss          (canonical copy under shared/skin/scss/)
