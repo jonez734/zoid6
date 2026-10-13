@@ -15,6 +15,13 @@
 
 define("DATEFORMAT", "%Y-%m-%d %I:%M%P %Z (%a)");
 
+// The zoid6 modifier delegates to \bbsengine6\util\datestamp (the
+// canonical PHP date/time formatter in bbsengine6/php/util.php),
+// so load util.php to make the function available. The bbsengine6
+// repo must be at the path used by bbsengine6's test
+// (REPO_ROOT . "/bbsengine6/php/util.php"); zoid6's test assumes
+// the bbsengine6 checkout is a sibling.
+require_once(__DIR__ . "/../../bbsengine6/php/util.php");
 $source = file_get_contents("/home/opencode/data/work/zoid6/smarty/modifier.datestamp.php");
 $source = preg_replace('/require_once\("config\.php"\);/', '// stubbed', $source);
 eval("?>" . $source);
