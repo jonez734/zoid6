@@ -8,9 +8,9 @@
 // shim with no strftime translation; the format string was passed
 // straight to date() which produced broken output for any strftime
 // format. Now implements the same token-aware walker as
-// bbsengine6/smarty/modifier.datestamp.php, plus the achilles-
-// specific %O per-user timezone opt-in. See
-// bbsengine6/handbook/specs/datestamp.md for the full spec.
+// bbsengine6/smarty/modifier.datestamp.php, plus the %O per-user
+// timezone opt-in (reads $_SESSION['localtimezoneoffset']).
+// See bbsengine6/handbook/specs/datestamp.md for the full spec.
 
 require_once("config.php");
 
