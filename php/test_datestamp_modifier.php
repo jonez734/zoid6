@@ -2,7 +2,7 @@
 /**
  * test_datestamp_modifier.php — Verifies the zoid6 `|datestamp`
  * Smarty modifier supports the full Python strftime vocabulary,
- * plus the achilles-specific %O opt-in (per-user timezone offset).
+ * plus the %O opt-in (per-user timezone offset).
  *
  * This test is parallel to bbsengine6/php/test_datestamp_modifier.php
  * and verifies the same vocabulary in zoid6's modifier. Both
@@ -91,7 +91,7 @@ $defaultResult = smarty_modifier_datestamp($ts);
 $expectedDefault = '2026-10-13 02:30pm ' . date('T', $ts) . ' (Tue)';
 check('reads DATEFORMAT', $expectedDefault, $defaultResult);
 
-echo "\n--- %O opt-in (achilles-specific per-user TZ) ---\n\n";
+echo "\n--- %O opt-in (per-user TZ) ---\n\n";
 
 check('%O no session', '', smarty_modifier_datestamp($ts, '%O'));
 check('%O no session with context', '2026-10-13 ', smarty_modifier_datestamp($ts, '%Y-%m-%d %O'));
