@@ -20,8 +20,8 @@ bbsengine6's modifier:
 
 - Supports the full Python strftime vocabulary: `%Y %y %m %b %B %d
   %j %H %I %l %M %S %p %P %Z %z %:z %a %A %%`.
-- Adds `%O` opt-in token for achilles per-user timezone offset
-  (reads `$_SESSION['localtimezoneoffset']`, renders `±HH:MM`).
+- Adds `%O` opt-in token for per-user timezone offset (reads
+  `$_SESSION['localtimezoneoffset']`, renders `±HH:MM`).
 - Signature: `smarty_modifier_datestamp($timestamp, $format = null)`.
   Format arg optional; bare modifier reads `\config\DATEFORMAT`
   (falls back to bare `DATEFORMAT`, then `%Y-%m-%d %H:%M`).
