@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### refactor(smarty): zoid6 |datestamp modifier is now byte-identical with bbsengine6's
+
+`zoid6/smarty/modifier.datestamp.php` and
+`bbsengine6/smarty/modifier.datestamp.php` are now byte-for-byte
+identical. The bbsengine6 file was previously the
+VHOSTDOCROOT-bootstrap variant; the zoid6 file was the bare
+wrapper. Both now share the same content (3-line thin wrapper
+around `\bbsengine6\util\datestamp()` plus a single
+`\bbsengine6\util\smarty_plugin_bootstrap()` call to prime
+include_path for `bbsengine6config.php`).
+
+`diff bbsengine6/smarty/modifier.datestamp.php
+zoid6/smarty/modifier.datestamp.php` returns nothing.
+
+The bootstrap is idempotent: in the bbsengine6 standalone case
+it primes the include_path; in the zoid6-using vhost case (which
+already loaded zoid6config.php → bbsengine6config.php before the
+plugin is loaded) it's a no-op. Either way, both modifiers emit
+byte-identical output because they delegate to the same
+helper.
+
+### feat(php): byte-exact parity with Python's strftime for `\bbsengine6\util\datestamp()`
+
+The canonical walker in `bbsengine6/php/util.php` now pins
+`LC_TIME=C` at entry so day/month names match Python's
+C-locale strftime output, and space-pads the `%l` token to
+match Python's `" 2"` (vs PHP's native `"2"`). The Python
+walker now explicitly handles `%:z` (which Python's strftime
+does not support natively). With these changes, the PHP
+modifier and Python's `bbsengine6.util.datestamp` produce
+**byte-exact** output for any common-subset token on a server
+with `LC_TIME=C`. The contract is enforced by
+`bbsengine6/test_parity_php_python.json` (a shared JSON
+fixture read by both `test_parity_php_python.php` and
+`test_parity_php_python.py`).
+
 ### feat(smarty): extend |datestamp modifier with full Python strftime vocabulary + %O per-user TZ opt-in
 
 The `|datestamp` Smarty modifier was previously a 3-line shim that
