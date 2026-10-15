@@ -5,9 +5,18 @@
  * plus the %O opt-in (per-user timezone offset).
  *
  * This test is parallel to bbsengine6/php/test_datestamp_modifier.php
- * and verifies the same vocabulary in zoid6's modifier. Both
- * modifiers implement the same token-aware walker (see
- * bbsengine6/handbook/specs/datestamp.md).
+ * and verifies the same vocabulary. The modifier body is shared
+ * (defined in bbsengine6/php/smarty_modifier_datestamp.php) so
+ * the zoid6 modifier and the bbsengine6 modifier produce identical
+ * output. See bbsengine6/handbook/specs/datestamp.md.
+ *
+ * @since 2026-10-15 — The test no longer eval's the zoid6 modifier
+ * file with a `require_once("config.php")` stub. The canonical
+ * modifier body lives in
+ * bbsengine6/php/smarty_modifier_datestamp.php, and the test
+ * requires it directly. This is simpler and avoids the eval
+ * workaround (which had to deal with __DIR__ resolving to the
+ * test's CWD inside eval'd code).
  *
  * Usage:
  *   php test_datestamp_modifier.php
@@ -15,16 +24,13 @@
 
 define("DATEFORMAT", "%Y-%m-%d %I:%M%P %Z (%a)");
 
-// The zoid6 modifier delegates to \bbsengine6\util\datestamp (the
-// canonical PHP date/time formatter in bbsengine6/php/util.php),
-// so load util.php to make the function available. The bbsengine6
-// repo must be at the path used by bbsengine6's test
-// (REPO_ROOT . "/bbsengine6/php/util.php"); zoid6's test assumes
-// the bbsengine6 checkout is a sibling.
+// Load the canonical walker (defines \bbsengine6\util\datestamp)
+// and the canonical modifier body (defines smarty_modifier_datestamp).
+// Both files live in the bbsengine6 checkout, which is a sibling
+// of the zoid6 checkout (matching the production install layout:
+// /srv/www/{bbsengine6,zoid6}).
 require_once(__DIR__ . "/../../bbsengine6/php/util.php");
-$source = file_get_contents("/home/opencode/data/work/zoid6/smarty/modifier.datestamp.php");
-$source = preg_replace('/require_once\("config\.php"\);/', '// stubbed', $source);
-eval("?>" . $source);
+require_once(__DIR__ . "/../../bbsengine6/php/smarty_modifier_datestamp.php");
 
 echo "=== |datestamp modifier Tests (zoid6) ===\n\n";
 

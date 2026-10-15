@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### refactor(smarty): zoid6 |datestamp modifier body extracted to bbsengine6/php/smarty_modifier_datestamp.php
+
+`zoid6/smarty/modifier.datestamp.php` is now a 2-line stub
+that requires the canonical modifier body from
+`bbsengine6/php/smarty_modifier_datestamp.php` via a
+`__DIR__`-relative `require_once`. The previous arrangement
+(2026-10-15 commit `bb4cb03` making the file byte-identical
+with the bbsengine6 sibling) was correct but required any
+future change to be applied in lockstep. The new
+arrangement eliminates the "must be byte-identical" invariant
+by having both files require a single source of truth.
+
+The zoid6 modifier body is now:
+
+```php
+\bbsengine6\util\smarty_plugin_bootstrap();
+require_once("config.php");
+require_once(__DIR__ . "/../../bbsengine6/php/smarty_modifier_datestamp.php");
+```
+
+The relative path requires bbsengine6 to be installed as a
+sibling of zoid6 (the canonical install layout on production
+and in dev checkouts). If a future deploy puts bbsengine6
+elsewhere, this path must be updated to match.
+
+The test (`php/test_datestamp_modifier.php`) also simplified:
+instead of `eval`-ing the modifier file with a
+`require_once("config.php")` stub, it now `require_once`s the
+canonical body directly and calls `smarty_modifier_datestamp()`
+as a regular function.
+
+Behavior is unchanged. All 38 zoid6 modifier tests pass.
+
 ### refactor(smarty): zoid6 |datestamp modifier is now byte-identical with bbsengine6's
 
 `zoid6/smarty/modifier.datestamp.php` and
