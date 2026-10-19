@@ -32,26 +32,37 @@ clean:
 	$(MAKE) -C shared clean
 	$(MAKE) -C markdown clean
 
-prod: shared markdown parsedown-deploy php-deploy-prod
-#	python -m areyousure || (echo "aborted $$?"; exit 1)
+# stage: build the shared chrome, php, smarty, and markdown trees locally
+# under $(STAGE) and $(STAGEDOCROOT). Nothing is pushed to $(HOST).
+stage: shared-stage
 	mkdir -p $(STAGE)
 	$(MAKE) -C smarty stage
 	$(MAKE) -C markdown stage
-	$(RSYNC) $(STAGE) $(PROD)
 
-shared:
-	$(MAKE) -C shared stage
+# prod: stage, then push the zoid6 tree and shared chrome to $(HOST).
+prod: stage parsedown-deploy php-deploy-prod
+	$(RSYNC) $(STAGE) $(PROD)
 	$(RSYNC) --delete $(STAGEDOCROOT)shared/ $(PRODDOCROOT)shared/
+
+# shared: stage the shared chrome and push it to $(HOST). Named target
+# (no deploy- prefix) because deploytool calls it directly.
+shared: shared-stage
+	$(RSYNC) --delete $(STAGEDOCROOT)shared/ $(PRODDOCROOT)shared/
+
+shared-stage:
+	$(MAKE) -C shared stage
 
 backup:
 	rsync --recursive --verbose --exclude=.venv . /run/media/jam/AEAB-CF37/projects/$(PROJECT)/
 
-.PHONY: shared backup
+.PHONY: stage prod shared shared-stage backup
 
+# markdown: stage the markdown library locally. The merlin push for it is
+# parsedown-deploy, which runs as part of prod.
+markdown: markdown-stage
 
-markdown:
+markdown-stage:
 	$(MAKE) -C markdown stage
-	$(RSYNC) --dry-run $(STAGE)markdown $(HOST):$(STAGE)
 
 parsedown-deploy:
 	mkdir -p /srv/www/markdown/
@@ -67,13 +78,8 @@ php-deploy-prod: php-deploy
 
 .PHONY: markdown parsedown-deploy php-deploy php-deploy-prod deploy deploy-www deploy-tui deploy-prod
 
-deploy:
-	$(MAKE) -C shared stage
-	$(MAKE) php-deploy-prod
-	mkdir -p $(STAGE)smarty/
-	$(RSYNC) smarty/*.php $(STAGE)smarty/
-	$(RSYNC) --delete $(STAGEDOCROOT)shared/ $(PRODDOCROOT)shared/
-	$(RSYNC) $(STAGE) $(PROD)
+# deploy is the name older docs and muscle memory use; same as prod.
+deploy: prod
 
 deploy-www:
 	$(MAKE) -C sites/www prod

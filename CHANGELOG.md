@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### refactor(make): `stage` / `prod` deploy shape
+
+`stage` builds the shared chrome, smarty, and markdown trees locally.
+`prod` runs `stage`, pushes the zoid6 tree and the shared chrome to
+merlin, and ensures the php and markdown push. `deploy` is now an alias
+to `prod`. `markdown` no longer runs an `rsync --dry-run`; its merlin push
+is `parsedown-deploy`, which `prod` runs.
+
+Removed: the duplicate `php` stage; the `art` step in `shared/skin`
+(`shared/skin/art/` does not exist and the `-` prefix hid the failure).
+`deploy-www`, `deploy-tui`, `deploy-prod`, and `shared` keep their names.
+
 ### refactor(smarty): zoid6 |datestamp modifier body extracted to bbsengine6/php/smarty_modifier_datestamp.php
 
 `zoid6/smarty/modifier.datestamp.php` is now a 2-line stub
