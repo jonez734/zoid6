@@ -207,6 +207,10 @@ DEPLOY_EDITABLE ?=
 # `--upgrade`. Empty = prior no-op-if-version-matches behavior.
 DEPLOY_UPGRADE ?=
 PIP_UPGRADE_FLAG := $(if $(filter 1,$(DEPLOY_UPGRADE)),--upgrade,)
+# TODO(verify-install): after the wheel `pip install` below, compare the
+# wheel's METADATA Version against `pip show zoid6`. See zoidoffice/src/
+# Makefile's VERIFY_INSTALL variable for the reference implementation.
+# The editable branch installs from source, not a wheel, so no check there.
 deploy-tui: build
 ifeq ($(DEPLOY_EDITABLE),1)
 	$(PIP) install $(PIP_UPGRADE_FLAG) --no-cache-dir -e .
@@ -218,11 +222,6 @@ else
 		exit 1; \
 	fi; \
 	$(PIP) install $(PIP_UPGRADE_FLAG) --no-cache-dir $$WHEEL
-	# TODO(verify-install): after this `pip install` of $$WHEEL,
-	# compare the wheel's METADATA Version against `pip show zoid6`.
-	# See zoidoffice/src/Makefile's VERIFY_INSTALL variable for the
-	# reference implementation. Editable branch (DEPLOY_EDITABLE=1,
-	# line 204) installs from source, not a wheel, so no check.
 endif
 
 # sudo umbrella — everything `install-fhs` does (sysusers, tmpfiles,
@@ -261,24 +260,25 @@ uninstall-sysusers:
 	-sudo rm -f $(SYSUSERS_DST)
 	@echo "Removed $(SYSUSERS_DST)"
 
+# zoid6 builds on bed, so the bed wheel is installed into the venv too
+# (so `import bed` works there).
+#
+# TODO(verify-install): the `sudo -u <owner> pip install` of the bed wheel
+# runs as VENV_OWNER, not the active operator. The verify check has to be
+# either (a) re-sudoed to inspect the owner venv, or (b) accepted as a
+# blind spot. Compare against `pip show bed`; the wheel just installed is
+# a bed wheel, not zoid6. See zoidoffice/src/Makefile's VERIFY_INSTALL for
+# the operator-side reference.
 install-venv: install-sysusers
 	@command -v sudo >/dev/null 2>&1 || { echo "Error: sudo required"; exit 1; }
 	@sudo -u $(VENV_OWNER) test -d "$(VENV_DIR)" || sudo -u $(VENV_OWNER) $(PYTHON) -m venv "$(VENV_DIR)"
 	sudo -u $(VENV_OWNER) $(VENV_DIR)/bin/pip install --upgrade pip
 	sudo -u $(VENV_OWNER) $(VENV_DIR)/bin/pip install $(PIP_UPGRADE_FLAG) --quiet build setuptools wheel
-	# zoid6 builds on bed; install the bed wheel so `import bed` works inside this venv.
 	mkdir -p $(WHEEL_DIR)
 	rm -f $(WHEEL_DIR)/*.whl
 	$(MAKE) -C $(BED_DIR) version
 	$(PYTHON) -m build --no-isolation --wheel --outdir $(WHEEL_DIR) $(BED_DIR)
 	sudo -u $(VENV_OWNER) $(VENV_DIR)/bin/pip install $(PIP_UPGRADE_FLAG) --quiet $(WHEEL_DIR)/*.whl
-	# TODO(verify-install): this `sudo -u <owner> pip install` of the
-	# bed wheel runs as VENV_OWNER, not the active operator, so the
-	# verify check has to be either (a) re-sudoed to inspect the owner
-	# venv, or (b) accept that silent no-ops here won't be caught from
-	# this Makefile. Compare against `pip show bed` (the wheel just
-	# installed is a bed wheel, not zoid6). See zoidoffice/src/Makefile's
-	# VERIFY_INSTALL variable for the operator-side reference.
 	rm -rf $(WHEEL_DIR)
 	@command -v semanage >/dev/null 2>&1 && \
 		sudo semanage fcontext -a -t bin_t "$(VENV_DIR)/bin(/.*)?" 2>/dev/null || true
@@ -333,6 +333,15 @@ reassign-bootstrap-owners:
 	@echo "Reassigning public bootstrap SQL functions to role 'zoid6' (creates role if missing) ..."
 	$(PYTHON) $(PACKAGE)/reassign_bootstrap_owners.py
 
+# TODO(verify-install): after the batch `pip install` of $(WHEEL_DIR)/*.whl
+# (bbsengine6 + bed + casino + zoid6), verify each package's installed
+# version against its wheel's METADATA (pip show bbsengine6, bed, casino,
+# zoid6). The install is `--quiet`, so silent no-ops are hard to see. See
+# zoidoffice/src/Makefile's VERIFY_INSTALL for the reference; this would
+# need to loop over the four packages.
+#
+# casino has an undeclared runtime dep on PIL (lib.py imports it), which is
+# not in pyproject.toml, so pillow is installed explicitly below.
 install-user:
 	@command -v python3 >/dev/null 2>&1 || { echo "Error: python3 not on PATH"; exit 1; }
 	@test -n "$$HOME" || { echo "Error: HOME not set"; exit 1; }
@@ -351,17 +360,7 @@ install-user:
 	$(MAKE) version
 	$(PYTHON) -m pip wheel --no-deps --no-build-isolation --no-clean --wheel-dir $(WHEEL_DIR) $(CURDIR)
 	$(VENV_DIR)/bin/pip install $(PIP_UPGRADE_FLAG) --quiet $(WHEEL_DIR)/*.whl
-	# TODO(verify-install): after this batch `pip install` of
-	# $(WHEEL_DIR)/*.whl (bbsengine6 + bed + casino + zoid6), verify
-	# each package's installed version against its wheel's METADATA:
-	#   pip show bbsengine6, pip show bed, pip show casino, pip show zoid6
-	# The wildcard install is silent (`--quiet`), which makes silent
-	# no-ops even harder to detect. See zoidoffice/src/Makefile's
-	# VERIFY_INSTALL variable for the operator-side reference; this
-	# recipe's verify would need to loop over the four packages.
 	rm -rf $(WHEEL_DIR)
-	# Undeclared runtime dep of casino (lib.py imports PIL). Not in
-	# pyproject.toml so pip won't pull it; install explicitly.
 	$(VENV_DIR)/bin/pip install $(PIP_UPGRADE_FLAG) --quiet pillow
 	@test -f $(ETC_DIR)/zoid6.json || install -m 0644 $(PACKAGE)/data/zoid6.json $(ETC_DIR)/zoid6.json
 	@test -f $(ETC_DIR)/zoid6.env  || { \
@@ -377,6 +376,10 @@ install-user:
 	@echo "Or as a systemd user unit (also no sudo):"
 	@echo "  make install-systemd-user && systemctl --user enable --now zoid6"
 
+# Autorestart is read from the config ("bed": {"autorestart": true}), not a
+# CLI flag; zoid6's argparse does not define --no-autorestart.
+# `&` and `echo $!` stay on one line so the PID is captured by the same
+# shell that launched the process.
 start: install-user
 	@test ! -f $(RUN_DIR)/zoid6.pid || { \
 	    PID=$$(cat $(RUN_DIR)/zoid6.pid); \
@@ -385,10 +388,6 @@ start: install-user
 	    else \
 	        echo "stale pidfile, removing"; rm -f $(RUN_DIR)/zoid6.pid; \
 	    fi; }
-	# Autorestart is read from the config ("bed": {"autorestart": true}),
-	# not a CLI flag. zoid6's argparse does not define --no-autorestart.
-	# Chain `&` and `echo $!` on one line so Make doesn't fork a new
-	# shell between them (which would lose $! to an empty value).
 	nohup $(VENV_DIR)/bin/zoid6 \
 	    --config $(ETC_DIR)/zoid6.json \
 	    --router zoid6.api.handler.MessageRouter \
@@ -412,16 +411,17 @@ status:
 
 restart: stop start
 
+# The unit's %h/.local/zoid6 is templated to $(PREFIX), so it matches
+# wherever install-user landed (default or overridden PREFIX).
+#
+# daemon-reload is best-effort: it only matters when a user systemd is
+# running (interactive login). Headless servers, or containers without
+# $DBUS_SESSION_BUS_ADDRESS, skip it.
 install-systemd-user: install-user
 	@mkdir -p $(SYSTEMD_USER_DIR)
-	# Template %h/.local/zoid6 to $(PREFIX) so the unit matches wherever
-	# install-user landed (default %h/.local/zoid6 or overridden PREFIX).
 	sed 's|%h/\.local/zoid6|$(PREFIX)|g' $(PACKAGE)/daemon/zoid6-user.service \
 	    > $(SYSTEMD_USER_DIR)/zoid6.service
 	chmod 0644 $(SYSTEMD_USER_DIR)/zoid6.service
-	# Best-effort: daemon-reload only matters when a user systemd is
-	# running (interactive login session). On headless servers or in
-	# container namespaces without $DBUS_SESSION_BUS_ADDRESS, skip.
 	-systemctl --user daemon-reload 2>/dev/null || true
 	@echo "Installed $(SYSTEMD_USER_DIR)/zoid6.service (user unit)"
 	@echo "Enable + start:  systemctl --user enable --now zoid6"
