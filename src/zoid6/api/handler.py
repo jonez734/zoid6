@@ -31,6 +31,7 @@ class MessageRouter:
         token_store: Any = None,
         instance_id: Any = None,
         clock: Any = None,
+        channel_state: Any = None,
     ) -> None:
         self.args = args
         self.session_registry = session_registry
@@ -38,6 +39,9 @@ class MessageRouter:
         self.token_store = token_store
         self.instance_id = instance_id
         self.clock = clock
+        # bed's shared ChannelState. Kept so the router shares bed's channel
+        # map rather than building its own.
+        self.channel_state = channel_state
         self.config = self._load_config()
         self.routers: Dict[str, Any] = {}
 
