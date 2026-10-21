@@ -12,10 +12,9 @@ is **not needed**: the new ``backend.checkzoid6owner`` module runs
 automatically between ``checkfunctions`` and ``checksuperuser`` in
 ``stage_zero`` and migrates ownership to ``zoid6`` on first run.
 
-The script connects as ``SUPERUSER`` (``jam``) because
+The script connects as the role named in ``PGUSER`` because
 ``ALTER FUNCTION ... OWNER TO`` requires the caller to be either the
-current owner or a superuser. ``jam`` authenticates over TCP via the
-local ``host 127.0.0.1/32 trust`` rule in ``pg_hba.conf``. If the
+current owner or a superuser. The caller chooses that role; the code does not. If the
 role ``zoid6`` does not yet exist, the script creates it as
 ``NOSUPERUSER NOCREATEDB NOCREATEROLE NOLOGIN INHERIT`` first, since
 ``ALTER FUNCTION ... OWNER TO zoid6`` cannot succeed against a
@@ -27,13 +26,13 @@ creation and the per-function reassignment.
 """
 from __future__ import annotations
 
+import os
 import sys
 
 import psycopg
 
 
 TARGET = "zoid6"
-SUPERUSER = "jam"
 DBNAME = "zoid6"
 FUNCTIONS = (
     "manage_database_priv",
@@ -44,8 +43,20 @@ FUNCTIONS = (
 )
 
 
+def superuser() -> str:
+    """The superuser to connect as, from PGUSER. Never a built-in name.
+
+    The owner migration needs a role that can ALTER FUNCTION ... OWNER TO, so the
+    caller names it. Nothing in the code chooses it.
+    """
+    user = os.environ.get("PGUSER", "").strip()
+    if not user:
+        raise SystemExit("set PGUSER to the superuser that owns the bootstrap functions")
+    return user
+
+
 def main() -> int:
-    with psycopg.connect(host="localhost", dbname=DBNAME, user=SUPERUSER) as conn:
+    with psycopg.connect(host="localhost", dbname=DBNAME, user=superuser()) as conn:
         with conn.cursor() as cur:
             cur.execute(
                 "SELECT 1 FROM pg_roles WHERE rolname = %s",
