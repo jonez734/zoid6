@@ -7,6 +7,9 @@
     "name": "zoid6"
   },
   "debug": false,
+  "auth": {
+    "token_persistence": "db"
+  },
   "services": {
     "auth": {
       "enabled": false,
