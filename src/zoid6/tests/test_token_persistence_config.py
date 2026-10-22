@@ -30,3 +30,20 @@ def test_factory_config_selects_db():
 
 def test_source_and_factory_agree():
     assert _persistence(SRC) == _persistence(FACTORY)
+
+
+def _session_idle(path: Path):
+    cfg = json.loads(path.read_text())
+    return cfg.get("session", {}).get("idle_minutes")
+
+
+def test_source_config_sets_session_idle_minutes():
+    assert _session_idle(SRC) == 15
+
+
+def test_factory_config_sets_session_idle_minutes():
+    assert _session_idle(FACTORY) == 15
+
+
+def test_source_and_factory_agree_on_session_idle_minutes():
+    assert _session_idle(SRC) == _session_idle(FACTORY)

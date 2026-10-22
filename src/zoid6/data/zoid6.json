@@ -10,6 +10,9 @@
   "auth": {
     "token_persistence": "db"
   },
+  "session": {
+    "idle_minutes": 15
+  },
   "services": {
     "auth": {
       "enabled": false,
