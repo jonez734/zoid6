@@ -25,9 +25,9 @@
       "description": "Member service (profile, tier, referrals)"
     },
     "bank": {
-      "enabled": true,
+      "enabled": false,
       "modulepath": "bbsengine6.bank.api.handler",
-      "description": "Banking service (balance, transfers, history)"
+      "description": "Disabled. bed's BankService (bed/api/bank.py) serves bank_* via engine.bed_bank_op. Enabling this shadows it with the direct-table handler."
     },
     "channel": {
       "enabled": true,

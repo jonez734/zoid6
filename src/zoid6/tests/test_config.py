@@ -109,13 +109,15 @@ class TestConfigServices:
         ):
             assert services[name]["enabled"] is False, f"{name} should be disabled"
 
-    def test_bank_modulepath_points_at_bbsengine6(self, services):
-        """bank's modulepath is bbsengine6.bank.api.handler (option b in
-        the zoid6 TODO). The bare 'bank.api.handler' path does not resolve
-        as a top-level module; the bbsengine6 bank package does."""
+    def test_bank_is_disabled_so_bed_owns_bank_messages(self, services):
+        """bank_* message types are served only by bed's BankService.
+
+        zoid6's bank entry would register the same message types a second
+        time with bbsengine6's direct-table BankServiceHandler, shadowing
+        bed's definer-function handler. It must stay disabled.
+        """
         bank = services["bank"]
-        assert bank["enabled"] is True
-        assert bank["modulepath"] == "bbsengine6.bank.api.handler"
+        assert bank["enabled"] is False, "bank must stay disabled; bed owns bank_*"
 
     def test_all_modulepaths_are_dotted(self, services):
         """All modulepaths use dot notation for import."""
