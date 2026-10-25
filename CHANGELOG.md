@@ -25,6 +25,48 @@ bbsengine6 cannot satisfy zoid6, which depends on the 0.0.3 login and bank fixes
 `make version` stamps `0.0.3.dev<datestamp>`. The stamp had been `0.0.1.dev`,
 which left a stale package looking current to pip.
 
+### feat(config): zoid6 selects db token persistence, so tokens survive restarts
+
+`auth.token_persistence` is `db` in `zoid6.json` and its factory copy. bed stores only the
+SHA-256 digest of each token, in `engine.__bed_token`, so a client can reconnect after a
+daemon restart.
+
+### feat(config): `session.idle_minutes` is 15, matching `bed.json` in both config files
+
+### fix(config): the owner-migration superuser is taken from `PGUSER`, not a constant
+
+### fix(router): accept and store bed's `channel_state` in `MessageRouter`
+
+### feat(smarty): `|datestamp` modifier gets the full strftime vocabulary and `%O`
+
+`zoid6/smarty/modifier.datestamp.php` is a thin wrapper around the bbsengine6 body. The
+modifier accepts the full strftime vocabulary, plus `%O` as an opt-in ordinal form.
+
+### feat(template): `\zoid6\template` namespace and `\zoid6\plugin_extra()`
+
+`\zoid6\template\extra()` contributes the shared template directory. `refresh_smarty_aliases()`
+re-runs the `SMARTY*` aliasing, so a vhost that defines the namespaced constants after
+`zoid6config.php` loads can call it.
+
+### refactor(zoid6constants): `FONTAWESOMEURL` and `GOOGLEANALYTICSACCOUNT` move to `zoid6constants.php`
+
+They are loaded transitively through `zoid6config.php`, and each is guarded so a vhost can
+override it. `ACHILLESURL` is dropped.
+
+### fix(sites/www): SMARTY defines come before the `zoid6config.php` require
+
+### feat(shared/page.tmpl): the FA Kit script tag is enabled
+
+### fix(zoid6config): `zoid6config.php` loads `bbsengine6config.php` transitively
+
+### fix(zoid6config): honour a `TEOSURL` environment override
+
+### fix(zoid6): the `shared/skin/art` descent is gated on the directory existing
+
+### config(zoid6): `websocket.ping_interval` 60s and `ping_timeout` 600s
+
+### fix(zoid6): the factory `zoid6.json` is refreshed from source
+
 ### refactor(make): `stage` / `prod` deploy shape
 
 `stage` builds the shared chrome, smarty, and markdown trees locally.
