@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### fix(config): the bank module is disabled so bed's BankService is the only bank handler
+
+zoid6's `bank` entry registered `bank_*` a second time with bbsengine6's
+direct-table `BankServiceHandler`, which shadowed bed's definer-function handler
+and failed with "permission denied to set role". `bank` is `enabled: false` in
+`zoid6.json` and in its factory copy. Existing installs must set the same in
+`/etc/zoid6/zoid6.json`.
+
+### chore(deps): pin bed and bbsengine6 to 0.0.3
+
+`bed>=0.0.3.dev202610` and `bbsengine6>=0.0.3.dev202610`, so an older bed or
+bbsengine6 cannot satisfy zoid6, which depends on the 0.0.3 login and bank fixes.
+
+### chore(version): 0.0.3.dev series
+
+`make version` stamps `0.0.3.dev<datestamp>`. The stamp had been `0.0.1.dev`,
+which left a stale package looking current to pip.
+
 ### refactor(make): `stage` / `prod` deploy shape
 
 `stage` builds the shared chrome, smarty, and markdown trees locally.

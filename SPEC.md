@@ -166,8 +166,10 @@ The `services` block is the router's input. Per-module knobs are
 free-form but `casino` uses an opinionated sub-schema
 (`table_service.*`, `game_service.*`, `chat_service.*`,
 `bet_service`, `games`). The bundled config enables `member`,
-`bank`, `channel`, `casino`. `auth` is documented but
-disabled — bed handles auth natively. `empyre` and `murdermotel`
+`channel`, `casino`. `bank` is documented but disabled: bed's `BankService`
+serves every `bank_*` message through `engine.bed_bank_op`, and enabling the
+bbsengine6 bank module would register the same types a second time. `auth` is
+documented but disabled — bed handles auth natively. `empyre` and `murdermotel`
 are documented placeholders pending implementation.
 
 `bind` and `database` are bed-level knobs that flow through

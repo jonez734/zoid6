@@ -4,8 +4,8 @@
 > / bbsengine.org stack.**
 
 `zoid6` is a Python package that ships a single `MessageRouter` which
-loads every BBS module (`member`, `bank`, `channel`, `casino`, …) into
-one WebSocket server, plus the legacy PHP framework that powers the
+loads every BBS module (`member`, `channel`, `casino`, …) into
+one WebSocket server (bank messages are served by bed, not by zoid6), plus the legacy PHP framework that powers the
 `www.zoidtechnologies.com` and `engine.bbsengine.org` websites. It is
 the glue layer between [`bbsengine6`](../bbsengine6/) (the engine),
 [`bed`](../bed/) (the daemon), and the BBS games (currently
@@ -154,7 +154,7 @@ The shipped config enables:
 |-------------|---------------------------------------|---------------------------------------|
 | `auth`      | `auth.api.handler`                    | **disabled** — bed handles natively   |
 | `member`    | `bbsengine6.member.api.handler`       | profile / tier / referrals            |
-| `bank`      | `bbsengine6.bank.api.handler`         | balance / transfers / history         |
+| `bank`      | `bbsengine6.bank.api.handler`         | **disabled** — bed's BankService serves `bank_*` |
 | `channel`   | `bbsengine6.channel.api.handler`      | pub/sub messaging                     |
 | `casino`    | `casino.api.handler`                  | blackjack / poker / yahtzee           |
 | `empyre`    | `empyre.api.handler`                  | (not yet implemented)                 |
