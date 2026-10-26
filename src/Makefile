@@ -46,7 +46,7 @@ SYSTEMD_USER_DIR ?= $(HOME)/.config/systemd/user
 endif
 
 .PHONY: all help install install-dev test test-cov test-verbose lint clean uninstall egg-info
-.PHONY: build version rename-sdist sign release
+.PHONY: build version rename-sdist sign release stale-build
 .PHONY: install-etc install-tmpfiles install-fhs uninstall-etc uninstall-tmpfiles factory-sync
 .PHONY: install-sysusers uninstall-sysusers
 .PHONY: install-venv uninstall-venv restorecon
@@ -115,7 +115,19 @@ egg-info:
 uninstall:
 	$(PIP) uninstall -y $(PACKAGE)
 
-clean:
+# Move aside any build/dist/egg-info directory the project holds before a build.
+# A tree left by another user cannot be deleted, but renaming it needs only write
+# access to this project directory. The stale tree is kept under *.stale.<timestamp>.
+stale-build:
+	@ts=$$(date +%Y%m%d%H%M%S); \
+	for d in build dist *.egg-info; do \
+		for x in $$d; do \
+			[ -e "$$x" ] || continue; \
+			mv "$$x" "$$x.stale.$$ts" && echo "stale-build: moved $$x -> $$x.stale.$$ts"; \
+		done; \
+	done
+
+clean: stale-build
 	-rm -rf build dist
 	-rm -rf *.egg-info
 	-find . -type d -name __pycache__ -exec rm -rf {} +
