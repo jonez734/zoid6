@@ -6,6 +6,12 @@
     "restart_on_bind_failure": false,
     "name": "zoid6"
   },
+  "casino": {
+    "clock": {
+      "max_turn_seconds": 120,
+      "_comment_max_turn_seconds": "Sysop ceiling for a table's turn_seconds (the play clock). 0 disables the clock on every table. Read by casino.config.get_max_turn_seconds."
+    }
+  },
   "debug": false,
   "auth": {
     "token_persistence": "db"
