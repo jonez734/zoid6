@@ -19,6 +19,14 @@ def _resolve_config_path() -> str:
 
 
 def main() -> None:
+    # Answer --version here, before bed's parser sees argv, so the output is
+    # zoid6's version rather than bed's.
+    if "--version" in sys.argv[1:]:
+        from zoid6._version import __version__ as zoid6_version
+
+        print(f"zoid6 {zoid6_version}")
+        return
+
     config_path = _resolve_config_path()
     sys.argv = [
         sys.argv[0],
