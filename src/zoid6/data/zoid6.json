@@ -14,7 +14,8 @@
   },
   "debug": false,
   "auth": {
-    "token_persistence": "db"
+    "token_persistence": "db",
+    "bed_instance_id": "9cdf4851-99a7-4559-bcaa-7e0eda77075c"
   },
   "session": {
     "idle_minutes": 15
