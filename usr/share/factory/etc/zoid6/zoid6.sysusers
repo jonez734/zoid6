@@ -1,5 +1,0 @@
-# Type Name  ID  GECOS              Home           Shell
-u     zoid6  -   "zoid6 BBS Router" /var/lib/zoid6 -
-g     zoid6  -   -
-m     bed        zoid6
-m     postoffice zoid6
