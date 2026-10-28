@@ -13,8 +13,8 @@ TMPFILES_SRC = $(PACKAGE)/daemon/$(PROJECT).tmpfiles
 TMPFILES_DST = /usr/lib/tmpfiles.d/$(PROJECT).conf
 SYSUSERS_SRC = $(PACKAGE)/daemon/$(PROJECT).sysusers
 SYSUSERS_DST = /usr/lib/sysusers.d/$(PROJECT).conf
-# One source for the zoid6 unit: the bed repo copy, which bed and zoid6 share.
-UNIT_SRC = $(BED_DIR)/src/bed/daemon/$(PROJECT).service
+# The zoid6 unit is zoid6's own file: it runs bed's daemon with zoid6's router and config.
+UNIT_SRC = $(PACKAGE)/daemon/$(PROJECT).service
 UNIT_DST = /usr/lib/systemd/system/$(PROJECT).service
 
 VENV_DIR ?= /home/zoid6/venv
