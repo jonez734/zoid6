@@ -112,10 +112,19 @@ if [ "$DRY_RUN" -eq 0 ] && [ "${SYNCED:-0}" -ne 1 ]; then
     echo "  (SYNCED is not 1: stopping before the account install.)" >&2
     exit 1
 fi
-if command -v deploy >/dev/null 2>&1; then
-    run deploy zoid6.venv
+# install-wheels runs as the zoid6 account and refuses any other user, so jam cannot run it
+# here. The service install is printed as the account command; the same target runs under
+# deploytool's zoid6.venv when it is invoked as zoid6.
+ZOID6_MAKE="make -C $HERE/../src install-wheels"
+if [ "$(id -un)" = "zoid6" ]; then
+    run $ZOID6_MAKE
 else
-    run env PYTHONPATH="$HERE/../../deploytool/src" python3 -m deploytool zoid6.venv
+    echo "  step 1b runs as the zoid6 account (install-wheels refuses other users). Run:"
+    echo "    sudo -u zoid6 $ZOID6_MAKE"
+    if [ "$DRY_RUN" -eq 0 ]; then
+        echo "  (not running as zoid6: stopping before the shell and owner installs.)" >&2
+        exit 1
+    fi
 fi
 
 echo "== 2/4 shell/owner venv: bed + bbsengine6 + letteredolive"

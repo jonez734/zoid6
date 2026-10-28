@@ -111,11 +111,15 @@ def test_deploy_script_rejects_a_needinfo_placeholder_by_name():
 
 
 @pytest.mark.unit
-def test_service_venv_goes_through_deploytool_not_direct_pip():
-    # jam cannot write the zoid6-owned venv, so the service install must be deploytool's
-    # zoid6.venv (as the account), never a pip call against ZOID6_HOME/venv from this script.
+def test_service_venv_installs_as_the_account_not_jam():
+    # jam cannot write the zoid6-owned venv, and install-wheels refuses any user but zoid6. The
+    # service install is the account's make target, never a pip call against ZOID6_HOME/venv.
     text = DEPLOY.read_text()
-    assert "zoid6.venv" in text
+    assert "install-wheels" in text
+    assert "sudo -u zoid6" in text
+    assert not re.search(r"^\s*(run\s+)?deploy zoid6\.venv", text, re.MULTILINE), (
+        "the script must not run deploy zoid6.venv: it refuses any user but zoid6"
+    )
     assert not re.search(r'run "\$SERVICE_PY"', text)
     assert "SERVICE_PY" not in text
 
