@@ -280,8 +280,7 @@ and reads no `/etc` file. Its `ExecStart` passes three arguments that matter:
 - `--router zoid6.api.handler.MessageRouter`.
 
 `ProtectHome=read-only` lets the service read its venv under `/home/zoid6`. `ReadWritePaths` covers
-`/var/log/zoid6` and `/home/zoid6`. `install-systemd` renders `@VENV_DIR@`, and removes a stale symlink
-under `/etc/systemd/system` that would otherwise shadow the rendered unit. Install it:
+`/var/log/zoid6` and `/home/zoid6`. `install-systemd` renders `@VENV_DIR@` into `/usr/lib/systemd/system/zoid6.service`. Install it:
 
 ```
 sudo install -m 0644 zoid6-unit.service /usr/lib/systemd/system/zoid6.service
@@ -316,8 +315,8 @@ journalctl -u zoid6 --since "5 minutes ago" | grep -i "MessageRouter\|fatal\|err
 | Symptom | Cause | Fix |
 |---|---|---|
 | `status=203/EXEC`, "Permission denied" on the venv | SELinux: the venv `bin/` is not labelled `bin_t` | `sudo make -C zoid6/src restorecon VENV_DIR=/home/zoid6/venv` |
-| `status=203/EXEC`, "No such file" | `@VENV_DIR@` unrendered, or a stale `/etc/systemd/system/zoid6.service` symlink shadows the rendered unit | `install-systemd` (it removes the symlink) |
-| `Unit configuration has fatal error ... VENV_DIR@` | The raw template is in use, through the symlink | As above |
+| `status=203/EXEC`, "No such file" | `@VENV_DIR@` unrendered, or a stale link shadows the rendered unit | Re-run `install-systemd`; if `systemctl cat zoid6` shows a stale path, remove the stale link by hand (see Stale unit link) |
+| `Unit configuration has fatal error ... VENV_DIR@` | The raw template is in use, through a stale link | Remove the stale link by hand (see Stale unit link), then `install-systemd` |
 | `Member service not registered` | The daemon loaded bed's `bed.json`, not zoid6's `services` | `ExecStart` must pass `--config` (section 6) |
 | `role "zoid6" is not permitted to log in` | The DSN names no user, so libpq logs in as the OS user | `ExecStart` must pass `--databaseuser bed_zoid6`; identd map and `pg_hba` in place (section 4a) |
 | `module 'bbsengine6.message' has no attribute 'configure'` | The venv has an older bbsengine6 | Sync and install the current wheels (section 3a) |
@@ -327,6 +326,23 @@ journalctl -u zoid6 --since "5 minutes ago" | grep -i "MessageRouter\|fatal\|err
 | `permission denied for schema casino` or `…__table` | The daemon connected as another role | The unit's `--databaseuser`, and the grants in section 4 |
 | Connection refused on 8765 | Wrong `bind.port`, or the daemon is down | `systemctl status zoid6`, `ss -ltnp` |
 | Unit stops after 10 restarts | systemd's start limit | `sudo systemctl reset-failed zoid6` after the fix |
+
+### Stale unit link
+
+A link at `/etc/systemd/system/zoid6.service` shadows the rendered unit in `/usr/lib/systemd/system/`.
+The install does not write under `/etc`, so remove a stale link by hand, as root, then reinstall the
+unit. Check first:
+
+```
+systemctl cat zoid6 | head -3
+```
+
+If the first line names `/etc/systemd/system/zoid6.service` and that file is a symlink to the raw
+template (its `ExecStart` still contains `@VENV_DIR@`), remove it:
+
+```
+sudo rm /etc/systemd/system/zoid6.service && sudo systemctl daemon-reload && make -C bed/src install-zoid6-systemd
+```
 
 ## See also
 

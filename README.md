@@ -23,8 +23,8 @@ roadmap).
 
 ```bash
 pip install -e .
-zoid6                       # uses /etc/zoid6/zoid6.json if present,
-                            # else the packaged zoid6/data/zoid6.json
+zoid6                       # uses $ZOID6_CONFIG if set, else the packaged
+                            # zoid6/data/zoid6.json
 ```
 
 The `zoid6` console script is a thin wrapper around `bed --router
@@ -32,10 +32,12 @@ zoid6.api.handler.MessageRouter`. It resolves a config path in this
 order:
 
 1. `$ZOID6_CONFIG` (env-var override)
-2. `/etc/zoid6/zoid6.json` (FHS-installed config)
-3. the packaged `src/zoid6/data/zoid6.json`
+2. the packaged `src/zoid6/data/zoid6.json`
 
-and then forwards to `bed.main.main`. Every flag `bed` accepts
+zoid6 reads nothing from `/etc`, so it runs on a read-only root
+filesystem. There is no `/etc/zoid6` file and no factory copy into it.
+
+It then forwards to `bed.main.main`. Every flag `bed` accepts
 (`--host`, `--port`, `--debug`, `--foreground`, `--pidfile`, …) is
 honoured because `zoid6` only prepends `--config` and `--router` to
 `argv`.
@@ -54,18 +56,13 @@ wscat -c ws://127.0.0.1:8765
 
 ### Production
 
-The `usr/share/factory/etc/zoid6/zoid6.json` factory default is installed
-to `/etc/zoid6/zoid6.json` by the host-package installer. The systemd
-unit lives in the `bed` repo (`bed/src/bed/daemon/bed.service`) and
-expects to be invoked as:
+zoid6 runs as the `zoid6` account from its own venv, `/home/zoid6/venv`.
+The system unit is `bed/src/bed/daemon/zoid6.service`, installed by the
+`bed` repo's `install-zoid6-systemd`. It runs with no `--config`, so the
+packaged `zoid6.json` is the configuration. Set `ZOID6_CONFIG` in the
+unit's environment to use another file.
 
-```bash
-/var/lib/bed/venv/bin/zoid6 --config /etc/zoid6/zoid6.json
-```
-
-`make install` (in `bed/`) will set up the `bed` user, venv, and
-systemd unit; this repo only ships the FHS factory tree and the
-`zoid6.tmpfiles` drop-in for `/var/log/zoid6`, `/var/lib/zoid6`.
+See `handbook/INSTALL.md` for the account, venv and identd steps.
 
 ## What's in this repo
 
@@ -126,8 +123,6 @@ zoid6/
 ├── handbook/                    User / developer documentation
 │   └── SMOOTHSTATE.md           Page-transition framework guide
 │
-├── usr/share/factory/etc/zoid6/ FHS factory defaults (zoid6.json + tmpfiles)
-│
 ├── index.php                    5-line stub (requires config.php + session.php)
 ├── Makefile                     Root build orchestrator
 ├── SKIN.md                      (mislabeled — actually casino io.input*()
@@ -186,26 +181,18 @@ Each `sites/<name>/` directory is a self-contained vhost with its own
 `skin/`, `php/`, and `js/` trees. `sites/www/` is the most developed
 and has its own README.
 
-## FHS install
+## Install
+
+zoid6 installs nothing under `/etc`. Its configuration is the packaged
+`zoid6.json`, and its directories come from `zoid6.tmpfiles`:
 
 ```
-/etc/zoid6/zoid6.json         (from usr/share/factory/etc/zoid6/zoid6.json)
-/var/lib/zoid6/              (created by zoid6.tmpfiles)
+/home/zoid6/venv/bin/zoid6   (console script, the zoid6 account's venv)
 /var/log/zoid6/              (created by zoid6.tmpfiles)
-/var/lib/bed/venv/bin/zoid6  (console script, installed by bed)
+/home/zoid6/                 (the zoid6 account's home, created by zoid6.sysusers)
 ```
 
-The factory tree is byte-identical to the packaged default; a test in
-`tests/` pins this. To install fresh:
-
-```bash
-cd /path/to/zoid6
-sudo rsync -a usr/share/factory/etc/zoid6/ /etc/zoid6/
-sudo install -m 0644 src/zoid6/daemon/zoid6.tmpfiles /usr/lib/tmpfiles.d/zoid6.conf
-sudo systemd-tmpfiles --create
-```
-
-The systemd unit and the venv live in the `bed` repo.
+`handbook/INSTALL.md` has the step-by-step install.
 
 ## Dependencies
 
