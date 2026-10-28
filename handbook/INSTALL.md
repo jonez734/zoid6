@@ -129,6 +129,38 @@ Then the database owner adds the identd mapping, so the OS user `zoid6` logs in 
 
 The DSN in zoid6's configuration does **not** name a user. The login is decided by the map.
 
+## 4a. The identd mapping on the server *(built: `install-pgsql`; run by jam)*
+
+The daemon logs in as `bed_zoid6` over TCP, and PostgreSQL authenticates it with identd. The OS user
+`zoid6` must map to `bed_zoid6`, and `pg_hba.conf` must allow that login from this host. Two files on
+the server carry this, and they live under `/var/lib/pgsql/18/data/`, owned by `postgres`:
+
+- `pg_ident.conf` gets the map `zoidmap  zoid6  bed_zoid6`.
+- `pg_hba.conf` gets `host zoid6 bed_zoid6 127.0.0.1/32 ident map=zoidmap`, placed above the first
+  existing rule for database `zoid6`, because the first matching rule wins.
+
+The managed copies are in `handbook/pgsql/` (`pg_ident.zoid6.conf`, `pg_hba.zoid6.conf`). The
+`bed` rollback login has its own copies in `bed/src/bed/daemon/pgsql/`, with the map `bedmap`.
+
+**Run once per server, as root:**
+
+```
+sudo make -C /home/opencode/data/work/zoid6/src install-pgsql
+```
+
+The target backs up both files (suffix `.bak-<timestamp>`), adds only the lines that are not already
+present, validates the server config, and reloads `postgresql-18`. Run it again and it reports
+"already in" for each line, so it is safe to repeat.
+
+It is not part of `zoid6.prod`. Deploytool has the same step as `deploytool zoid6.pgsql`, which runs
+this target, and `deploytool bed.pgsql` for the rollback copy.
+
+**To back out:** restore the `.bak-<timestamp>` files, then `systemctl reload postgresql-18`. Or delete
+the managed lines (the ones shown above) and reload.
+
+**Verify:** the daemon's journal stops showing `role "zoid6" is not permitted to log in`, and
+`zoid6.service` stays active.
+
 ## 5. Configuration
 
 zoid6 has no required configuration file. With no `--config`, the daemon uses the bundled

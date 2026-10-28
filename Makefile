@@ -90,10 +90,14 @@ deploy-tui:
 deploy-prod:
 	$(MAKE) -C src deploy-prod VENV_DIR="$(VENV_DIR)" VENV_USER="$(VENV_USER)" VENV_GROUP="$(VENV_GROUP)" BED_DIR="$(BED_DIR)" WHEEL_DIR="$(WHEEL_DIR)"
 
-.PHONY: install-venv uninstall-venv install-fhs uninstall-fhs
+.PHONY: install-venv uninstall-venv install-fhs uninstall-fhs install-pgsql
 
 install-venv:
 	$(MAKE) -C src install-venv VENV_DIR="$(VENV_DIR)" VENV_USER="$(VENV_USER)" VENV_GROUP="$(VENV_GROUP)" BED_DIR="$(BED_DIR)" WHEEL_DIR="$(WHEEL_DIR)"
+
+# Identd mapping on the PostgreSQL server (root). Forwards to src; not part of deploy-prod.
+install-pgsql:
+	$(MAKE) -C src install-pgsql VENV_DIR="$(VENV_DIR)"
 
 uninstall-venv:
 	$(MAKE) -C src uninstall-venv VENV_DIR="$(VENV_DIR)"
