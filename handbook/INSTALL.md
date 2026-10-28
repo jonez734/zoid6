@@ -71,6 +71,15 @@ This creates `/home/zoid6/venv` if it is missing, installs every wheel in `/home
 one `pip` call (pip orders the dependencies), and prints each package's version. Repeat the sync and
 the install after every build.
 
+**Then relabel the venv for SELinux (run as `jam`, with sudo).** On an enforcing host the service
+cannot execute a binary whose `bin/` is not labelled `bin_t`; the failure shows as `status=203/EXEC`
+with "Permission denied". This step is needed after every install, because the staged route does not
+label the venv:
+
+```
+sudo make -C /home/opencode/data/work/zoid6/src restorecon VENV_DIR=/home/zoid6/venv
+```
+
 ### 3b. From the source tree (a host with its own build)
 
 On a host where the `zoid6` account can build from the source tree itself, use the Makefile target:
