@@ -42,7 +42,38 @@ install. Until then, use `install-sysusers`.)*
 
 ## 3. The venv *(built)*
 
-The daemon runs from a venv owned by `zoid6`, at `/home/zoid6/venv`:
+The daemon runs from a venv owned by `zoid6`, at `/home/zoid6/venv`. There are two ways to create it.
+
+### 3a. From staged wheels (the normal route)
+
+Use this when the wheels are built on a build host and the `zoid6` account has no access to the
+source tree. The `zoid6` account never reads `/home/opencode`: the wheels are copied into its home.
+
+**Sync (run as `jam`, with sudo, after each build):**
+
+```
+sudo sh /home/opencode/data/work/dist-wheels/sync-zoid6-wheels.sh
+```
+
+This copies the wheels named in `dist-wheels/zoid6-wheels.txt` into `/home/zoid6/dist-wheels`, owned
+by `zoid6`. It removes any wheel in the target that is no longer listed, so a stale build cannot be
+installed, and it copies the install script alongside them. To check first, add `--dry-run`.
+
+Update `zoid6-wheels.txt` when a package is rebuilt, so it names the new file.
+
+**Install (run as the `zoid6` account, no sudo):**
+
+```
+sh /home/zoid6/dist-wheels/INSTALL-zoid6-venv.sh
+```
+
+This creates `/home/zoid6/venv` if it is missing, installs every wheel in `/home/zoid6/dist-wheels` in
+one `pip` call (pip orders the dependencies), and prints each package's version. Repeat the sync and
+the install after every build.
+
+### 3b. From the source tree (a host with its own build)
+
+On a host where the `zoid6` account can build from the source tree itself, use the Makefile target:
 
 ```
 make -C zoid6 install-venv VENV_DIR=/home/zoid6/venv
