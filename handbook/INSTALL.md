@@ -93,6 +93,13 @@ PYTHONPATH=src python3 -m deploytool --host merlin --with-deps zoid6.venv
 `--with-deps` only `zoid6.venv` itself runs, so use `--with-deps` on the first install, after a
 build, or whenever the wheel set changes.
 
+**Operator convention: chain steps with `&&`.** Run a multi-step install as one command line joined
+with `&&`, so a failed step stops the rest. For example:
+
+```
+cd /home/opencode/data/work/zoid6 && sudo make sync-wheels && cd /home/opencode/data/work/deploytool && PYTHONPATH=src python3 -m deploytool --host merlin zoid6.venv && sudo systemctl restart zoid6
+```
+
 **Keeping the manifest current.** `dist-wheels/zoid6-wheels.txt` must name the wheel built for each
 package. After rebuilding a package, replace its line with the new file name, then run the sync. The
 sync removes any wheel in the account home that the manifest no longer lists.
