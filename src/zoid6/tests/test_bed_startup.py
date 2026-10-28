@@ -383,12 +383,13 @@ class TestBedJsonStartup:
         assert target not in router.routers
 
     def test_bed_section_fields(self, mock_args):
-        """bed section has autorestart=true, restart_delay=5, max_restarts=10."""
+        """bed section matches the packaged zoid6.json: autorestart=false (systemd's
+        Restart=on-failure does the restarting), restart_delay=5, max_restarts=10."""
         from zoid6.api.handler import MessageRouter
 
         router = MessageRouter(mock_args)
         bed = router.config["bed"]
-        assert bed["autorestart"] is True
+        assert bed["autorestart"] is False
         assert bed["restart_delay"] == 5
         assert bed["max_restarts"] == 10
 

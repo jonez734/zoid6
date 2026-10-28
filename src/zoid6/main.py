@@ -9,12 +9,13 @@ _DEFAULT_ROUTER = "zoid6.api.handler.MessageRouter"
 
 
 def _resolve_config_path() -> str:
+    """The zoid6 configuration: $ZOID6_CONFIG when set, otherwise the packaged zoid6.json.
+
+    Nothing is read from /etc. The packaged file ships with the module.
+    """
     override = os.environ.get(_CONFIG_FILE_ENV)
     if override:
         return override
-    etc_path = "/etc/zoid6/zoid6.json"
-    if os.path.isfile(etc_path):
-        return etc_path
     return get_bundled_config_path()
 
 

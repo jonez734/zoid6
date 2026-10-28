@@ -161,23 +161,3 @@ class TestConfigSchemaConsistency:
                 assert field in db
 
 
-class TestConfigFactorySync:
-    """Guard against drift between src/zoid6/data/zoid6.json and the
-    usr/share/factory/etc/zoid6/zoid6.json FHS factory default. The
-    factory default is what `make -C src install-etc` ships to
-    /etc/zoid6/zoid6.json on a real install, so a stale copy silently
-    ships an out-of-date config to production hosts.
-    """
-
-    def test_factory_default_matches_source(self):
-        """usr/share/factory/etc/zoid6/zoid6.json must equal src/zoid6/data/zoid6.json."""
-        from pathlib import Path
-
-        src = _config_path()
-        factory = Path(
-            "/home/opencode/data/work/zoid6/usr/share/factory/etc/zoid6/zoid6.json"
-        )
-        assert src.read_bytes() == factory.read_bytes(), (
-            f"{factory} is out of date; run `make -C zoid6/src factory-sync` "
-            "to sync from src/zoid6/data/zoid6.json"
-        )

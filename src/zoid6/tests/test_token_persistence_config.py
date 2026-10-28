@@ -1,8 +1,7 @@
 """zoid6 config selects the database-backed token store.
 
-bed reads token_persistence from the top-level ``auth`` section. The shipped
-zoid6 config and its factory copy must both set "db", and must agree, so a
-fresh install and a live install get the same behaviour.
+bed reads token_persistence from the top-level ``auth`` section. The packaged zoid6 config
+must set "db", so a fresh install gets the database-backed token store.
 """
 
 import json
@@ -12,7 +11,6 @@ import zoid6
 
 ROOT = Path(zoid6.__file__).resolve().parents[2]
 SRC = ROOT / "src" / "zoid6" / "data" / "zoid6.json"
-FACTORY = ROOT / "usr" / "share" / "factory" / "etc" / "zoid6" / "zoid6.json"
 
 
 def _persistence(path: Path):
@@ -24,14 +22,6 @@ def test_source_config_selects_db():
     assert _persistence(SRC) == "db"
 
 
-def test_factory_config_selects_db():
-    assert _persistence(FACTORY) == "db"
-
-
-def test_source_and_factory_agree():
-    assert _persistence(SRC) == _persistence(FACTORY)
-
-
 def _session_idle(path: Path):
     cfg = json.loads(path.read_text())
     return cfg.get("session", {}).get("idle_minutes")
@@ -41,9 +31,3 @@ def test_source_config_sets_session_idle_minutes():
     assert _session_idle(SRC) == 15
 
 
-def test_factory_config_sets_session_idle_minutes():
-    assert _session_idle(FACTORY) == 15
-
-
-def test_source_and_factory_agree_on_session_idle_minutes():
-    assert _session_idle(SRC) == _session_idle(FACTORY)
