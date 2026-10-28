@@ -3,8 +3,9 @@
 This is the operator guide for running zoid6 on a host. It covers the OS account, the Python
 venv, the database role, the configuration, the systemd unit, and how to check it works.
 
-> **Status:** steps marked *(built)* exist and are tested. Steps marked *(pending)* are part of the
-> planned install and are not in the code yet.
+> **Status:** every step is built and was run on minotaur. Steps that need root or the `zoid6`
+> account say who runs them. Two items remain planned: the `casino --install` account step, and a
+> single deploytool target for the venv (both marked *(pending)* below).
 
 zoid6 is bed (the WebSocket daemon) running with zoid6's config and router. It runs as the OS user
 `zoid6`, and it connects to PostgreSQL as the login role `bed_zoid6`, authenticated by identd (no
@@ -105,11 +106,23 @@ the casino venv target, each with `VENV_DIR=/home/zoid6/venv` and run as `zoid6`
 *(pending: a deploytool target that installs all three packages into the zoid6 venv and verifies
 each one.)*
 
-## 4. The database role *(pending: the migration and the `bed_zoid6` role are planned, not yet written)*
+## 4. The database role *(built: `zoid6_role_migration.sql`; run by the schema owner)*
 
 The daemon's login is `bed_zoid6`, a `LOGIN NOINHERIT` role that holds the grants the daemon needs.
-It is planned to be created by `src/casino/sql/zoid6_role_migration.sql`, which copies the grants
-from `bed` and records the role in `engine.pgrole`. That file is not written yet.
+`zoid6` itself stays a non-login schema owner: do not grant it login. The migration
+`src/casino/sql/zoid6_role_migration.sql` creates `bed_zoid6`, copies every privilege `bed` holds on
+the `engine` and `casino` schemas (read from the catalog ACLs), and records the role in `engine.pgrole`.
+`bed` is left in place for rollback.
+
+Run it as the schema owner (or a `zoid6` member), on each database:
+
+```
+psql -h 127.0.0.1 -d zoid6 -v ON_ERROR_STOP=1 -f src/casino/sql/zoid6_role_migration.sql
+```
+
+It is idempotent. The daemon connects as `bed_zoid6` because the unit passes `--databaseuser bed_zoid6`
+(section 6). Without that flag the DSN names no user, and libpq logs in as the OS user `zoid6`, which is
+not a login.
 
 Once it exists, the database owner (not the daemon) runs it on each database:
 
@@ -193,10 +206,21 @@ install -m 0644 zoid6/src/zoid6/data/zoid6.json /home/zoid6/zoid6.json
 Only do this when a setting must differ from the bundled file. Otherwise the bundled file is the one
 to trust, since it is the one tested with the code.
 
-## 6. The systemd unit *(pending: the source still has `EnvironmentFile` and no oidentd dependency)*
+## 6. The systemd unit *(built; the source is `bed/src/bed/daemon/zoid6.service`)*
 
-The unit source is `bed/src/bed/daemon/zoid6.service`. Once the planned changes land, it runs as
-`zoid6`, uses the venv at `/home/zoid6/venv`, and requires `oidentd`. Install it:
+The unit runs as `zoid6` from `/home/zoid6`, uses the venv at `/home/zoid6/venv`, requires `oidentd`,
+and reads no `/etc` file. Its `ExecStart` passes three arguments that matter:
+
+- `--databasename zoid6` and `--databaseuser bed_zoid6`: the login (section 4).
+- `--config <venv>/lib64/python3.12/site-packages/zoid6/data/zoid6.json`: the packaged zoid6
+  configuration. zoid6's router requires the `services` block that only this file carries. Without
+  `--config`, bed loads its own `bed.json`, and the daemon refuses to start with
+  "Member service not registered".
+- `--router zoid6.api.handler.MessageRouter`.
+
+`ProtectHome=read-only` lets the service read its venv under `/home/zoid6`. `ReadWritePaths` covers
+`/var/log/zoid6` and `/home/zoid6`. `install-systemd` renders `@VENV_DIR@`, and removes a stale symlink
+under `/etc/systemd/system` that would otherwise shadow the rendered unit. Install it:
 
 ```
 sudo install -m 0644 zoid6-unit.service /usr/lib/systemd/system/zoid6.service
@@ -204,30 +228,44 @@ sudo systemctl daemon-reload
 sudo systemctl enable --now zoid6
 ```
 
-*(pending: the unit's `ExecStart` path is rendered from `@VENV_DIR@` by the install target, the same way
-`bed.service` is. Until then, check the path in the installed unit matches your venv.)*
+After any change to the unit, run the install again and then `systemctl daemon-reload`. The
+installed `ExecStart` should show `/home/zoid6/venv/bin/bed` with both `--databaseuser bed_zoid6` and
+`--config`.
 
 ## 7. Verify
 
 ```
-systemctl status zoid6
-journalctl -u zoid6 --since "5 minutes ago" | grep -i "MessageRouter\|error\|permission"
+systemctl show zoid6 -p ActiveState -p User -p ExecStart
+ps -o user=,args= -C bed
+journalctl -u zoid6 --since "5 minutes ago" | grep -i "MessageRouter\|fatal\|error\|permitted"
 ```
 
-- The journal should show `Registered router: MessageRouter` and no `MessageRouter not found` line.
-- The daemon's database login must be `bed_zoid6`. A `permission denied` error names the role it ran as.
-- A WebSocket probe: authenticate, then send `list_tables` with `game_type: "poker"`. The reply should
-  be `table_list`, not `no_handler`.
+- `ActiveState=active`, `User=zoid6`, and the process runs with `--databaseuser bed_zoid6`.
+- The journal shows the router registering its services, and no `MessageRouter not found`,
+  `Member service not registered`, or `is not permitted to log in`.
+- Database sessions as the daemon login: `select count(*) from pg_stat_activity where usename = 'bed_zoid6'`
+  is non-zero while the daemon runs.
+- A WebSocket check: authenticate as a member, then send `list_tables` with `game_type: "poker"`.
+  The reply is `table_list`.
+- Channels: a seated member subscribes to `casino:table:<table>:chat` and gets `subscribed`; a
+  non-seated member gets `forbidden`.
 
 ## 8. Troubleshooting
 
-| Symptom | Likely cause | Check |
+| Symptom | Cause | Fix |
 |---|---|---|
-| Daemon does not start; `identd` errors | `oidentd` not running | `systemctl status oidentd` |
-| `permission denied for schema casino` or `…__table` | Daemon connected as another role | The `pg_ident` map and `pg_hba` line (section 4) |
-| `no_handler` for `poker_*` or `list_tables` | casino's router did not load | The journal for `MessageRouter not found` |
-| `relation … does not exist` | A migration has not been run | Run the migration in section 4 |
+| `status=203/EXEC`, "Permission denied" on the venv | SELinux: the venv `bin/` is not labelled `bin_t` | `sudo make -C zoid6/src restorecon VENV_DIR=/home/zoid6/venv` |
+| `status=203/EXEC`, "No such file" | `@VENV_DIR@` unrendered, or a stale `/etc/systemd/system/zoid6.service` symlink shadows the rendered unit | `install-systemd` (it removes the symlink) |
+| `Unit configuration has fatal error ... VENV_DIR@` | The raw template is in use, through the symlink | As above |
+| `Member service not registered` | The daemon loaded bed's `bed.json`, not zoid6's `services` | `ExecStart` must pass `--config` (section 6) |
+| `role "zoid6" is not permitted to log in` | The DSN names no user, so libpq logs in as the OS user | `ExecStart` must pass `--databaseuser bed_zoid6`; identd map and `pg_hba` in place (section 4a) |
+| `module 'bbsengine6.message' has no attribute 'configure'` | The venv has an older bbsengine6 | Sync and install the current wheels (section 3a) |
+| `no_handler`, or `not_authenticated` on every subscribe | The channel router did not receive bed's session registry, or the loader fell back | Install the current bbsengine6 wheel |
+| `forbidden: Subscribe authority denied` for a seated poker player | The authority read the cash-table seat table for a poker table | Install the current casino wheel |
+| `can't be used in 'await' expression` | Async query path on psycopg-pool 3.3 | Install the current bbsengine6 wheel |
+| `permission denied for schema casino` or `…__table` | The daemon connected as another role | The unit's `--databaseuser`, and the grants in section 4 |
 | Connection refused on 8765 | Wrong `bind.port`, or the daemon is down | `systemctl status zoid6`, `ss -ltnp` |
+| Unit stops after 10 restarts | systemd's start limit | `sudo systemctl reset-failed zoid6` after the fix |
 
 ## See also
 
