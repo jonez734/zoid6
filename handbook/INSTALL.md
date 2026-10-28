@@ -267,7 +267,7 @@ install -m 0644 zoid6/src/zoid6/data/zoid6.json /home/zoid6/zoid6.json
 Only do this when a setting must differ from the bundled file. Otherwise the bundled file is the one
 to trust, since it is the one tested with the code.
 
-## 6. The systemd unit *(built; the source is `bed/src/bed/daemon/zoid6.service`)*
+## 6. The systemd unit *(built; the source is `zoid6/src/zoid6/daemon/zoid6.service`)*
 
 The unit runs as `zoid6` from `/home/zoid6`, uses the venv at `/home/zoid6/venv`, requires `oidentd`,
 and reads no `/etc` file. Its `ExecStart` passes three arguments that matter:
@@ -278,6 +278,14 @@ and reads no `/etc` file. Its `ExecStart` passes three arguments that matter:
   `--config`, bed loads its own `bed.json`, and the daemon refuses to start with
   "Member service not registered".
 - `--router zoid6.api.handler.MessageRouter`.
+
+**Where the unit is installed.** The installed unit is the vendor copy at
+`/usr/lib/systemd/system/zoid6.service`, written by `install-systemd`. zoid6 does not copy the unit
+or any `.env` file into `/etc/systemd/system/`. A file there overrides the vendor unit, which is how
+a stale symlink shadowed the rendered unit earlier, and every `/etc` write breaks a read-only root.
+zoid6 has no `.env` file: none was ever tracked, and the user-mode unit's `EnvironmentFile` is for
+developer installs only. To change the unit, change it in `zoid6/src/zoid6/daemon/`, and let
+`install-systemd` render it.
 
 `ProtectHome=read-only` lets the service read its venv under `/home/zoid6`. `ReadWritePaths` covers
 `/var/log/zoid6` and `/home/zoid6`. `install-systemd` renders `@VENV_DIR@` into `/usr/lib/systemd/system/zoid6.service`. Install it:

@@ -46,3 +46,19 @@ def test_no_factory_tree_or_etc_install_targets():
     assert "install-etc" not in text
     assert "usr/share/factory" not in text
     assert not re.search(r"^\s*ETC_DIR\b", text, re.M)
+
+
+@pytest.mark.unit
+def test_systemd_unit_is_not_copied_into_etc():
+    """The unit is installed to /usr/lib/systemd/system/ only. A copy in /etc/systemd/system/
+    overrides the vendor unit and writes under /etc, so no install target may write there."""
+    text = (ROOT / "src" / "Makefile").read_text()
+    code = "\n".join(l for l in text.splitlines() if not l.lstrip().startswith("#"))
+    assert "/etc/systemd/system" not in code
+
+
+@pytest.mark.unit
+def test_install_guide_names_the_zoid6_unit_source():
+    text = (ROOT / "handbook" / "INSTALL.md").read_text()
+    assert "zoid6/src/zoid6/daemon/zoid6.service" in text
+    assert "bed/src/bed/daemon/zoid6.service" not in text
