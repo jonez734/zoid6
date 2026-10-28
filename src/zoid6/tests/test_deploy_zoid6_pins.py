@@ -108,3 +108,21 @@ def test_deploy_script_rejects_a_needinfo_placeholder_by_name():
     text = DEPLOY.read_text()
     assert "*NEEDINFO*)" in text
     assert "is not set (value:" in text
+
+
+@pytest.mark.unit
+def test_service_venv_goes_through_deploytool_not_direct_pip():
+    # jam cannot write the zoid6-owned venv, so the service install must be deploytool's
+    # zoid6.venv (as the account), never a pip call against ZOID6_HOME/venv from this script.
+    text = DEPLOY.read_text()
+    assert "zoid6.venv" in text
+    assert not re.search(r'run "\$SERVICE_PY"', text)
+    assert "SERVICE_PY" not in text
+
+
+@pytest.mark.unit
+def test_service_install_requires_the_sync_first():
+    # The account cannot read the staged wheels; the sync (root) must run before the install.
+    text = DEPLOY.read_text()
+    assert "sync-zoid6-wheels.sh" in text
+    assert "SYNCED" in text

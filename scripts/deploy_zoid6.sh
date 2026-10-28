@@ -1,15 +1,22 @@
 #!/usr/bin/env bash
-# deploy_zoid6.sh -- reinstall the bed, bbsengine6 and letteredolive wheels into the
-# zoid6 service venv and the shell/owner venv, run the owner install against the
-# zoid6 database, then print the restart and verification steps.
+# deploy_zoid6.sh -- deploy bed, bbsengine6 and letteredolive for zoid6.
 #
-# Run as the 'jam' user (the owner role). Do NOT run this with sudo: the systemctl
-# restart is printed for you to run, because the install venvs are jam's.
+# 1. Service venv (zoid6 account): needs the sync first, then deploytool's zoid6.venv.
+# 2. Shell/owner venv (jam): bed, bbsengine6, letteredolive.
+# 3. Owner install against the zoid6 database (bed --install).
+# 4. Prints the restart and verification steps for you to run.
+#
+# The wheels are resolved from the staged directory by resolve_wheels.py (the newest build
+# on each version line). No wheel filename is written here.
+#
+# Run as the 'jam' user (the owner role). Do NOT run this with sudo: the sync and the
+# restart are printed for you to run, and the script never sudos itself.
 #
 # Usage:
-#   scripts/deploy_zoid6.sh                 # uses the default wheel names below
-#   scripts/deploy_zoid6.sh --wheels DIR    # wheels live in DIR instead
-#   scripts/deploy_zoid6.sh --dry-run       # print the commands, change nothing
+#   sudo sh <wheels>/sync-zoid6-wheels.sh      # step 1a, as root
+#   SYNCED=1 scripts/deploy_zoid6.sh           # steps 1b-4, as jam
+#   scripts/deploy_zoid6.sh --dry-run          # print the commands, change nothing
+#   scripts/deploy_zoid6.sh --wheels DIR       # resolve wheels from DIR instead
 #
 # Exits on the first failed step. Never creates a database: the owner install
 # targets 'zoid6', which must already exist.
@@ -25,7 +32,6 @@ RESOLVE="$HERE/resolve_wheels.py"
 # ZOID6_HOME: the zoid6 account's home (zoid6's Makefile: VENV_DIR ?= /home/zoid6/venv).
 # The service venv is $ZOID6_HOME/venv. Override either with the environment.
 ZOID6_HOME="${ZOID6_HOME:-/home/zoid6}"
-SERVICE_PY="$ZOID6_HOME/venv/bin/python"
 SHELL_PY="${SHELL_PY:-/home/jam/.venv/bin/python}"
 SERVICE_BED="$ZOID6_HOME/venv/bin/bed"
 DB="zoid6"
@@ -85,7 +91,6 @@ check_python() {
         exit 1
     fi
 }
-check_python "$SERVICE_PY" "ZOID6_HOME (service venv)"
 check_python "$SHELL_PY" "SHELL_PY (shell/owner venv)"
 
 run() {
@@ -95,8 +100,23 @@ run() {
     fi
 }
 
-echo "== 1/4 service venv: bed + bbsengine6"
-run "$SERVICE_PY" -m pip install --force-reinstall --no-deps "$BED_PATH" "$BBS_PATH"
+# 1. Service venv. Owned by the zoid6 account, so it is installed as that account by
+#    deploytool's zoid6.venv (make install-wheels as zoid6). Jam cannot write it, and the
+#    account cannot read the staged wheels, so the wheels go through the sync first:
+#    sync-zoid6-wheels.sh copies exactly the manifest's wheels into /home/zoid6/dist-wheels.
+#    The sync needs root, so it is printed for the operator to run; this script does not sudo.
+echo "== 1/4 service venv (zoid6 account): sync the manifest wheels, then install"
+echo "  step 1a needs root; run it first, then re-run this script with SYNCED=1:"
+echo "    sudo sh $WHEELS_DIR/sync-zoid6-wheels.sh"
+if [ "$DRY_RUN" -eq 0 ] && [ "${SYNCED:-0}" -ne 1 ]; then
+    echo "  (SYNCED is not 1: stopping before the account install.)" >&2
+    exit 1
+fi
+if command -v deploy >/dev/null 2>&1; then
+    run deploy zoid6.venv
+else
+    run env PYTHONPATH="$HERE/../../deploytool/src" python3 -m deploytool zoid6.venv
+fi
 
 echo "== 2/4 shell/owner venv: bed + bbsengine6 + letteredolive"
 run "$SHELL_PY" -m pip install --force-reinstall --no-deps "$BED_PATH" "$BBS_PATH" "$LO_PATH"
