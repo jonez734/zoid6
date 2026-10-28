@@ -9,8 +9,6 @@ PYTEST ?= $(PYTHON) -m pytest
 SRC := .
 PACKAGE := zoid6
 
-FACTORY_DIR = $(CURDIR)/../usr/share/factory/etc/$(PROJECT)
-ETC_DIR ?= /etc/$(PROJECT)
 TMPFILES_SRC = $(PACKAGE)/daemon/$(PROJECT).tmpfiles
 TMPFILES_DST = /usr/lib/tmpfiles.d/$(PROJECT).conf
 SYSUSERS_SRC = $(PACKAGE)/daemon/$(PROJECT).sysusers
@@ -28,18 +26,17 @@ WHEEL_DIR ?= $(HOME)/wheel-build/zoid6-current
 BBSENGINE_DIR ?= $(CURDIR)/../../bbsengine6/py
 CASINO_DIR ?= $(CURDIR)/../../casino
 
-# User-writable install prefix (no-sudo flow). Production FHS layout
-# uses /etc/zoid6 + /var/lib/zoid6 + /usr/lib/systemd/system instead;
-# install-sysusers / install-tmpfiles / install-systemd / install-etc
-# are unchanged and still need sudo.
+# User-writable install prefix (no-sudo flow). The FHS layout installs the
+# unit under /usr/lib/systemd/system and runs the daemon from /home/zoid6/venv;
+# install-sysusers / install-tmpfiles / install-systemd are unchanged and still
+# need sudo. Nothing reads /etc: the configuration is the packaged zoid6.json.
 #
 # These only override the FHS defaults when one of the user-mode targets
-# is the goal; otherwise the FHS targets (install-etc, install-venv,
-# install-systemd, install-fhs) keep using /etc/zoid6 + /var/lib/zoid6.
+# is the goal; otherwise the FHS targets (install-venv, install-systemd,
+# install-fhs) keep their defaults.
 ifneq ($(filter install-user start stop status restart install-systemd-user uninstall-systemd-user uninstall-user,$(MAKECMDGOALS)),)
 PREFIX           ?= $(HOME)/.local/zoid6
 VENV_DIR         = $(PREFIX)/venv
-ETC_DIR          = $(PREFIX)/etc
 LOG_DIR          = $(PREFIX)/log
 RUN_DIR          = $(PREFIX)/run
 DATA_DIR         = $(PREFIX)/data
@@ -48,7 +45,7 @@ endif
 
 .PHONY: all help install install-dev test test-cov test-verbose lint clean uninstall egg-info
 .PHONY: build version rename-sdist sign release stale-build
-.PHONY: install-etc install-tmpfiles install-fhs uninstall-etc uninstall-tmpfiles factory-sync
+.PHONY: install-tmpfiles install-fhs uninstall-tmpfiles
 .PHONY: install-sysusers uninstall-sysusers
 .PHONY: install-venv uninstall-venv restorecon
 .PHONY: install-systemd uninstall-systemd uninstall-fhs
@@ -64,19 +61,16 @@ help:
 	@echo "Targets:"
 	@echo "  install       Install zoid6 in editable mode (pip install -e .)"
 	@echo "  install-dev   Install zoid6 with test extras"
-	@echo "  install-fhs   Install FHS system files (sysusers + tmpfiles + venv + systemd + etc)"
-	@echo "  install-etc   Install /etc/zoid6/zoid6.json from factory defaults"
+	@echo "  install-fhs   Install FHS system files (sysusers + tmpfiles + venv + systemd)"
 	@echo "  install-tmpfiles Install /usr/lib/tmpfiles.d/zoid6.conf"
 	@echo "  install-sysusers Install /usr/lib/sysusers.d/zoid6.conf (creates zoid6 user/group)"
 	@echo "  install-venv  Ensure shared venv at $(VENV_DIR) (owner: $(VENV_OWNER):$(VENV_GROUP))"
 	@echo "  install-systemd Install /usr/lib/systemd/system/zoid6.service (@VENV_DIR@ templated)"
-	@echo "  uninstall-etc Remove /etc/zoid6/zoid6.json"
 	@echo "  uninstall-tmpfiles Remove tmpfiles drop-in"
 	@echo "  uninstall-sysusers Remove sysusers drop-in"
 	@echo "  uninstall-venv Remove $(VENV_DIR)"
 	@echo "  uninstall-systemd Stop, disable, and remove the zoid6.service unit"
 	@echo "  restorecon    Relabel $(VENV_DIR)/bin for SELinux"
-	@echo "  factory-sync  Copy in-tree data/ + daemon/ to usr/share/factory/"
 	@echo "  test          Run tests with pytest"
 	@echo "  test-verbose  Run tests with verbose output"
 	@echo "  test-cov      Run tests with coverage report"
@@ -238,26 +232,16 @@ else
 endif
 
 # sudo umbrella — everything `install-fhs` does (sysusers, tmpfiles,
-# venv, systemd, /etc/zoid6). The deploytool `zoid6.prod` sub-target
+# venv, systemd). The deploytool `zoid6.prod` sub-target
 # resolves to this. Keep this an alias so `make deploy-prod` and
 # `make install-fhs` stay interchangeable.
 deploy-prod: install-fhs
-
-install-etc:
-	sudo install -d -m 0755 -o root -g root $(ETC_DIR)
-	sudo install -m 0644 -o root -g root $(FACTORY_DIR)/zoid6.json $(ETC_DIR)/zoid6.json
-	sudo chown root:root $(ETC_DIR)/zoid6.json
-	@echo "Installed $(ETC_DIR)/zoid6.json from factory defaults"
-
-uninstall-etc:
-	-sudo rm -f $(ETC_DIR)/zoid6.json
-	@echo "Removed $(ETC_DIR)/zoid6.json"
 
 install-tmpfiles: install-sysusers
 	sudo install -m 0644 -o root -g root $(TMPFILES_SRC) $(TMPFILES_DST)
 	sudo chown root:root $(TMPFILES_DST)
 	sudo systemd-tmpfiles --create
-	@echo "Installed $(TMPFILES_DST) and materialized $(ETC_DIR)"
+	@echo "Installed $(TMPFILES_DST)"
 
 uninstall-tmpfiles:
 	-sudo rm -f $(TMPFILES_DST)
@@ -322,18 +306,12 @@ restorecon:
 	sudo restorecon -R $(VENV_DIR)/bin/
 	@echo "Relabeled $(VENV_DIR)/bin/ for SELinux"
 
-install-fhs: install-sysusers install-tmpfiles install-venv install-systemd install-etc
+install-fhs: install-sysusers install-tmpfiles install-venv install-systemd
 	@echo "zoid6 FHS files installed"
 
-uninstall-fhs: uninstall-systemd uninstall-venv uninstall-tmpfiles uninstall-sysusers uninstall-etc
+uninstall-fhs: uninstall-systemd uninstall-venv uninstall-tmpfiles uninstall-sysusers
 	@echo "zoid6 FHS files uninstalled"
 
-factory-sync:
-	install -d -m 0755 $(FACTORY_DIR)
-	install -m 0644 -o opencode -g opencode $(PACKAGE)/data/zoid6.json $(FACTORY_DIR)/zoid6.json
-	install -m 0644 -o opencode -g opencode $(PACKAGE)/daemon/$(PROJECT).tmpfiles $(FACTORY_DIR)/$(PROJECT).tmpfiles
-	install -m 0644 -o opencode -g opencode $(PACKAGE)/daemon/$(PROJECT).sysusers $(FACTORY_DIR)/$(PROJECT).sysusers
-	@echo "Synced factory defaults from in-tree sources"
 
 
 # ----- no-sudo / user-mode install -------------------------------------------
@@ -358,7 +336,7 @@ reassign-bootstrap-owners:
 install-user:
 	@command -v python3 >/dev/null 2>&1 || { echo "Error: python3 not on PATH"; exit 1; }
 	@test -n "$$HOME" || { echo "Error: HOME not set"; exit 1; }
-	@mkdir -p $(PREFIX) $(ETC_DIR) $(LOG_DIR) $(RUN_DIR) $(DATA_DIR)
+	@mkdir -p $(PREFIX) $(LOG_DIR) $(RUN_DIR) $(DATA_DIR)
 	@test -d $(VENV_DIR) || $(PYTHON) -m venv $(VENV_DIR)
 	$(VENV_DIR)/bin/pip install --upgrade pip
 	$(VENV_DIR)/bin/pip install $(PIP_UPGRADE_FLAG) --quiet build setuptools wheel
@@ -375,13 +353,6 @@ install-user:
 	$(VENV_DIR)/bin/pip install $(PIP_UPGRADE_FLAG) --quiet $(WHEEL_DIR)/*.whl
 	rm -rf $(WHEEL_DIR)
 	$(VENV_DIR)/bin/pip install $(PIP_UPGRADE_FLAG) --quiet pillow
-	@test -f $(ETC_DIR)/zoid6.json || install -m 0644 $(PACKAGE)/data/zoid6.json $(ETC_DIR)/zoid6.json
-	@test -f $(ETC_DIR)/zoid6.env  || { \
-	    { printf 'PREFIX=%s\nVENV_DIR=%s\nLOG_DIR=%s\nRUN_DIR=%s\n' \
-	        '$(PREFIX)' '$(VENV_DIR)' '$(LOG_DIR)' '$(RUN_DIR)'; \
-	      echo 'BED_DATABASE_USER=$${USER}'; \
-	    } > $(ETC_DIR)/zoid6.env; \
-	    chmod 0644 $(ETC_DIR)/zoid6.env; }
 	@echo "User-mode install complete at $(PREFIX)"
 	@echo "Quick start (no sudo):"
 	@echo "  make start                     # foreground-daemon via nohup, PID file"
@@ -402,7 +373,6 @@ start: install-user
 	        echo "stale pidfile, removing"; rm -f $(RUN_DIR)/zoid6.pid; \
 	    fi; }
 	nohup $(VENV_DIR)/bin/zoid6 \
-	    --config $(ETC_DIR)/zoid6.json \
 	    --router zoid6.api.handler.MessageRouter \
 	    > $(LOG_DIR)/zoid6.log 2>&1 & echo $$! > $(RUN_DIR)/zoid6.pid
 	@echo "zoid6 started (pid $$(cat $(RUN_DIR)/zoid6.pid)) — log: $(LOG_DIR)/zoid6.log"

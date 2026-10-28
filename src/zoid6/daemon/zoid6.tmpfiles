@@ -1,5 +1,3 @@
 # Type Path                Mode  Owner  Group  Age Argument
-d     /etc/zoid6           0755  root   root   -   -
-d     /var/lib/zoid6       0755  zoid6  zoid6  -   -
-d     /var/lib/zoid6/venv  0755  zoid6  zoid6  -   -
-d     /var/log/zoid6       0755  zoid6  zoid6  -   -
+d     /home/zoid6            0750  zoid6  zoid6  -   -
+d     /home/zoid6/venv       0755  zoid6  zoid6  -   -
