@@ -1,0 +1,48 @@
+"""zoid6 reads nothing from /etc and installs nothing there.
+
+A read-only root filesystem makes any /etc write fail, and a daemon that reads /etc breaks
+there. The configuration is the packaged zoid6.json, or $ZOID6_CONFIG.
+"""
+
+import pathlib
+import re
+
+import pytest
+
+ROOT = pathlib.Path(__file__).resolve().parents[3]
+ETC_PATH = re.compile(r"""(?<![\w.])/etc/""")
+RUNTIME = [p for p in (ROOT / "src" / "zoid6").rglob("*.py") if "tests" not in p.parts]
+DAEMON = ROOT / "src" / "zoid6" / "daemon"
+
+# OS files named in messages, not config or install paths. Not reads.
+ALLOWED = ("/etc/hosts",)
+
+
+def _code(line):
+    return line.split("#", 1)[0]
+
+
+@pytest.mark.unit
+def test_runtime_code_does_not_read_etc():
+    offenders = []
+    for path in RUNTIME:
+        for n, line in enumerate(path.read_text().splitlines(), 1):
+            code = _code(line)
+            if ETC_PATH.search(code) and not any(a in code for a in ALLOWED):
+                offenders.append(f"{path.relative_to(ROOT)}:{n}: {line.strip()}")
+    assert not offenders, "runtime code reads /etc:\n" + "\n".join(offenders)
+
+
+@pytest.mark.unit
+def test_daemon_files_do_not_reference_etc():
+    for path in sorted(p for p in DAEMON.glob("*") if p.is_file()):
+        text = "\n".join(l for l in path.read_text().splitlines() if not l.lstrip().startswith("#"))
+        assert not ETC_PATH.search(text), f"{path.name} references /etc"
+
+
+@pytest.mark.unit
+def test_no_factory_tree_or_etc_install_targets():
+    text = (ROOT / "src" / "Makefile").read_text()
+    assert "install-etc" not in text
+    assert "usr/share/factory" not in text
+    assert not re.search(r"^\s*ETC_DIR\b", text, re.M)
