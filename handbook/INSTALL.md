@@ -81,6 +81,22 @@ label the venv:
 sudo make -C /home/opencode/data/work/zoid6/src restorecon VENV_DIR=/home/zoid6/venv
 ```
 
+**Through deploytool (the same two steps, in order):**
+
+```
+cd /home/opencode/data/work/deploytool
+PYTHONPATH=src python3 -m deploytool --host merlin --with-deps zoid6.venv
+```
+
+`zoid6.venv` runs the engine's venv sub, then `zoid6.wheels` (the sync, run as root, so it needs
+`sudo`), then the install as the `zoid6` account. It never runs the prod rsync. Without
+`--with-deps` only `zoid6.venv` itself runs, so use `--with-deps` on the first install, after a
+build, or whenever the wheel set changes.
+
+**Keeping the manifest current.** `dist-wheels/zoid6-wheels.txt` must name the wheel built for each
+package. After rebuilding a package, replace its line with the new file name, then run the sync. The
+sync removes any wheel in the account home that the manifest no longer lists.
+
 ### 3b. From the source tree (a host with its own build)
 
 On a host where the `zoid6` account can build from the source tree itself, use the Makefile target:
