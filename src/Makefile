@@ -287,13 +287,6 @@ uninstall-venv:
 	@echo "Removed $(VENV_DIR)"
 
 install-systemd:
-	@# A symlink under /etc/systemd/system shadows /usr/lib/systemd/system, and a leftover one
-	@# pointing at the raw template (with @VENV_DIR@ unrendered) would keep the unit from starting.
-	@# Remove only that symlink, so the rendered unit in $(UNIT_DST) is the one systemd reads.
-	@if [ -L /etc/systemd/system/$(PROJECT).service ]; then \
-	    echo "removing stale symlink /etc/systemd/system/$(PROJECT).service"; \
-	    sudo rm -f /etc/systemd/system/$(PROJECT).service; \
-	fi
 	sed 's|@VENV_DIR@|$(VENV_DIR)|g' $(UNIT_SRC) | sudo tee $(UNIT_DST) > /dev/null
 	sudo chmod 0644 $(UNIT_DST)
 	sudo chown root:root $(UNIT_DST)
