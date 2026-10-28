@@ -16,7 +16,12 @@
 
 set -euo pipefail
 
+# Directory holding the staged wheels. Each package is resolved from it by
+# scripts/resolve_wheels.py: the newest build on the package's version line. No wheel
+# filename is written in this script.
 WHEELS_DIR="/home/opencode/data/work/dist-wheels"
+HERE="$(cd "$(dirname "$0")" && pwd)"
+RESOLVE="$HERE/resolve_wheels.py"
 # BED_HOME: the bed account's home. Same variable as the bed Makefile; override with the env.
 BED_HOME="${BED_HOME:-/home/NEEDINFO}"
 SERVICE_PY="$BED_HOME/venv/bin/python"
@@ -25,9 +30,6 @@ SERVICE_BED="$BED_HOME/venv/bin/bed"
 DB="zoid6"
 ROUTER="zoid6.api.handler.MessageRouter"
 
-BED_WHEEL="bed-0.0.2.dev20261023173910-py3-none-any.whl"
-BBS_WHEEL="bbsengine6-0.0.1.dev202610182201-py3-none-any.whl"
-LO_WHEEL="letteredolive-0.0.2.dev20261024155248-py3-none-any.whl"
 
 DRY_RUN=0
 
@@ -49,23 +51,22 @@ if [ "$(id -un)" = "opencode" ]; then
     exit 1
 fi
 
-# Every wheel and interpreter must exist before anything is installed.
-for w in "$BED_WHEEL" "$BBS_WHEEL" "$LO_WHEEL"; do
-    if [ ! -f "$WHEELS_DIR/$w" ]; then
-        echo "missing wheel: $WHEELS_DIR/$w" >&2
-        exit 1
-    fi
-done
+# Resolve every wheel before anything is installed. resolve_wheels.py exits non-zero, with
+# a message, when a package has no build on its version line.
+if ! mapfile -t WHEELS < <(python3 "$RESOLVE" "$WHEELS_DIR" bed bbsengine6 letteredolive); then
+    echo "could not resolve the wheels in $WHEELS_DIR" >&2
+    exit 1
+fi
+[ "${#WHEELS[@]}" -eq 3 ] || { echo "expected 3 wheels, resolved ${#WHEELS[@]}" >&2; exit 1; }
+BED_PATH="${WHEELS[0]}"
+BBS_PATH="${WHEELS[1]}"
+LO_PATH="${WHEELS[2]}"
 for py in "$SERVICE_PY" "$SHELL_PY"; do
     if [ ! -x "$py" ]; then
         echo "missing interpreter: $py" >&2
         exit 1
     fi
 done
-
-BED_PATH="$WHEELS_DIR/$BED_WHEEL"
-BBS_PATH="$WHEELS_DIR/$BBS_WHEEL"
-LO_PATH="$WHEELS_DIR/$LO_WHEEL"
 
 run() {
     echo "+ $*"
