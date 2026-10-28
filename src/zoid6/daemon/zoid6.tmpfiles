@@ -1,4 +1,4 @@
 # Type Path                Mode  Owner  Group  Age Argument
-d     /home/zoid6            0750  zoid6  zoid6  -   -
-d     /home/zoid6/venv       0755  zoid6  zoid6  -   -
+# The account home /home/zoid6 is created and owned by zoid6.sysusers, not here: tmpfiles refuses
+# to manage a path whose parent (/home) is owned by another account. Only the log dir is created here.
 d     /var/log/zoid6         0755  zoid6  zoid6  -   -
