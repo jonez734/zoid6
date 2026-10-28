@@ -91,3 +91,20 @@ def test_deploy_script_names_no_wheel_filename():
     assert not re.search(r"[a-z0-9_]+-\d+\.\d+\.\d+\.dev\d+", text), "a wheel filename is hard-coded"
     assert not re.search(r"^\w+_WHEEL=", text, re.MULTILINE), "a *_WHEEL pin is hard-coded"
     assert "resolve_wheels.py" in text
+
+
+@pytest.mark.unit
+def test_deploy_script_defaults_to_the_zoid6_account_home():
+    text = DEPLOY.read_text()
+    assert 'ZOID6_HOME="${ZOID6_HOME:-/home/zoid6}"' in text
+    assert "NEEDINFO" not in re.sub(r"#.*", "", text).replace("*NEEDINFO*", ""), (
+        "a NEEDINFO placeholder is a default value"
+    )
+
+
+@pytest.mark.unit
+def test_deploy_script_rejects_a_needinfo_placeholder_by_name():
+    # The guard must name the variable it rejects, so the operator knows what to set.
+    text = DEPLOY.read_text()
+    assert "*NEEDINFO*)" in text
+    assert "is not set (value:" in text

@@ -22,11 +22,12 @@ set -euo pipefail
 WHEELS_DIR="/home/opencode/data/work/dist-wheels"
 HERE="$(cd "$(dirname "$0")" && pwd)"
 RESOLVE="$HERE/resolve_wheels.py"
-# BED_HOME: the bed account's home. Same variable as the bed Makefile; override with the env.
-BED_HOME="${BED_HOME:-/home/NEEDINFO}"
-SERVICE_PY="$BED_HOME/venv/bin/python"
-SHELL_PY="/home/jam/.venv/bin/python"
-SERVICE_BED="$BED_HOME/venv/bin/bed"
+# ZOID6_HOME: the zoid6 account's home (zoid6's Makefile: VENV_DIR ?= /home/zoid6/venv).
+# The service venv is $ZOID6_HOME/venv. Override either with the environment.
+ZOID6_HOME="${ZOID6_HOME:-/home/zoid6}"
+SERVICE_PY="$ZOID6_HOME/venv/bin/python"
+SHELL_PY="${SHELL_PY:-/home/jam/.venv/bin/python}"
+SERVICE_BED="$ZOID6_HOME/venv/bin/bed"
 DB="zoid6"
 ROUTER="zoid6.api.handler.MessageRouter"
 
@@ -61,12 +62,31 @@ fi
 BED_PATH="${WHEELS[0]}"
 BBS_PATH="${WHEELS[1]}"
 LO_PATH="${WHEELS[2]}"
-for py in "$SERVICE_PY" "$SHELL_PY"; do
-    if [ ! -x "$py" ]; then
-        echo "missing interpreter: $py" >&2
+# A NEEDINFO placeholder means a path was never set. Name the variable and stop, rather than
+# run with a path that does not exist.
+for setting in ZOID6_HOME SHELL_PY; do
+    value="${!setting}"
+    case "$value" in
+        *NEEDINFO*)
+            echo "deploy_zoid6: $setting is not set (value: $value). Set it in the environment and re-run." >&2
+            exit 1 ;;
+    esac
+done
+
+# Each interpreter must exist and be executable. Say which variable controls it.
+check_python() {
+    local py="$1" var="$2"
+    if [ ! -e "$py" ]; then
+        echo "deploy_zoid6: no interpreter at $py ($var). Create the venv or set $var." >&2
         exit 1
     fi
-done
+    if [ ! -x "$py" ]; then
+        echo "deploy_zoid6: $py ($var) is not executable by $(id -un)." >&2
+        exit 1
+    fi
+}
+check_python "$SERVICE_PY" "ZOID6_HOME (service venv)"
+check_python "$SHELL_PY" "SHELL_PY (shell/owner venv)"
 
 run() {
     echo "+ $*"
