@@ -23,6 +23,10 @@ VENV_GROUP ?= zoid6
 
 BED_DIR ?= $(CURDIR)/../../bed
 WHEEL_DIR ?= $(HOME)/wheel-build/zoid6-current
+# Private build venv (build, setuptools, wheel), created once per operator under WHEEL_DIR. The
+# wheel build runs from it, so it does not depend on which python3 sudo or the shell resolves.
+BUILD_VENV ?= $(WHEEL_DIR)/buildenv
+BUILD_PYTHON ?= $(BUILD_VENV)/bin/python
 BBSENGINE_DIR ?= $(CURDIR)/../../bbsengine6/py
 CASINO_DIR ?= $(CURDIR)/../../casino
 
@@ -266,15 +270,23 @@ uninstall-sysusers:
 # blind spot. Compare against `pip show bed`; the wheel just installed is
 # a bed wheel, not zoid6. See zoidoffice/src/Makefile's VERIFY_INSTALL for
 # the operator-side reference.
+# Create the private build venv once per operator. Its interpreter comes from $(PYTHON), so the
+# build does not depend on which python3 sudo resolves.
+build-env:
+	@mkdir -p $(WHEEL_DIR)
+	@if [ ! -x "$(BUILD_VENV)/bin/python" ]; then \
+		$(PYTHON) -m venv "$(BUILD_VENV)" || { echo "build-env: cannot create $(BUILD_VENV)" >&2; exit 1; }; \
+	fi
+	@$(BUILD_VENV)/bin/python -m pip install --quiet --upgrade build setuptools wheel
+
 install-venv: install-sysusers
 	@command -v sudo >/dev/null 2>&1 || { echo "Error: sudo required"; exit 1; }
 	@sudo -u $(VENV_OWNER) test -d "$(VENV_DIR)" || sudo -u $(VENV_OWNER) $(PYTHON) -m venv "$(VENV_DIR)"
 	sudo -u $(VENV_OWNER) $(VENV_DIR)/bin/pip install --upgrade pip
-	sudo -u $(VENV_OWNER) $(VENV_DIR)/bin/pip install $(PIP_UPGRADE_FLAG) --quiet build setuptools wheel
-	mkdir -p $(WHEEL_DIR)
+	$(MAKE) build-env
 	rm -f $(WHEEL_DIR)/*.whl
 	$(MAKE) -C $(BED_DIR) version
-	$(PYTHON) -m build --no-isolation --wheel --outdir $(WHEEL_DIR) $(BED_DIR)
+	$(BUILD_PYTHON) -m build --no-isolation --wheel --outdir $(WHEEL_DIR) $(BED_DIR)
 	sudo -u $(VENV_OWNER) $(VENV_DIR)/bin/pip install $(PIP_UPGRADE_FLAG) --quiet $(WHEEL_DIR)/*.whl
 	rm -rf $(WHEEL_DIR)
 	@command -v semanage >/dev/null 2>&1 && \
