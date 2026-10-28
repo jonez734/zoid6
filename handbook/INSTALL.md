@@ -19,31 +19,68 @@ password).
 - The `oidentd` configuration from `zoidlan/minotaur/oidentd/etc-oidentd.conf`. The stock defaults
   are used: spoofing and hiding are denied, and the daemon's connections are answered truthfully.
 
-## 2. The OS account *(built: sysusers)*
+## 2. The OS account *(built)*
 
-The `zoid6` user and group come from `zoid6/src/zoid6/daemon/zoid6.sysusers`:
+The daemon runs as the Unix account `zoid6`. Create it once per host, as root.
+
+**Create the account with `useradd`:**
 
 ```
-make -C zoid6 install-sysusers
+sudo useradd --system --create-home --home-dir /home/zoid6 --user-group \
+  --comment "zoid6 BBS Router" --shell /bin/bash zoid6
+sudo chmod 0750 /home/zoid6
 ```
 
-This installs `/usr/lib/sysusers.d/zoid6.conf` and runs `systemd-sysusers`, which creates the user
-`zoid6` (group `zoid6`) and its home directory `/home/zoid6`. Check it:
+- `--system` gives a system UID; the account needs no password, since it never logs in. The daemon
+  connects to PostgreSQL as `bed_zoid6` through identd (section 4a), not as this account.
+- `--create-home --home-dir /home/zoid6` creates the home the venv and the staged wheels live in.
+- `--user-group` makes the group `zoid6`, and `chmod 0750` keeps the home private to the account.
+- `--shell /bin/bash` is what the account has on minotaur. Its shell is used only by the install
+  commands below, which run it with `sudo -u zoid6`.
+
+`useradd` fails if the account already exists. Check first:
+
+```
+id zoid6 && ls -ld /home/zoid6
+```
+
+**Or create it from the repo's sysusers file** (this also records the account for `systemd-sysusers`):
+
+```
+sudo make -C /home/opencode/data/work/zoid6/src install-sysusers
+```
+
+This installs `/usr/lib/sysusers.d/zoid6.conf` and runs `systemd-sysusers`. It creates the same
+account with no login shell, so use `useradd` above if you need the shell for the install commands.
+
+Confirm the account:
 
 ```
 id zoid6
+getent passwd zoid6
 ls -ld /home/zoid6
 ```
 
-The account is a system account for the daemon. It does not need a login shell for the daemon's
-use.
-
-*(pending: the `casino --install` step will create the account itself as part of the database
-install. Until then, use `install-sysusers`.)*
+*(pending: `casino --install` will create the account itself as part of the database install.)*
 
 ## 3. The venv *(built)*
 
-The daemon runs from a venv owned by `zoid6`, at `/home/zoid6/venv`. There are two ways to create it.
+The daemon runs from a venv owned by the `zoid6` account, at `/home/zoid6/venv`. Create it after
+section 2.
+
+**Create the venv (the commands to run, chained with `&&`):**
+
+```
+cd /home/opencode/data/work/zoid6 && sudo make sync-wheels && sudo -u zoid6 make -C /home/opencode/data/work/zoid6 install-wheels && sudo systemctl restart zoid6 && journalctl -u zoid6 --since "2 minutes ago" | tail -5
+```
+
+- `sudo make sync-wheels` (root) copies the wheels named in `dist-wheels/zoid6-wheels.txt` into
+  `/home/zoid6/dist-wheels`, owned by `zoid6`.
+- `sudo -u zoid6 make … install-wheels` (the account) creates `/home/zoid6/venv` with
+  `/usr/bin/python3.12` and installs those wheels. It needs no root, because the account owns its home.
+- The restart and journal check confirm the daemon starts on the new venv.
+
+The two routes below explain how the wheels get there. Use 3a for the normal route.
 
 ### 3a. From staged wheels (the normal route)
 
@@ -121,8 +158,8 @@ What this does:
   `--router zoid6.api.handler.MessageRouter` argument, so bed's wheel is the one that runs.
 - Relabels `bin/` for SELinux where `semanage` and `restorecon` exist.
 
-The target needs `sudo`. Without `VENV_DIR`, it defaults to `/var/lib/zoid6/venv`, which is the old
-location; pass `VENV_DIR` to use `/home/zoid6/venv`.
+The target needs `sudo`. `VENV_DIR` defaults to `/home/zoid6/venv`, the account's own venv that the
+unit runs; pass `VENV_DIR` only to use another location.
 
 The engine (`bbsengine6`) and casino are installed separately, with `make -C bbsengine6 venv` and
 the casino venv target, each with `VENV_DIR=/home/zoid6/venv` and run as `zoid6`.
