@@ -90,10 +90,18 @@ deploy-tui:
 deploy-prod:
 	$(MAKE) -C src deploy-prod VENV_DIR="$(VENV_DIR)" VENV_USER="$(VENV_USER)" VENV_GROUP="$(VENV_GROUP)" BED_DIR="$(BED_DIR)" WHEEL_DIR="$(WHEEL_DIR)"
 
-.PHONY: install-venv uninstall-venv install-fhs uninstall-fhs install-pgsql
+.PHONY: install-venv uninstall-venv install-fhs uninstall-fhs install-pgsql sync-wheels install-wheels
 
 install-venv:
 	$(MAKE) -C src install-venv VENV_DIR="$(VENV_DIR)" VENV_USER="$(VENV_USER)" VENV_GROUP="$(VENV_GROUP)" BED_DIR="$(BED_DIR)" WHEEL_DIR="$(WHEEL_DIR)"
+
+# Staged-wheel venv: sync (root) copies the wheels into the zoid6 account's home; install (the
+# zoid6 account) builds the venv from them. Forward to src. See handbook/INSTALL.md section 3a.
+sync-wheels:
+	$(MAKE) -C src sync-wheels
+
+install-wheels:
+	$(MAKE) -C src install-wheels
 
 # Identd mapping on the PostgreSQL server (root). Forwards to src; not part of deploy-prod.
 install-pgsql:

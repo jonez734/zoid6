@@ -439,6 +439,21 @@ PGSQL_BIN  ?= /usr/pgsql-18/bin
 PGSQL_UNIT ?= postgresql-18.service
 PGSQL_SRC  ?= $(CURDIR)/../handbook/pgsql
 
+# ---- staged-wheel venv (see handbook/INSTALL.md section 3a) ------------------------------------
+# WHEEL_STAGE holds the built wheels and the manifest zoid6-wheels.txt. sync-wheels copies the
+# listed wheels into the zoid6 account's home (root). install-wheels builds the venv from them as
+# the zoid6 account (no sudo for the install itself).
+WHEEL_STAGE ?= $(CURDIR)/../../dist-wheels
+ZOID6_DIST  ?= /home/zoid6/dist-wheels
+
+sync-wheels:
+	@test "$$(id -u)" -eq 0 || { echo "sync-wheels: run as root (sudo make sync-wheels)"; exit 1; }
+	SRC=$(WHEEL_STAGE) DEST=$(ZOID6_DIST) OWNER=$(VENV_OWNER):$(VENV_GROUP) sh $(WHEEL_STAGE)/sync-zoid6-wheels.sh
+
+install-wheels:
+	@test "$$(id -un)" = "$(VENV_OWNER)" || { echo "install-wheels: run as $(VENV_OWNER) (sudo -u $(VENV_OWNER) make install-wheels)"; exit 1; }
+	DIST=$(ZOID6_DIST) VENV=$(VENV_DIR) sh $(ZOID6_DIST)/INSTALL-zoid6-venv.sh
+
 install-pgsql:
 	@test "$$(id -u)" -eq 0 || [ -n "$(PGSQL_ALLOW_NONROOT)" ] || { echo "install-pgsql: run as root (sudo make install-pgsql)"; exit 1; }
 	@test -f $(PGSQL_DATA)/pg_hba.conf || { echo "install-pgsql: $(PGSQL_DATA)/pg_hba.conf not found"; exit 1; }
