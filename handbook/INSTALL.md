@@ -71,12 +71,12 @@ section 2.
 **Create the venv (the commands to run, chained with `&&`):**
 
 ```
-cd /home/opencode/data/work/zoid6 && sudo make sync-wheels && sudo -u zoid6 make -C /home/opencode/data/work/zoid6 install-wheels && sudo systemctl restart zoid6 && journalctl -u zoid6 --since "2 minutes ago" | tail -5
+cd /home/opencode/data/work/zoid6 && sudo make sync-wheels && sudo -u zoid6 sh /home/zoid6/dist-wheels/INSTALL-zoid6-venv.sh && sudo systemctl restart zoid6 && journalctl -u zoid6 --since "2 minutes ago" | tail -5
 ```
 
 - `sudo make sync-wheels` (root) copies the wheels named in `dist-wheels/zoid6-wheels.txt` into
   `/home/zoid6/dist-wheels`, owned by `zoid6`.
-- `sudo -u zoid6 make … install-wheels` (the account) creates `/home/zoid6/venv` with
+- `sudo -u zoid6 sh /home/zoid6/dist-wheels/INSTALL-zoid6-venv.sh` (the account) creates `/home/zoid6/venv` with
   `/usr/bin/python3.12` and installs those wheels. It needs no root, because the account owns its home.
 - The restart and journal check confirm the daemon starts on the new venv.
 
@@ -135,7 +135,7 @@ chain, because deploytool cannot prompt for a password when it runs `sudo -u zoi
 with `&&`, so a failed step stops the rest. For example:
 
 ```
-cd /home/opencode/data/work/zoid6 && sudo make sync-wheels && sudo -u zoid6 make -C /home/opencode/data/work/zoid6 install-wheels && sudo systemctl restart zoid6 && journalctl -u zoid6 --since "2 minutes ago" | tail -5
+cd /home/opencode/data/work/zoid6 && sudo make sync-wheels && sudo -u zoid6 sh /home/zoid6/dist-wheels/INSTALL-zoid6-venv.sh && sudo systemctl restart zoid6 && journalctl -u zoid6 --since "2 minutes ago" | tail -5
 ```
 
 **Keeping the manifest current.** `dist-wheels/zoid6-wheels.txt` must name the wheel built for each
