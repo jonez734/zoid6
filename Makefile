@@ -17,7 +17,7 @@ export RSYNC = rsync --chmod=Dg=rwxs,Fgu=rw,Fo=r --verbose --archive --times --n
 export PYTHON ?= python3
 VERSION = $(shell date +%Y%m%d%H%M)
 
-export VENV_DIR ?= /var/lib/zoid6/venv
+export VENV_DIR ?= /home/zoid6/venv
 export VENV_USER ?= zoid6
 export VENV_GROUP ?= zoid6
 
