@@ -93,11 +93,12 @@ PYTHONPATH=src python3 -m deploytool --host merlin --with-deps zoid6.venv
 `--with-deps` only `zoid6.venv` itself runs, so use `--with-deps` on the first install, after a
 build, or whenever the wheel set changes.
 
-**Operator convention: chain steps with `&&`.** Run a multi-step install as one command line joined
+**Operator convention: chain steps with `&&`.** The account install is run as `sudo -u zoid6` in the
+chain, because deploytool cannot prompt for a password when it runs `sudo -u zoid6` itself. Run a multi-step install as one command line joined
 with `&&`, so a failed step stops the rest. For example:
 
 ```
-cd /home/opencode/data/work/zoid6 && sudo make sync-wheels && cd /home/opencode/data/work/deploytool && PYTHONPATH=src python3 -m deploytool --host merlin zoid6.venv && sudo systemctl restart zoid6
+cd /home/opencode/data/work/zoid6 && sudo make sync-wheels && sudo -u zoid6 make -C /home/opencode/data/work/zoid6 install-wheels && sudo systemctl restart zoid6 && journalctl -u zoid6 --since "2 minutes ago" | tail -5
 ```
 
 **Keeping the manifest current.** `dist-wheels/zoid6-wheels.txt` must name the wheel built for each
