@@ -2,7 +2,7 @@
 
 Goal: let `opencode` read zoid6's startup lines without access to the journal.
 
-Status: built, tested, and deployed to minotaur. The startup log is written. One check remains: a fresh opencode login must read the file.
+Status: built, tested, and deployed to minotaur. Open: the unchecked items under Verification.
 
 ## Decisions
 
@@ -48,15 +48,17 @@ tail /var/log/zoid6/startup.log     # as opencode
 
 ## Verification
 
-Verified on minotaur:
-- `install-tmpfiles` and `install-systemd` applied; the unit has `UMask=0027`, and the daemon
-  restarted with it (21:10:59).
-- `/var/log/zoid6` is `0750 zoid6:zoid6`.
-- `startup.log` exists and holds `startup completed, 3 modules enabled`.
-- `opencode` is a member of group `zoid6`.
+- [x] `install-tmpfiles` and `install-systemd` applied on minotaur.
+- [x] The unit has `UMask=0027`, and the daemon restarted with it (21:10:59).
+- [x] `/var/log/zoid6` is `0750 zoid6:zoid6`.
+- [x] `startup.log` exists and holds `startup completed, 3 modules enabled`.
+- [x] `opencode` is a member of group `zoid6`.
+- [ ] `startup.log` is `0640`, owned by `zoid6:zoid6`. (Not yet checked as the zoid6 account.)
+- [ ] After a restart, `startup.log` holds a new startup line.
+- [ ] A fresh `opencode` login reads the file: `tail /var/log/zoid6/startup.log`.
+- [ ] `opencode` cannot read the journal (`journalctl -u zoid6` is denied).
 
-Still to check: a fresh `opencode` login reads the file (`tail /var/log/zoid6/startup.log`).
+## Open
 
-- After a restart, `startup.log` holds the startup line.
-- `opencode` can read it, and cannot read `journalctl`.
-- The file is `0640`, owned by `zoid6:zoid6`.
+- Verify the verification items above on minotaur (three unchecked items need a fresh login or a
+  restart).
