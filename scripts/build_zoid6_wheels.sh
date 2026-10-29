@@ -59,7 +59,11 @@ MANIFEST="$STAGE/zoid6-wheels.txt"
         ls -t "$STAGE/$name"-*.whl | head -1 | xargs -n1 basename
     done
 } > "$MANIFEST.new"
-mv "$MANIFEST.new" "$MANIFEST"
+# The manifest may already exist and be read-only to this user (it is group-shared). Replace it
+# explicitly with -f, and keep it group-writable so the next run can replace it too.
+[ -e "$MANIFEST" ] && chmod g+w "$MANIFEST" 2>/dev/null || true
+mv -f "$MANIFEST.new" "$MANIFEST"
+chmod 0664 "$MANIFEST" 2>/dev/null || true
 echo "manifest: $MANIFEST"
 cat "$MANIFEST"
 
