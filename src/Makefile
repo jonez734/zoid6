@@ -54,7 +54,7 @@ endif
 .PHONY: install-venv uninstall-venv restorecon
 .PHONY: install-systemd uninstall-systemd uninstall-fhs
 .PHONY: deploy-tui deploy-prod
-.PHONY: reassign-bootstrap-owners install-user start stop status restart
+.PHONY: reassign-bootstrap-owners install-user install-systemd-user uninstall-systemd-user start stop status restart
 .PHONY: uninstall-user
 
 all: help
@@ -369,6 +369,25 @@ install-user:
 	@echo "Quick start (no sudo):"
 	@echo "  make start                     # foreground-daemon via nohup, PID file"
 	@echo "  make stop"
+
+# The systemd user unit: runs zoid6 as the logged-in user, under `systemctl --user`. The unit source is
+# daemon/user/zoid6.service; %h is the user's home, so it matches $(PREFIX) (default ~/.local/zoid6).
+# It is installed to the user manager's directory, not the system one. Needs install-user first.
+SYSTEMD_USER_DIR ?= $(HOME)/.config/systemd/user
+
+install-systemd-user: install-user
+	@mkdir -p $(SYSTEMD_USER_DIR)
+	install -m 0644 $(PACKAGE)/daemon/user/zoid6.service $(SYSTEMD_USER_DIR)/zoid6.service
+	-systemctl --user daemon-reload 2>/dev/null || true
+	@echo "Installed $(SYSTEMD_USER_DIR)/zoid6.service (user unit)"
+	@echo "Enable and start:  systemctl --user enable --now zoid6"
+	@echo "Survive logout:    loginctl enable-linger $$USER   (one-time, needs root)"
+
+uninstall-systemd-user:
+	-systemctl --user disable --now zoid6 2>/dev/null || true
+	-rm -f $(SYSTEMD_USER_DIR)/zoid6.service
+	-systemctl --user daemon-reload 2>/dev/null || true
+	@echo "Removed $(SYSTEMD_USER_DIR)/zoid6.service"
 
 # Autorestart is read from the config ("bed": {"autorestart": true}), not a
 # CLI flag; zoid6's argparse does not define --no-autorestart.

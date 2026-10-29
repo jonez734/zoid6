@@ -1,0 +1,32 @@
+[Unit]
+Description=zoid6 BBS Engine Daemon (user service: bed with zoid6 config and router)
+Documentation=https://bbsengine.org/
+After=network.target
+
+[Service]
+Type=simple
+# A user unit runs as the logged-in user. %h is that user's home. The venv and the packaged config are
+# the ones `make install-user` creates under $(PREFIX) (default %h/.local/zoid6).
+WorkingDirectory=%h/.local/zoid6
+ExecStart=%h/.local/zoid6/venv/bin/bed \
+  --config %h/.local/zoid6/venv/lib/python3.12/site-packages/zoid6/data/zoid6.json \
+  --router zoid6.api.handler.MessageRouter
+Restart=on-failure
+RestartSec=5s
+KillMode=mixed
+KillSignal=SIGTERM
+TimeoutStopSec=30s
+
+# The startup log and its rotated backups are created 0640.
+UMask=0027
+
+# Logs go to the user journal: journalctl --user -u zoid6
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=%h/.local/zoid6
+
+[Install]
+WantedBy=default.target
