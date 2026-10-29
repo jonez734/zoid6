@@ -38,7 +38,7 @@ CASINO_DIR ?= $(CURDIR)/../../casino
 # These only override the FHS defaults when one of the user-mode targets
 # is the goal; otherwise the FHS targets (install-venv, install-systemd,
 # install-fhs) keep their defaults.
-ifneq ($(filter install-user start stop status restart uninstall-user,$(MAKECMDGOALS)),)
+ifneq ($(filter install-user install-systemd-user uninstall-systemd-user start stop status restart uninstall-user,$(MAKECMDGOALS)),)
 PREFIX           ?= $(HOME)/.local/zoid6
 VENV_DIR         = $(PREFIX)/venv
 LOG_DIR          = $(PREFIX)/log
@@ -376,6 +376,8 @@ install-user:
 SYSTEMD_USER_DIR ?= $(HOME)/.config/systemd/user
 
 install-systemd-user: install-user
+	@test "$$(id -u)" -ne 0 || { echo "install-systemd-user: run as your login user, not root (a user unit belongs to the user who logs in)" >&2; exit 1; }
+	@test "$$(id -un)" != "zoid6" || { echo "install-systemd-user: run as your login user, not zoid6 (zoid6's daemon is the system unit)" >&2; exit 1; }
 	@mkdir -p $(SYSTEMD_USER_DIR)
 	install -m 0644 $(PACKAGE)/daemon/user/zoid6.service $(SYSTEMD_USER_DIR)/zoid6.service
 	-systemctl --user daemon-reload 2>/dev/null || true

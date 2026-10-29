@@ -79,3 +79,18 @@ def test_user_unit_is_a_user_service_in_the_user_directory():
     makefile = (ROOT / "src" / "Makefile").read_text()
     assert "SYSTEMD_USER_DIR ?= $(HOME)/.config/systemd/user" in makefile
     assert "systemctl --user" in makefile
+
+
+@pytest.mark.unit
+def test_user_install_target_is_in_the_goal_filter():
+    """install-systemd-user must be in the MAKECMDGOALS filter, or PREFIX and the dirs are empty."""
+    text = (ROOT / "src" / "Makefile").read_text()
+    filter_line = next(l for l in text.splitlines() if "MAKECMDGOALS" in l and "install-user" in l)
+    assert "install-systemd-user" in filter_line
+
+
+@pytest.mark.unit
+def test_user_install_refuses_root_and_the_zoid6_account():
+    text = (ROOT / "src" / "Makefile").read_text()
+    assert 'test "$$(id -u)" -ne 0' in text
+    assert 'test "$$(id -un)" != "zoid6"' in text
