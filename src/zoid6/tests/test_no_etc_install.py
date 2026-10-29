@@ -65,9 +65,11 @@ def test_install_guide_names_the_zoid6_unit_source():
 
 
 @pytest.mark.unit
-def test_user_unit_source_is_named_zoid6_service():
-    """The developer user unit is zoid6.service (in daemon/user/); it installs as zoid6.service."""
-    user = ROOT / "src" / "zoid6" / "daemon" / "user" / "zoid6.service"
-    assert user.is_file()
-    assert not (ROOT / "src" / "zoid6" / "daemon" / "zoid6-user.service").exists()
-    assert "daemon/user/zoid6.service" in (ROOT / "src" / "Makefile").read_text()
+def test_no_user_mode_unit_exists():
+    """There is no developer user-mode unit: no zoid6.service or zoid6-user.service in the user route."""
+    daemon = ROOT / "src" / "zoid6" / "daemon"
+    assert not (daemon / "user").exists()
+    assert not (daemon / "zoid6-user.service").exists()
+    text = (ROOT / "src" / "Makefile").read_text()
+    assert "install-systemd-user" not in text
+    assert "systemctl --user" not in text

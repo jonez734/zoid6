@@ -38,7 +38,7 @@ CASINO_DIR ?= $(CURDIR)/../../casino
 # These only override the FHS defaults when one of the user-mode targets
 # is the goal; otherwise the FHS targets (install-venv, install-systemd,
 # install-fhs) keep their defaults.
-ifneq ($(filter install-user start stop status restart install-systemd-user uninstall-systemd-user uninstall-user,$(MAKECMDGOALS)),)
+ifneq ($(filter install-user start stop status restart uninstall-user,$(MAKECMDGOALS)),)
 PREFIX           ?= $(HOME)/.local/zoid6
 VENV_DIR         = $(PREFIX)/venv
 LOG_DIR          = $(PREFIX)/log
@@ -55,7 +55,7 @@ endif
 .PHONY: install-systemd uninstall-systemd uninstall-fhs
 .PHONY: deploy-tui deploy-prod
 .PHONY: reassign-bootstrap-owners install-user start stop status restart
-.PHONY: install-systemd-user uninstall-systemd-user uninstall-user
+.PHONY: uninstall-user
 
 all: help
 
@@ -369,8 +369,6 @@ install-user:
 	@echo "Quick start (no sudo):"
 	@echo "  make start                     # foreground-daemon via nohup, PID file"
 	@echo "  make stop"
-	@echo "Or as a systemd user unit (also no sudo):"
-	@echo "  make install-systemd-user && systemctl --user enable --now zoid6"
 
 # Autorestart is read from the config ("bed": {"autorestart": true}), not a
 # CLI flag; zoid6's argparse does not define --no-autorestart.
@@ -405,32 +403,6 @@ status:
 	@kill -0 $$PID 2>/dev/null && echo "running (pid $$PID)" || { echo "stale pidfile (pid $$PID)"; exit 1; }
 
 restart: stop start
-
-# The unit's %h/.local/zoid6 is templated to $(PREFIX), so it matches
-# wherever install-user landed (default or overridden PREFIX).
-#
-# daemon-reload is best-effort: it only matters when a user systemd is
-# running (interactive login). Headless servers, or containers without
-# $DBUS_SESSION_BUS_ADDRESS, skip it.
-install-systemd-user: install-user
-	@mkdir -p $(SYSTEMD_USER_DIR)
-	sed 's|%h/\.local/zoid6|$(PREFIX)|g' $(PACKAGE)/daemon/user/zoid6.service \
-	    > $(SYSTEMD_USER_DIR)/zoid6.service
-	chmod 0644 $(SYSTEMD_USER_DIR)/zoid6.service
-	-systemctl --user daemon-reload 2>/dev/null || true
-	@echo "Installed $(SYSTEMD_USER_DIR)/zoid6.service (user unit)"
-	@echo "Enable + start:  systemctl --user enable --now zoid6"
-	@echo "Boot persistence: loginctl enable-linger $$USER  (one-time, needs root)"
-
-uninstall-systemd-user:
-	-systemctl --user disable --now zoid6 2>/dev/null || true
-	-rm -f $(SYSTEMD_USER_DIR)/zoid6.service
-	-systemctl --user daemon-reload 2>/dev/null || true
-	@echo "Removed $(SYSTEMD_USER_DIR)/zoid6.service"
-
-uninstall-user:
-	-rm -rf $(PREFIX)
-	@echo "Removed $(PREFIX)"
 
 # ---- pgsql: identd mapping for the daemon login (run as root) -------------------------------
 # Adds the managed lines in handbook/pgsql/ to the server's pg_ident.conf and pg_hba.conf.
