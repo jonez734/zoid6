@@ -112,3 +112,12 @@ def test_user_install_retries_transient_index_resets():
     """The dependency install retries a connection reset instead of printing a warning."""
     text = (ROOT / "src" / "Makefile").read_text()
     assert "--retries 10 --timeout 60" in text
+
+
+@pytest.mark.unit
+def test_version_target_uses_the_version_line_not_a_literal():
+    """zoid6's version is the 0.4.0.dev line from next_version.sh, not a hard-coded 0.0.3 prefix."""
+    text = (ROOT / "src" / "Makefile").read_text()
+    assert "0.0.3" not in text
+    assert "VERSION_PREFIX ?= 0.4.0.dev" in text
+    assert "next_version.sh" in text

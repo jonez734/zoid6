@@ -1,6 +1,11 @@
 PROJECT = zoid6
 OUTDIR = /srv/repo/$(PROJECT)/
-VERSION := $(shell date +%Y%m%d%H%M)
+# Version line for this package, and the shared build stamp (scripts/next_version.sh). Set once, when the
+# Makefile is read, so every target sees the same version.
+VERSION_PREFIX ?= 0.4.0.dev
+VERSION_SCRIPT ?= $(CURDIR)/../../scripts/next_version.sh
+WHEELS_DIR ?= $(CURDIR)/../../dist-wheels
+VERSION := $(shell $(VERSION_SCRIPT) $(VERSION_PREFIX) $(WHEELS_DIR))
 
 PYTHON ?= python3
 PIP ?= $(PYTHON) -m pip
@@ -135,7 +140,7 @@ clean: stale-build
 	-find . -type d -name .mypy_cache -exec rm -rf {} +
 
 version:
-	@echo '__version__ = "0.0.3.dev$(VERSION)"' > $(PROJECT)/_version.py
+	@echo '__version__ = "$(VERSION)"' > $(PROJECT)/_version.py
 	@echo '__datestamp__ = "$(VERSION)"' >> $(PROJECT)/_version.py
 	@echo '__githash__ = "'`git log -1 --format='%H' 2>/dev/null | cut -c 1-16`'"' >> $(PROJECT)/_version.py
 	@cat $(PROJECT)/_version.py
