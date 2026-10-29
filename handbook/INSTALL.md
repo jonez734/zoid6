@@ -118,29 +118,46 @@ label the venv:
 sudo make -C /home/opencode/data/work/zoid6/src restorecon VENV_DIR=/home/zoid6/venv
 ```
 
-**Through deploytool (the same two steps, in order):**
+**The one-command route (deploy, then restart).** This is the normal install. Run these as `jam`,
+from the meta-repo at `/home/opencode/data/work`.
 
-```
-cd /home/opencode/data/work/deploytool
-PYTHONPATH=src python3 -m deploytool --host merlin --with-deps zoid6.venv
-```
+1. Install deploytool (once per change to deploytool):
 
-`zoid6.venv` runs the engine's venv sub, then `zoid6.wheels` (the sync, run as root, so it needs
-`sudo`), then the install as the `zoid6` account. It never runs the prod rsync. Without
-`--with-deps` only `zoid6.venv` itself runs, so use `--with-deps` on the first install, after a
-build, or whenever the wheel set changes.
+   ```
+   cd /home/opencode/data/work/deploytool && make deploy-tui PYTHON=python3.12 PIP="python3.12 -m pip"
+   ```
 
-**Operator convention: chain steps with `&&`.** The account install is run as `sudo -u zoid6` in the
-chain, because deploytool cannot prompt for a password when it runs `sudo -u zoid6` itself. Run a multi-step install as one command line joined
-with `&&`, so a failed step stops the rest. For example:
+2. One-time, per host: make the account's directories writable by the `zoid6` group, which jam is in.
+   Run it as root or as `zoid6`:
 
-```
-cd /home/opencode/data/work/zoid6 && sudo make sync-wheels && sudo -u zoid6 sh /home/zoid6/dist-wheels/INSTALL-zoid6-venv.sh && sudo systemctl restart zoid6 && journalctl -u zoid6 --since "2 minutes ago" | tail -5
-```
+   ```
+   sudo -u zoid6 mkdir -p /home/zoid6/dist-wheels && sudo chmod -R g+rwX /home/zoid6/dist-wheels /home/zoid6/venv
+   ```
 
-**Keeping the manifest current.** `dist-wheels/zoid6-wheels.txt` must name the wheel built for each
-package. After rebuilding a package, replace its line with the new file name, then run the sync. The
-sync removes any wheel in the account home that the manifest no longer lists.
+3. Deploy the venv:
+
+   ```
+   deploy zoid6.venv --with-deps
+   ```
+
+   This builds the five wheels from git HEAD (`zoid6/scripts/build_zoid6_wheels.sh`, which deploy runs
+   and labels `helper:`), stages them and the installer into `/home/zoid6/dist-wheels`, and installs them
+   into `/home/zoid6/venv` as the `zoid6` account's installer. It ends with `deploy complete`. A step that
+   stops prints the one command to run; fix it, then run step 3 again.
+
+4. Restart the daemon:
+
+   ```
+   sudo systemctl restart zoid6
+   systemctl is-active zoid6
+   journalctl -u zoid6 --since "5 minutes ago" | grep -E "startup completed|PingService"
+   ```
+
+   Expect `active`, a `startup completed, <n> modules enabled` line, and the new bed version in
+   `PingService`.
+
+The manual sync and install commands above remain the way to install by hand. The one-command route
+does the same steps.
 
 ### 3b. From the source tree (a host with its own build)
 
