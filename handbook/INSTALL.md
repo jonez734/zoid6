@@ -159,6 +159,28 @@ from the meta-repo at `/home/opencode/data/work`.
 The manual sync and install commands above remain the way to install by hand. The one-command route
 does the same steps.
 
+**The startup log (for `opencode` to read).** The daemon writes its startup lines to
+`/var/log/zoid6/startup.log` as well as the journal. The file is `0640` and group `zoid6`, and it rotates by
+size. Its path and rotation are set in `bed.json` (`startup_log`) and must match the same section in
+`zoid6.json` (a test enforces this). An empty `path` turns the file off.
+
+One-time, as root, so the `opencode` account can read the file through group `zoid6`:
+
+```
+sudo usermod -aG zoid6 opencode
+```
+
+`opencode` must log in again before the group takes effect. After a restart, read the startup lines as
+`opencode`:
+
+```
+tail /var/log/zoid6/startup.log
+```
+
+The file holds only the startup lines (`startup completed` and `startup_failed`), not request traffic.
+If `/var/log/zoid6` is not writable, the daemon still starts and logs a warning; the startup lines then go
+to the journal only.
+
 ### 3b. From the source tree (a host with its own build)
 
 On a host where the `zoid6` account can build from the source tree itself, use the Makefile target:

@@ -14,6 +14,8 @@ StartLimitBurst=10
 Type=simple
 User=zoid6
 Group=zoid6
+# The startup log and its rotated backups are created 0640 (group zoid6 can read, others cannot).
+UMask=0027
 WorkingDirectory=/home/zoid6
 
 # The daemon connects to PostgreSQL as bed_zoid6, which identd maps from this OS user.
