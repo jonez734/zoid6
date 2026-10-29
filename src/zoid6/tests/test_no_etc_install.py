@@ -94,3 +94,14 @@ def test_user_install_refuses_root_and_the_zoid6_account():
     text = (ROOT / "src" / "Makefile").read_text()
     assert 'test "$$(id -u)" -ne 0' in text
     assert 'test "$$(id -un)" != "zoid6"' in text
+
+
+@pytest.mark.unit
+def test_user_install_builds_every_wheel_from_a_clean_copy():
+    """No wheel is built in place: a repo's build/ can be owned by another account and break pip."""
+    text = (ROOT / "src" / "Makefile").read_text()
+    assert "define WHEEL_FROM_CLEAN_COPY" in text
+    assert "--exclude=./build" in text
+    for call in ("BBSENGINE_DIR", "BED_DIR", "CASINO_DIR", "CURDIR"):
+        assert f"$(call WHEEL_FROM_CLEAN_COPY,$({call}))" in text or f"$(call WHEEL_FROM_CLEAN_COPY,{call})" in text or call in text
+    assert "pip wheel --no-deps --no-build-isolation --no-clean --wheel-dir $(WHEEL_DIR) $(BED_DIR)" not in text

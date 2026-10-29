@@ -355,13 +355,13 @@ install-user:
 	mkdir -p $(WHEEL_DIR)
 	rm -f $(WHEEL_DIR)/*.whl
 	$(MAKE) -C $(BBSENGINE_DIR) version
-	$(PYTHON) -m pip wheel --no-deps --no-build-isolation --no-clean --wheel-dir $(WHEEL_DIR) $(BBSENGINE_DIR)
 	$(MAKE) -C $(BED_DIR) version
-	$(PYTHON) -m pip wheel --no-deps --no-build-isolation --no-clean --wheel-dir $(WHEEL_DIR) $(BED_DIR)
 	$(MAKE) -C $(CASINO_DIR) version
-	$(PYTHON) -m pip wheel --no-deps --no-build-isolation --no-clean --wheel-dir $(WHEEL_DIR) $(CASINO_DIR)
 	$(MAKE) version
-	$(PYTHON) -m pip wheel --no-deps --no-build-isolation --no-clean --wheel-dir $(WHEEL_DIR) $(CURDIR)
+	$(call WHEEL_FROM_CLEAN_COPY,$(BBSENGINE_DIR))
+	$(call WHEEL_FROM_CLEAN_COPY,$(BED_DIR))
+	$(call WHEEL_FROM_CLEAN_COPY,$(CASINO_DIR))
+	$(call WHEEL_FROM_CLEAN_COPY,$(CURDIR))
 	$(VENV_DIR)/bin/pip install $(PIP_UPGRADE_FLAG) --quiet $(WHEEL_DIR)/*.whl
 	rm -rf $(WHEEL_DIR)
 	$(VENV_DIR)/bin/pip install $(PIP_UPGRADE_FLAG) --quiet pillow
@@ -369,6 +369,16 @@ install-user:
 	@echo "Quick start (no sudo):"
 	@echo "  make start                     # foreground-daemon via nohup, PID file"
 	@echo "  make stop"
+
+# WHEEL_FROM_CLEAN_COPY(SRC): build SRC's wheel from a copy of its tree, not in place. A repo's build/
+# can be owned by another account from an earlier build, and pip cannot write into it. The copy leaves
+# out build/, dist/, *.egg-info and __pycache__, so each wheel is built from source only.
+define WHEEL_FROM_CLEAN_COPY
+	rm -rf $(WHEEL_DIR)/.src-copy && mkdir -p $(WHEEL_DIR)/.src-copy
+	tar -C $(1) --exclude=./build --exclude=./dist --exclude='*.egg-info' --exclude=__pycache__ -cf - . | tar -C $(WHEEL_DIR)/.src-copy -xf -
+	$(PYTHON) -m pip wheel --no-deps --no-build-isolation --no-clean --wheel-dir $(WHEEL_DIR) $(WHEEL_DIR)/.src-copy
+	rm -rf $(WHEEL_DIR)/.src-copy
+endef
 
 # The systemd user unit: runs zoid6 as the logged-in user, under `systemctl --user`. The unit source is
 # daemon/user/zoid6.service; %h is the user's home, so it matches $(PREFIX) (default ~/.local/zoid6).
