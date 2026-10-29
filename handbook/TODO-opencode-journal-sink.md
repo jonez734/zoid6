@@ -2,7 +2,7 @@
 
 Goal: let `opencode` read zoid6's startup lines without access to the journal.
 
-Status: built and tested in bed and zoid6. Not yet deployed to minotaur; the operator steps below remain.
+Status: built, tested, and deployed to minotaur. The startup log is written. One check remains: a fresh opencode login must read the file.
 
 ## Decisions
 
@@ -37,7 +37,7 @@ An empty `path` turns the sink off. Keys are validated at load time.
 5. [x] zoid6 tmpfiles (`zoid6.tmpfiles`): `/var/log/zoid6` becomes `0750 zoid6 zoid6`.
 6. [x] zoid6 tests: keys match `bed.json`, `UMask` is set, the directory mode is `0750`.
 7. [x] zoid6 `INSTALL.md`: document the one-time group step and where the log is.
-8. [ ] Commit bed, then zoid6, then bump the meta-repo pointers.
+8. [x] Commit bed, then zoid6, then bump the meta-repo pointers.
 
 ## Operator steps (after deploy and restart)
 
@@ -48,7 +48,14 @@ tail /var/log/zoid6/startup.log     # as opencode
 
 ## Verification
 
-Not yet verified on minotaur. Run the operator steps, then check the three points below.
+Verified on minotaur:
+- `install-tmpfiles` and `install-systemd` applied; the unit has `UMask=0027`, and the daemon
+  restarted with it (21:10:59).
+- `/var/log/zoid6` is `0750 zoid6:zoid6`.
+- `startup.log` exists and holds `startup completed, 3 modules enabled`.
+- `opencode` is a member of group `zoid6`.
+
+Still to check: a fresh `opencode` login reads the file (`tail /var/log/zoid6/startup.log`).
 
 - After a restart, `startup.log` holds the startup line.
 - `opencode` can read it, and cannot read `journalctl`.
