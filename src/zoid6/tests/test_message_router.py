@@ -370,3 +370,32 @@ class TestPackageMetadata:
         bed_json = Path(get_bundled_config_path())
         assert bed_json.exists()
         assert bed_json.is_file()
+
+
+class TestLoadedModules:
+    """The router records the modules it loaded; bed reads the count for its startup log."""
+
+    def test_loaded_modules_starts_empty(self, mock_args):
+        from zoid6.api.handler import MessageRouter
+
+        assert MessageRouter(mock_args).loaded_modules == []
+
+    def test_register_all_records_each_enabled_module_once(self, mock_args, mock_server):
+        from zoid6.api.handler import MessageRouter
+
+        router = MessageRouter(mock_args)
+        with patch.object(router, "_register_module"):
+            router.register_all(mock_server)
+        enabled = [k for k, v in router.config["services"].items()
+                   if isinstance(v, dict) and v.get("enabled", False)]
+        assert router.loaded_modules == enabled
+        assert len(router.loaded_modules) == len(set(router.loaded_modules))
+
+    def test_disabled_modules_are_not_counted(self, mock_args, mock_server):
+        from zoid6.api.handler import MessageRouter
+
+        router = MessageRouter(mock_args)
+        with patch.object(router, "_register_module"):
+            router.register_all(mock_server)
+        assert "empyre" not in router.loaded_modules
+        assert "murdermotel" not in router.loaded_modules

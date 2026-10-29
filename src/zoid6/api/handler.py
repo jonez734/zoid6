@@ -44,6 +44,9 @@ class MessageRouter:
         self.channel_state = channel_state
         self.config = self._load_config()
         self.routers: Dict[str, Any] = {}
+        # The enabled services-block modules this router registered, in load order. bed reads it
+        # for the startup log ("N modules enabled"), so the count is modules, not message types.
+        self.loaded_modules: list = []
 
     def _load_config(self) -> Dict[str, Any]:
         """Load configuration via bed.config.load_config().
@@ -122,6 +125,7 @@ class MessageRouter:
                 continue
 
             self._register_module(module_name, module_config, server)
+            self.loaded_modules.append(module_name)
 
         if server.get_service("member_profile") is None:
             raise RuntimeError(
