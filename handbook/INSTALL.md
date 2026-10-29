@@ -402,7 +402,7 @@ make -C zoid6/src install-systemd-user
 systemctl --user enable --now zoid6
 ```
 
-The unit is `zoid6/src/zoid6/daemon/zoid6-user.service`. It reads `~/.local/zoid6/etc/zoid6.env`
+The unit is `zoid6/src/zoid6/daemon/user/zoid6.service`, installed as `~/.config/systemd/user/zoid6.service`. It reads `~/.local/zoid6/etc/zoid6.env`
 (the user's home, not `/etc`), and logs to the user journal (`journalctl --user -u zoid6`). Nothing
 in this route writes under `/etc` or `/var`.
 

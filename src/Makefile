@@ -414,7 +414,7 @@ restart: stop start
 # $DBUS_SESSION_BUS_ADDRESS, skip it.
 install-systemd-user: install-user
 	@mkdir -p $(SYSTEMD_USER_DIR)
-	sed 's|%h/\.local/zoid6|$(PREFIX)|g' $(PACKAGE)/daemon/zoid6-user.service \
+	sed 's|%h/\.local/zoid6|$(PREFIX)|g' $(PACKAGE)/daemon/user/zoid6.service \
 	    > $(SYSTEMD_USER_DIR)/zoid6.service
 	chmod 0644 $(SYSTEMD_USER_DIR)/zoid6.service
 	-systemctl --user daemon-reload 2>/dev/null || true

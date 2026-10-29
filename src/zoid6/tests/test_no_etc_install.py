@@ -62,3 +62,12 @@ def test_install_guide_names_the_zoid6_unit_source():
     text = (ROOT / "handbook" / "INSTALL.md").read_text()
     assert "zoid6/src/zoid6/daemon/zoid6.service" in text
     assert "bed/src/bed/daemon/zoid6.service" not in text
+
+
+@pytest.mark.unit
+def test_user_unit_source_is_named_zoid6_service():
+    """The developer user unit is zoid6.service (in daemon/user/); it installs as zoid6.service."""
+    user = ROOT / "src" / "zoid6" / "daemon" / "user" / "zoid6.service"
+    assert user.is_file()
+    assert not (ROOT / "src" / "zoid6" / "daemon" / "zoid6-user.service").exists()
+    assert "daemon/user/zoid6.service" in (ROOT / "src" / "Makefile").read_text()
