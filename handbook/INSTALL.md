@@ -391,6 +391,21 @@ template (its `ExecStart` still contains `@VENV_DIR@`), remove it:
 sudo rm /etc/systemd/system/zoid6.service && sudo systemctl daemon-reload && make -C bed/src install-zoid6-systemd
 ```
 
+## Developer route: user-mode unit
+
+For a developer workstation with no system install, zoid6 runs as the user's own service from
+`~/.local/zoid6`. This is separate from the minotaur install above and is not used on the host.
+
+```
+make -C zoid6/src install-user
+make -C zoid6/src install-systemd-user
+systemctl --user enable --now zoid6
+```
+
+The unit is `zoid6/src/zoid6/daemon/zoid6-user.service`. It reads `~/.local/zoid6/etc/zoid6.env`
+(the user's home, not `/etc`), and logs to the user journal (`journalctl --user -u zoid6`). Nothing
+in this route writes under `/etc` or `/var`.
+
 ## See also
 
 - `SMOOTHSTATE.md` in this directory.
