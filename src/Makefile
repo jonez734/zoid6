@@ -362,7 +362,9 @@ install-user:
 	$(call WHEEL_FROM_CLEAN_COPY,$(BED_DIR))
 	$(call WHEEL_FROM_CLEAN_COPY,$(CASINO_DIR))
 	$(call WHEEL_FROM_CLEAN_COPY,$(CURDIR))
-	$(VENV_DIR)/bin/pip install $(PIP_UPGRADE_FLAG) --quiet $(WHEEL_DIR)/*.whl
+	# Dependencies come from the package index. A transient reset is retried by pip (--retries), with a
+	# longer timeout, so it does not surface as a warning in the install output.
+	$(VENV_DIR)/bin/pip install $(PIP_UPGRADE_FLAG) --quiet --retries 10 --timeout 60 $(WHEEL_DIR)/*.whl
 	rm -rf $(WHEEL_DIR)
 	$(VENV_DIR)/bin/pip install $(PIP_UPGRADE_FLAG) --quiet pillow
 	@echo "User-mode install complete at $(PREFIX)"

@@ -105,3 +105,10 @@ def test_user_install_builds_every_wheel_from_a_clean_copy():
     for call in ("BBSENGINE_DIR", "BED_DIR", "CASINO_DIR", "CURDIR"):
         assert f"$(call WHEEL_FROM_CLEAN_COPY,$({call}))" in text or f"$(call WHEEL_FROM_CLEAN_COPY,{call})" in text or call in text
     assert "pip wheel --no-deps --no-build-isolation --no-clean --wheel-dir $(WHEEL_DIR) $(BED_DIR)" not in text
+
+
+@pytest.mark.unit
+def test_user_install_retries_transient_index_resets():
+    """The dependency install retries a connection reset instead of printing a warning."""
+    text = (ROOT / "src" / "Makefile").read_text()
+    assert "--retries 10 --timeout 60" in text
