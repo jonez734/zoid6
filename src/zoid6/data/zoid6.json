@@ -10,6 +10,14 @@
     "clock": {
       "max_turn_seconds": 120,
       "_comment_max_turn_seconds": "Sysop ceiling for a table's turn_seconds (the play clock). 0 disables the clock on every table. Read by casino.config.get_max_turn_seconds."
+    },
+    "slots": {
+      "big_win": {
+        "enabled": true,
+        "multiplier": 50,
+        "_comment_enabled": "Announce big slots wins to every signed-in player on casino:global.",
+        "_comment_multiplier": "A spin whose payout is at least this many times the bet is a big win. Must be a whole number of 1 or more. Read by casino.config.get_big_win_settings."
+      }
     }
   },
   "debug": false,
