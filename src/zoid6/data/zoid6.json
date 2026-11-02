@@ -98,6 +98,11 @@
       "poll_interval": 30,
       "mailboxes": []
     },
+    "jargon": {
+      "enabled": true,
+      "modulepath": "jargon.api.handler",
+      "description": "Glossary of BBS and internet slang (aolbonics)"
+    },
     "empyre": {
       "enabled": false,
       "modulepath": "empyre.api.handler",
