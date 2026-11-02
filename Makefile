@@ -90,7 +90,7 @@ deploy-tui:
 deploy-prod:
 	$(MAKE) -C src deploy-prod VENV_DIR="$(VENV_DIR)" VENV_USER="$(VENV_USER)" VENV_GROUP="$(VENV_GROUP)" BED_DIR="$(BED_DIR)" WHEEL_DIR="$(WHEEL_DIR)"
 
-.PHONY: install-venv uninstall-venv install-fhs uninstall-fhs install-pgsql sync-wheels install-wheels
+.PHONY: install-venv uninstall-venv install-fhs uninstall-fhs install-identd install-pgsql sync-wheels install-wheels
 
 install-venv:
 	$(MAKE) -C src install-venv VENV_DIR="$(VENV_DIR)" VENV_USER="$(VENV_USER)" VENV_GROUP="$(VENV_GROUP)" BED_DIR="$(BED_DIR)" WHEEL_DIR="$(WHEEL_DIR)"
@@ -104,8 +104,11 @@ install-wheels:
 	$(MAKE) -C src install-wheels
 
 # Identd mapping on the PostgreSQL server (root). Forwards to src; not part of deploy-prod.
-install-pgsql:
-	$(MAKE) -C src install-pgsql VENV_DIR="$(VENV_DIR)"
+install-identd:
+	$(MAKE) -C src install-identd VENV_DIR="$(VENV_DIR)"
+
+# Alias kept for deploytool's identd mapping; see src/Makefile.
+install-pgsql: install-identd
 
 uninstall-venv:
 	$(MAKE) -C src uninstall-venv VENV_DIR="$(VENV_DIR)"
