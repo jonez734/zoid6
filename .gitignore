@@ -17,3 +17,6 @@ shared/skin/art/*.otf
 sites/static/skin/art/*.png
 sites/static/skin/art/*.jpg
 sites/static/skin/art/*.otf
+
+# build version stamp (rewritten by every build; not tracked)
+_version.py
