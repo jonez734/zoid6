@@ -1,0 +1,353 @@
+{
+  "schema_version": 1,
+  "entries": [
+    {
+      "package": "bed",
+      "object": "engine.__bed_token",
+      "kind": "table",
+      "owner": "bed_obj"
+    },
+    {
+      "package": "bed",
+      "object": "engine.bed_bank_balance",
+      "kind": "function",
+      "owner": "bed_obj",
+      "args": "bytea, citext"
+    },
+    {
+      "package": "bed",
+      "object": "engine.bed_bank_op",
+      "kind": "function",
+      "owner": "bed_obj",
+      "args": "bytea, text, jsonb"
+    },
+    {
+      "package": "bed",
+      "object": "engine.bed_client_exit",
+      "kind": "function",
+      "owner": "bed_obj",
+      "args": "bytea, citext, text, inet"
+    },
+    {
+      "package": "bed",
+      "object": "engine.bed_count_unread",
+      "kind": "function",
+      "owner": "bed_obj",
+      "args": "citext"
+    },
+    {
+      "package": "bed",
+      "object": "engine.bed_group_add_member",
+      "kind": "function",
+      "owner": "bed_obj",
+      "args": "bytea, text, citext"
+    },
+    {
+      "package": "bed",
+      "object": "engine.bed_group_create",
+      "kind": "function",
+      "owner": "bed_obj",
+      "args": "bytea, text, text"
+    },
+    {
+      "package": "bed",
+      "object": "engine.bed_group_delete",
+      "kind": "function",
+      "owner": "bed_obj",
+      "args": "bytea, text"
+    },
+    {
+      "package": "bed",
+      "object": "engine.bed_group_remove_member",
+      "kind": "function",
+      "owner": "bed_obj",
+      "args": "bytea, text, citext"
+    },
+    {
+      "package": "bed",
+      "object": "engine.bed_is_sysop",
+      "kind": "function",
+      "owner": "bed_obj",
+      "args": "citext"
+    },
+    {
+      "package": "bed",
+      "object": "engine.bed_list_pending_page",
+      "kind": "function",
+      "owner": "bed_obj",
+      "args": "citext, integer, timestamp with time zone, bigint, integer"
+    },
+    {
+      "package": "bed",
+      "object": "engine.bed_login_failed",
+      "kind": "function",
+      "owner": "bed_obj",
+      "args": "citext, inet"
+    },
+    {
+      "package": "bed",
+      "object": "engine.bed_message_send",
+      "kind": "function",
+      "owner": "bed_obj",
+      "args": "bytea, text, text, text, citext[], citext"
+    },
+    {
+      "package": "bed",
+      "object": "engine.bed_token_delete",
+      "kind": "function",
+      "owner": "bed_obj",
+      "args": "bytea"
+    },
+    {
+      "package": "bed",
+      "object": "engine.bed_token_gc",
+      "kind": "function",
+      "owner": "bed_obj",
+      "args": "double precision"
+    },
+    {
+      "package": "bed",
+      "object": "engine.bed_token_get",
+      "kind": "function",
+      "owner": "bed_obj",
+      "args": "bytea"
+    },
+    {
+      "package": "bed",
+      "object": "engine.bed_token_put",
+      "kind": "function",
+      "owner": "bed_obj",
+      "args": "bytea, citext, text, double precision, double precision, boolean, text, text, jsonb, text"
+    },
+    {
+      "package": "bed",
+      "object": "engine.bed_touch_lastlogin",
+      "kind": "function",
+      "owner": "bed_obj",
+      "args": "bytea, citext, inet"
+    },
+    {
+      "package": "casino",
+      "object": "casino.__account",
+      "kind": "table",
+      "owner": "casino_obj"
+    },
+    {
+      "package": "casino",
+      "object": "casino.__bank_player",
+      "kind": "table",
+      "owner": "casino_obj"
+    },
+    {
+      "package": "casino",
+      "object": "casino.__bank_table",
+      "kind": "table",
+      "owner": "casino_obj"
+    },
+    {
+      "package": "casino",
+      "object": "casino.__banktransaction",
+      "kind": "table",
+      "owner": "casino_obj"
+    },
+    {
+      "package": "casino",
+      "object": "casino.__betlog",
+      "kind": "table",
+      "owner": "casino_obj"
+    },
+    {
+      "package": "casino",
+      "object": "casino.__game",
+      "kind": "table",
+      "owner": "casino_obj"
+    },
+    {
+      "package": "casino",
+      "object": "casino.__hand",
+      "kind": "table",
+      "owner": "casino_obj"
+    },
+    {
+      "package": "casino",
+      "object": "casino.__log",
+      "kind": "table",
+      "owner": "casino_obj"
+    },
+    {
+      "package": "casino",
+      "object": "casino.__player",
+      "kind": "table",
+      "owner": "casino_obj"
+    },
+    {
+      "package": "casino",
+      "object": "casino.__poker_state",
+      "kind": "table",
+      "owner": "casino_obj"
+    },
+    {
+      "package": "casino",
+      "object": "casino.__shoe_event",
+      "kind": "table",
+      "owner": "casino_obj"
+    },
+    {
+      "package": "casino",
+      "object": "casino.__slot_spin",
+      "kind": "table",
+      "owner": "casino_obj"
+    },
+    {
+      "package": "casino",
+      "object": "casino.__table",
+      "kind": "table",
+      "owner": "casino_obj"
+    },
+    {
+      "package": "casino",
+      "object": "casino.__tabletransfer",
+      "kind": "table",
+      "owner": "casino_obj"
+    },
+    {
+      "package": "casino",
+      "object": "casino.map_cardtable_player",
+      "kind": "table",
+      "owner": "casino_obj"
+    },
+    {
+      "package": "casino",
+      "object": "casino.map_game_player",
+      "kind": "table",
+      "owner": "casino_obj"
+    },
+    {
+      "package": "casino",
+      "object": "casino.account",
+      "kind": "view",
+      "owner": "casino_obj"
+    },
+    {
+      "package": "casino",
+      "object": "casino.bank_player",
+      "kind": "view",
+      "owner": "casino_obj"
+    },
+    {
+      "package": "casino",
+      "object": "casino.bank_table",
+      "kind": "view",
+      "owner": "casino_obj"
+    },
+    {
+      "package": "casino",
+      "object": "casino.banktransaction",
+      "kind": "view",
+      "owner": "casino_obj"
+    },
+    {
+      "package": "casino",
+      "object": "casino.betlog",
+      "kind": "view",
+      "owner": "casino_obj"
+    },
+    {
+      "package": "casino",
+      "object": "casino.game",
+      "kind": "view",
+      "owner": "casino_obj"
+    },
+    {
+      "package": "casino",
+      "object": "casino.hand",
+      "kind": "view",
+      "owner": "casino_obj"
+    },
+    {
+      "package": "casino",
+      "object": "casino.log",
+      "kind": "view",
+      "owner": "casino_obj"
+    },
+    {
+      "package": "casino",
+      "object": "casino.player",
+      "kind": "view",
+      "owner": "casino_obj"
+    },
+    {
+      "package": "casino",
+      "object": "casino.slot_spin",
+      "kind": "view",
+      "owner": "casino_obj"
+    },
+    {
+      "package": "casino",
+      "object": "casino.table",
+      "kind": "view",
+      "owner": "casino_obj"
+    },
+    {
+      "package": "casino",
+      "object": "casino.tabletransfer",
+      "kind": "view",
+      "owner": "casino_obj"
+    },
+    {
+      "package": "casino",
+      "object": "casino.__account_id_seq",
+      "kind": "sequence",
+      "owner": "casino_obj"
+    },
+    {
+      "package": "casino",
+      "object": "casino.__banktransaction_id_seq",
+      "kind": "sequence",
+      "owner": "casino_obj"
+    },
+    {
+      "package": "casino",
+      "object": "casino.__betlog_id_seq",
+      "kind": "sequence",
+      "owner": "casino_obj"
+    },
+    {
+      "package": "casino",
+      "object": "casino.__game_id_seq",
+      "kind": "sequence",
+      "owner": "casino_obj"
+    },
+    {
+      "package": "casino",
+      "object": "casino.__hand_id_seq",
+      "kind": "sequence",
+      "owner": "casino_obj"
+    },
+    {
+      "package": "casino",
+      "object": "casino.__log_id_seq",
+      "kind": "sequence",
+      "owner": "casino_obj"
+    },
+    {
+      "package": "casino",
+      "object": "casino.__shoe_event_id_seq",
+      "kind": "sequence",
+      "owner": "casino_obj"
+    },
+    {
+      "package": "casino",
+      "object": "casino.__slot_spin_id_seq",
+      "kind": "sequence",
+      "owner": "casino_obj"
+    },
+    {
+      "package": "casino",
+      "object": "casino.__tabletransfer_id_seq",
+      "kind": "sequence",
+      "owner": "casino_obj"
+    }
+  ],
+  "grants": []
+}
