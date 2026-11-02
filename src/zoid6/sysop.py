@@ -24,6 +24,11 @@ from pathlib import Path
 from bbsengine6 import acl
 
 ACCOUNT = "zoid6"
+# The group that may write the zoid6 install paths. Members (jam, and the
+# deploy user) get access through this group, so the wheels and venv are
+# written without sudo. Setgid on dist-wheels keeps new files in this group.
+ACCOUNT_GROUP = "zoid6"
+ZOID6_HOME = "/home/zoid6"
 DEFAULT_VENV = "/home/zoid6/venv"
 DEFAULT_DIST = "/home/zoid6/dist-wheels"
 INSTALLER_NAME = "INSTALL-zoid6-venv.sh"
@@ -31,6 +36,21 @@ INSTALLER_NAME = "INSTALL-zoid6-venv.sh"
 
 class SysopError(RuntimeError):
     """The command refused, or a step failed. The message says what to do."""
+
+
+def zoid6_plan(venv: str, dist_wheels: str) -> list[acl.AclEntry]:
+    """The ACL entries for the zoid6 install, in the order they are applied.
+
+    ``/home/zoid6`` needs only traverse (``x``) so the group can reach the venv
+    and dist-wheels without listing the rest of the home directory.
+    """
+    return [
+        acl.AclEntry(ZOID6_HOME, ACCOUNT_GROUP, "x"),
+        acl.AclEntry(venv, ACCOUNT_GROUP, "rwX"),
+        acl.AclEntry(venv, ACCOUNT_GROUP, "rwX", default=True),
+        acl.AclEntry(dist_wheels, ACCOUNT_GROUP, "rwX"),
+        acl.AclEntry(dist_wheels, ACCOUNT_GROUP, "rwX", default=True),
+    ]
 
 
 def effective_account() -> str:
@@ -59,17 +79,13 @@ def _paths(prefix: str | None) -> tuple[str, str]:
 def check_acl(prefix: str | None = None) -> list[tuple[acl.AclEntry, bool]]:
     """Read-only. Each ACL entry with whether its effective permission is present."""
     venv, dist = _paths(prefix)
-    results = []
-    for entry in acl.acl_plan(venv=venv, dist_wheels=dist):
-        ok = acl.check_acl(entry.path, entry.group, entry.perms)
-        results.append((entry, ok))
-    return results
+    return acl.check_plan(zoid6_plan(venv, dist))
 
 
 def apply_acl(prefix: str | None = None) -> None:
     """Grant every ACL in the plan. Raises SysopError for a missing path or a setfacl failure."""
     venv, dist = _paths(prefix)
-    plan = acl.acl_plan(venv=venv, dist_wheels=dist)
+    plan = zoid6_plan(venv, dist)
     # Check every path before the first setfacl: a refusal must change nothing.
     missing = sorted({e.path for e in plan if not os.path.exists(e.path)})
     if missing:
@@ -77,11 +93,10 @@ def apply_acl(prefix: str | None = None) -> None:
             f"zoid6 --install: {', '.join(missing)} does not exist. Create it first, as "
             f"{ACCOUNT} (or root), then re-run. No ACL was changed."
         )
-    for entry in plan:
-        try:
-            acl.grant_acl(entry.path, entry.group, entry.perms, default=entry.default)
-        except (RuntimeError, FileNotFoundError) as exc:
-            raise SysopError(f"zoid6 --install: {exc}") from exc
+    try:
+        acl.apply_plan(plan)
+    except (RuntimeError, FileNotFoundError) as exc:
+        raise SysopError(f"zoid6 --install: {exc}") from exc
 
 
 def install_wheels(prefix: str | None = None) -> None:

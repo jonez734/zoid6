@@ -66,7 +66,7 @@ def test_check_acl_reports_every_entry_read_only(monkeypatch, capsys):
         rc = sysop.main(["--check-acl"])
     assert rc == 0
     grant.assert_not_called()
-    assert check.call_count == len(acl.acl_plan())
+    assert check.call_count == len(sysop.zoid6_plan(sysop.DEFAULT_VENV, sysop.DEFAULT_DIST))
     out = capsys.readouterr().out
     assert "all grants present" in out
 
@@ -162,3 +162,33 @@ def test_a_missing_later_path_changes_no_earlier_acl(monkeypatch, tmp_path):
          pytest.raises(sysop.SysopError, match="does not exist"):
         sysop.apply_acl(None)
     grant.assert_not_called()
+
+
+# ---- the zoid6 ACL plan (owned by zoid6, not bbsengine6) ----------------------------------
+
+
+def test_zoid6_plan_grants_the_zoid6_group_only():
+    plan = sysop.zoid6_plan("/home/zoid6/venv", "/home/zoid6/dist-wheels")
+    assert all(e.group == "zoid6" for e in plan)
+
+
+def test_zoid6_plan_grants_only_traverse_on_home():
+    plan = sysop.zoid6_plan("/home/zoid6/venv", "/home/zoid6/dist-wheels")
+    home = [e for e in plan if e.path == "/home/zoid6"]
+    assert home == [acl.AclEntry("/home/zoid6", "zoid6", "x")]
+
+
+def test_zoid6_plan_matches_expected_entries():
+    assert sysop.zoid6_plan("/home/zoid6/venv", "/home/zoid6/dist-wheels") == [
+        acl.AclEntry("/home/zoid6", "zoid6", "x"),
+        acl.AclEntry("/home/zoid6/venv", "zoid6", "rwX"),
+        acl.AclEntry("/home/zoid6/venv", "zoid6", "rwX", default=True),
+        acl.AclEntry("/home/zoid6/dist-wheels", "zoid6", "rwX"),
+        acl.AclEntry("/home/zoid6/dist-wheels", "zoid6", "rwX", default=True),
+    ]
+
+
+def test_zoid6_plan_honors_a_custom_prefix():
+    venv, dist = sysop._paths("/srv/z/venv")
+    paths = {e.path for e in sysop.zoid6_plan(venv, dist)}
+    assert paths == {"/home/zoid6", "/srv/z/venv", "/srv/z/dist-wheels"}
