@@ -347,6 +347,120 @@
       "object": "casino.__tabletransfer_id_seq",
       "kind": "sequence",
       "owner": "casino_obj"
+    },
+    {
+      "package": "postoffice",
+      "object": "postoffice.__address",
+      "kind": "table",
+      "owner": "postoffice_obj"
+    },
+    {
+      "package": "postoffice",
+      "object": "postoffice.__mailbox",
+      "kind": "table",
+      "owner": "postoffice_obj"
+    },
+    {
+      "package": "postoffice",
+      "object": "postoffice.__mailbox_address",
+      "kind": "table",
+      "owner": "postoffice_obj"
+    },
+    {
+      "package": "postoffice",
+      "object": "postoffice.__mailbox_member",
+      "kind": "table",
+      "owner": "postoffice_obj"
+    },
+    {
+      "package": "postoffice",
+      "object": "postoffice.__message",
+      "kind": "table",
+      "owner": "postoffice_obj"
+    },
+    {
+      "package": "postoffice",
+      "object": "postoffice.mailbox_password",
+      "kind": "table",
+      "owner": "postoffice_obj"
+    },
+    {
+      "package": "postoffice",
+      "object": "postoffice.member_mailbox_password",
+      "kind": "table",
+      "owner": "postoffice_obj"
+    },
+    {
+      "package": "postoffice",
+      "object": "postoffice.message_routing",
+      "kind": "table",
+      "owner": "postoffice_obj"
+    },
+    {
+      "package": "postoffice",
+      "object": "postoffice.shared_mailbox",
+      "kind": "table",
+      "owner": "postoffice_obj"
+    },
+    {
+      "package": "postoffice",
+      "object": "postoffice.virtual",
+      "kind": "table",
+      "owner": "postoffice_obj"
+    },
+    {
+      "package": "postoffice",
+      "object": "postoffice.mailbox",
+      "kind": "view",
+      "owner": "postoffice_obj"
+    },
+    {
+      "package": "postoffice",
+      "object": "postoffice.mailbox_address",
+      "kind": "view",
+      "owner": "postoffice_obj"
+    },
+    {
+      "package": "postoffice",
+      "object": "postoffice.mailbox_member",
+      "kind": "view",
+      "owner": "postoffice_obj"
+    },
+    {
+      "package": "postoffice",
+      "object": "postoffice.__mailbox_address_id_seq",
+      "kind": "sequence",
+      "owner": "postoffice_obj"
+    },
+    {
+      "package": "postoffice",
+      "object": "postoffice.__mailbox_id_seq",
+      "kind": "sequence",
+      "owner": "postoffice_obj"
+    },
+    {
+      "package": "postoffice",
+      "object": "postoffice.__mailbox_member_id_seq",
+      "kind": "sequence",
+      "owner": "postoffice_obj"
+    },
+    {
+      "package": "postoffice",
+      "object": "postoffice.member_mailbox_password_id_seq",
+      "kind": "sequence",
+      "owner": "postoffice_obj"
+    },
+    {
+      "package": "postoffice",
+      "object": "postoffice.message_routing_id_seq",
+      "kind": "sequence",
+      "owner": "postoffice_obj"
+    },
+    {
+      "package": "postoffice",
+      "object": "postoffice.shared_mailbox_id_seq",
+      "kind": "sequence",
+      "owner": "postoffice_obj"
     }
   ],
   "grants": []

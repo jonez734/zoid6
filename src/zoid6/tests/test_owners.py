@@ -40,12 +40,12 @@ def _changed(cur):
 
 def test_packaged_owner_list_loads():
     ol = ow.load_owners()
-    assert len(ol.entries) == 55
-    assert {e.package for e in ol.entries} == {"bed", "casino"}
+    assert len(ol.entries) == 74
+    assert {e.package for e in ol.entries} == {"bed", "casino", "postoffice"}
 
 
-def test_packaged_list_targets_only_bed_obj_and_casino_obj():
-    assert {e.owner for e in ow.load_owners().entries} == {"bed_obj", "casino_obj"}
+def test_packaged_list_targets_only_the_owner_roles():
+    assert {e.owner for e in ow.load_owners().entries} == {"bed_obj", "casino_obj", "postoffice_obj"}
 
 
 def test_casino_schema_is_not_in_the_list():

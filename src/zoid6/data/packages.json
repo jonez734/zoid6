@@ -21,7 +21,7 @@
     },
     {
       "name": "postoffice",
-      "enabled": false,
+      "enabled": true,
       "manifest": "postoffice/sql/objects.json",
       "install": "postoffice --install"
     },
