@@ -1,4 +1,4 @@
-"""The ``zoid6`` admin command: ``--install`` and ``--check-acl`` (phase 10).
+"""The ``zoid6`` sysop command: ``--install`` and ``--check-acl`` (phase 10).
 
 Runs as the zoid6 account (no sudo). The root-only steps are not here: they are
 printed as the command to run as root, and deploytool's zoid6.prod will own them.
@@ -29,7 +29,7 @@ DEFAULT_DIST = "/home/zoid6/dist-wheels"
 INSTALLER_NAME = "INSTALL-zoid6-venv.sh"
 
 
-class AdminError(RuntimeError):
+class SysopError(RuntimeError):
     """The command refused, or a step failed. The message says what to do."""
 
 
@@ -41,7 +41,7 @@ def effective_account() -> str:
 def require_zoid6() -> None:
     who = effective_account()
     if who != ACCOUNT:
-        raise AdminError(
+        raise SysopError(
             f"zoid6: must run as the {ACCOUNT} account (this is {who}). "
             f"Run it as {ACCOUNT}; sudo is not used."
         )
@@ -67,13 +67,13 @@ def check_acl(prefix: str | None = None) -> list[tuple[acl.AclEntry, bool]]:
 
 
 def apply_acl(prefix: str | None = None) -> None:
-    """Grant every ACL in the plan. Raises AdminError for a missing path or a setfacl failure."""
+    """Grant every ACL in the plan. Raises SysopError for a missing path or a setfacl failure."""
     venv, dist = _paths(prefix)
     plan = acl.acl_plan(venv=venv, dist_wheels=dist)
     # Check every path before the first setfacl: a refusal must change nothing.
     missing = sorted({e.path for e in plan if not os.path.exists(e.path)})
     if missing:
-        raise AdminError(
+        raise SysopError(
             f"zoid6 --install: {', '.join(missing)} does not exist. Create it first, as "
             f"{ACCOUNT} (or root), then re-run. No ACL was changed."
         )
@@ -81,7 +81,7 @@ def apply_acl(prefix: str | None = None) -> None:
         try:
             acl.grant_acl(entry.path, entry.group, entry.perms, default=entry.default)
         except (RuntimeError, FileNotFoundError) as exc:
-            raise AdminError(f"zoid6 --install: {exc}") from exc
+            raise SysopError(f"zoid6 --install: {exc}") from exc
 
 
 def install_wheels(prefix: str | None = None) -> None:
@@ -89,13 +89,13 @@ def install_wheels(prefix: str | None = None) -> None:
     venv, dist = _paths(prefix)
     installer = os.path.join(dist, INSTALLER_NAME)
     if not os.path.isfile(installer):
-        raise AdminError(
+        raise SysopError(
             f"zoid6 --install: {installer} is not staged. Run deploy zoid6.wheels first."
         )
     env = {**os.environ, "DIST": dist, "VENV": venv}
     proc = subprocess.run(["sh", installer], env=env, check=False)
     if proc.returncode != 0:
-        raise AdminError(f"zoid6 --install: the installer failed (rc={proc.returncode})")
+        raise SysopError(f"zoid6 --install: the installer failed (rc={proc.returncode})")
 
 
 def _print_check(results: list[tuple[acl.AclEntry, bool]]) -> bool:
@@ -142,6 +142,6 @@ def main(argv: Sequence[str] | None = None) -> int:
             return 1
         print("zoid6 --install: complete.")
         return 0
-    except AdminError as exc:
+    except SysopError as exc:
         print(str(exc), file=sys.stderr)
         return 1
