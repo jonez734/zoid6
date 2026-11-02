@@ -42,7 +42,11 @@ echo "$BUILDS" | while IFS='|' read -r name src prefix vfile; do
     git -C "$ROOT/$repo" archive HEAD | tar -x -C "$out/export"
     pkg="$out/export/$sub"
     version="$("$VERSION_SCRIPT" "$prefix" "$STAGE")"
-    printf '__version__ = "%s"\n__datestamp__ = "%s"\n' "$version" "$version" > "$pkg/$vfile"
+    # Write every name a package's build reads: bed/bbsengine6/zoid6 use __version__, casino uses
+    # version (pyproject attr casino._version.version). Writing only __version__ removed casino's
+    # `version` and broke its build.
+    printf '__version__ = "%s"\n__datestamp__ = "%s"\nversion = "%s"\ndatestamp = "%s"\n' \
+        "$version" "$version" "$version" "$version" > "$pkg/$vfile"
     ( cd "$pkg" && python3 -m build --wheel --outdir "$out/wheel" >"$out/build.log" 2>&1 ) \
         || { echo "build: $name failed; see $out/build.log" >&2; cat "$out/build.log" >&2; exit 1; }
     whl="$(ls "$out/wheel"/*.whl)"
