@@ -99,6 +99,10 @@ $functions$;
 -- bed does not hold this privilege, so it is not copied above; it is granted here, by the owner.
 grant select on engine.__member to bed_zoid6;
 
+-- jargon's write gate reads a member's flags through engine.getflags, which reads map_member_flag.
+-- bed does not hold this privilege, so it is granted here, by the owner.
+grant select on engine.map_member_flag to bed_zoid6;
+
 -- The daemon's login is a principal, so it has a member row (the foreign key from engine.pgrole
 -- requires one). It has no password: identd authenticates the connection. It is approved so it
 -- is not treated as a pending signup, and its email is a placeholder, since a daemon has no mailbox.
