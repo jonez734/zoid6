@@ -1,0 +1,8 @@
+#!/usr/bin/env python3.12
+# zoid6 admin command: --install and --check-acl. Run as the zoid6 account.
+import sys
+
+from zoid6.admin import main
+
+if __name__ == "__main__":
+    sys.exit(main())
