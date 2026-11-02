@@ -18,7 +18,7 @@ include = ["zoid6*"]
 
 [tool.setuptools]
 script-files = [
-    "bin/zoid6",
+    "bin/zoid6d",
     "bin/zoid6-ping",
 ] 
 

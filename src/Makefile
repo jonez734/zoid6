@@ -420,7 +420,7 @@ start: install-user
 	    else \
 	        echo "stale pidfile, removing"; rm -f $(RUN_DIR)/zoid6.pid; \
 	    fi; }
-	nohup $(VENV_DIR)/bin/zoid6 \
+	nohup $(VENV_DIR)/bin/zoid6d \
 	    --router zoid6.api.handler.MessageRouter \
 	    > $(LOG_DIR)/zoid6.log 2>&1 & echo $$! > $(RUN_DIR)/zoid6.pid
 	@echo "zoid6 started (pid $$(cat $(RUN_DIR)/zoid6.pid)) — log: $(LOG_DIR)/zoid6.log"

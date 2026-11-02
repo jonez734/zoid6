@@ -187,7 +187,7 @@ zoid6 installs nothing under `/etc`. Its configuration is the packaged
 `zoid6.json`, and its directories come from `zoid6.tmpfiles`:
 
 ```
-/home/zoid6/venv/bin/zoid6   (console script, the zoid6 account's venv)
+/home/zoid6/venv/bin/zoid6d  (daemon launcher, the zoid6 account's venv)
 /var/log/zoid6/              (created by zoid6.tmpfiles)
 /home/zoid6/                 (the zoid6 account's home, created by zoid6.sysusers)
 ```

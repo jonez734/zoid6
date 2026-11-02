@@ -275,7 +275,7 @@ filesystem. Its files are:
 
 ```
 /home/zoid6/                      (the zoid6 account home, zoid6.sysusers)
-/home/zoid6/venv/bin/zoid6        (console script, the zoid6 account's venv)
+/home/zoid6/venv/bin/zoid6d       (daemon launcher, the zoid6 account's venv)
 /var/log/zoid6/                   (created by zoid6.tmpfiles)
 ```
 
