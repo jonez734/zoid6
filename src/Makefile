@@ -471,11 +471,12 @@ PGSQL_DATABASENAME ?= zoid6
 # listed wheels into the zoid6 account's home (root). install-wheels builds the venv from them as
 # the zoid6 account (no sudo for the install itself).
 WHEEL_STAGE ?= $(CURDIR)/../../dist-wheels
+SCRIPTS_DIR ?= $(CURDIR)/../../scripts
 ZOID6_DIST  ?= /home/zoid6/dist-wheels
 
 sync-wheels:
 	@test "$$(id -u)" -eq 0 || { echo "sync-wheels: run as root (sudo make sync-wheels)"; exit 1; }
-	SRC=$(WHEEL_STAGE) DEST=$(ZOID6_DIST) OWNER=$(VENV_OWNER):$(VENV_GROUP) sh $(WHEEL_STAGE)/sync-zoid6-wheels.sh
+	SRC=$(WHEEL_STAGE) DEST=$(ZOID6_DIST) OWNER=$(VENV_OWNER):$(VENV_GROUP) sh $(SCRIPTS_DIR)/sync-zoid6-wheels.sh
 
 install-wheels:
 	@test "$$(id -un)" = "$(VENV_OWNER)" || { echo "install-wheels: run as $(VENV_OWNER) (sudo -u $(VENV_OWNER) make install-wheels)"; exit 1; }

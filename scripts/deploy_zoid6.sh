@@ -13,7 +13,7 @@
 # restart are printed for you to run, and the script never sudos itself.
 #
 # Usage:
-#   sudo sh <wheels>/sync-zoid6-wheels.sh      # step 1a, as root
+#   sudo sh <scripts>/sync-zoid6-wheels.sh    # step 1a, as root
 #   SYNCED=1 scripts/deploy_zoid6.sh           # steps 1b-4, as jam
 #   scripts/deploy_zoid6.sh --dry-run          # print the commands, change nothing
 #   scripts/deploy_zoid6.sh --wheels DIR       # resolve wheels from DIR instead
@@ -27,6 +27,7 @@ set -euo pipefail
 # scripts/resolve_wheels.py: the newest build on the package's version line. No wheel
 # filename is written in this script.
 WHEELS_DIR="/home/opencode/data/work/dist-wheels"
+SCRIPTS_DIR="/home/opencode/data/work/scripts"
 HERE="$(cd "$(dirname "$0")" && pwd)"
 RESOLVE="$HERE/resolve_wheels.py"
 # ZOID6_HOME: the zoid6 account's home (zoid6's Makefile: VENV_DIR ?= /home/zoid6/venv).
@@ -107,7 +108,7 @@ run() {
 #    The sync needs root, so it is printed for the operator to run; this script does not sudo.
 echo "== 1/4 service venv (zoid6 account): sync the manifest wheels, then install"
 echo "  step 1a needs root; run it first, then re-run this script with SYNCED=1:"
-echo "    sudo sh $WHEELS_DIR/sync-zoid6-wheels.sh"
+echo "    sudo sh $SCRIPTS_DIR/sync-zoid6-wheels.sh"
 if [ "$DRY_RUN" -eq 0 ] && [ "${SYNCED:-0}" -ne 1 ]; then
     echo "  (SYNCED is not 1: stopping before the account install.)" >&2
     exit 1
