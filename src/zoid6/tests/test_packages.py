@@ -43,7 +43,8 @@ def test_packaged_list_loads_and_is_ordered():
     pl = pk.load_packages()
     names = [p.name for p in pl.packages]
     assert names[:3] == ["bbsengine6", "bed", "casino"]
-    assert set(names[3:]) == {"empyre", "murdermotel", "zoidoffice", "teos"}
+    assert names[3] == "postoffice"
+    assert set(names[4:]) == {"empyre", "murdermotel", "zoidoffice", "teos"}
 
 
 def test_packaged_enabled_set_is_the_three_core_packages():
@@ -53,7 +54,7 @@ def test_packaged_enabled_set_is_the_three_core_packages():
 def test_disabled_entries_are_not_enabled():
     pl = pk.load_packages()
     for p in pl.packages:
-        if p.name in ("empyre", "murdermotel", "zoidoffice", "teos"):
+        if p.name in ("postoffice", "empyre", "murdermotel", "zoidoffice", "teos"):
             assert p.enabled is False
 
 
