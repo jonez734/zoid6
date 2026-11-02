@@ -210,14 +210,14 @@ each one.)*
 
 The daemon's login is `bed_zoid6`, a `LOGIN NOINHERIT` role that holds the grants the daemon needs.
 `zoid6` itself stays a non-login schema owner: do not grant it login. The migration
-`src/casino/sql/zoid6_role_migration.sql` creates `bed_zoid6`, copies every privilege `bed` holds on
+`src/zoid6/sql/zoid6_role_migration.sql` creates `bed_zoid6`, copies every privilege `bed` holds on
 the `engine` and `casino` schemas (read from the catalog ACLs), and records the role in `engine.pgrole`.
 `bed` is left in place for rollback.
 
 Run it as the schema owner (or a `zoid6` member), on each database:
 
 ```
-psql -h 127.0.0.1 -d zoid6 -v ON_ERROR_STOP=1 -f src/casino/sql/zoid6_role_migration.sql
+psql -h 127.0.0.1 -d zoid6 -v ON_ERROR_STOP=1 -f src/zoid6/sql/zoid6_role_migration.sql
 ```
 
 It is idempotent. The daemon connects as `bed_zoid6` because the unit passes `--databaseuser bed_zoid6`
@@ -227,7 +227,7 @@ not a login.
 Once it exists, the database owner (not the daemon) runs it on each database:
 
 ```
-psql -h 127.0.0.1 -d zoid6 -v ON_ERROR_STOP=1 -f src/casino/sql/zoid6_role_migration.sql
+psql -h 127.0.0.1 -d zoid6 -v ON_ERROR_STOP=1 -f src/zoid6/sql/zoid6_role_migration.sql
 ```
 
 The migration is idempotent. The `bed` login stays in place until verification passes, and is removed
