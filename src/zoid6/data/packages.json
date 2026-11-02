@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "packages": [
+    {"name": "bbsengine6", "enabled": true, "manifest": "bbsengine6/sql/objects.json", "install": "bbsengine6 --startup"},
+    {"name": "bed", "enabled": true, "manifest": "bed/sql/objects.json", "install": "bed --install"},
+    {"name": "casino", "enabled": true, "manifest": "casino/sql/objects.json", "install": "casino --install"},
+    {"name": "empyre", "enabled": false, "manifest": "empyre/sql/objects.json", "install": "empyre --install"},
+    {"name": "murdermotel", "enabled": false, "manifest": "murdermotel/sql/objects.json", "install": "murdermotel --install"},
+    {"name": "zoidoffice", "enabled": false, "manifest": "zoidoffice/sql/objects.json", "install": "zoidoffice --install"},
+    {"name": "teos", "enabled": false, "manifest": "teos/sql/objects.json", "install": "teos --install"}
+  ]
+}

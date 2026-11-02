@@ -274,6 +274,30 @@ the managed lines (the ones shown above) and reload.
 **Verify:** the daemon's journal stops showing `role "zoid6" is not permitted to log in`, and
 `zoid6.service` stays active.
 
+## 4b. Install order and the package list *(built: `src/zoid6/data/packages.json`, `src/zoid6/packages.py`)*
+
+Installs run in this order, and each step depends on the one before it:
+
+1. `bbsengine6 --startup`: the engine schema and bbsengine6's own objects.
+2. `bed --install`: bed's objects, created as the connecting superuser.
+3. `casino --install`: casino's objects, created as the connecting superuser.
+4. `zoid6 --install`: checks every enabled package above, then sets owners and grants.
+
+Step 4 refuses to run unless every enabled package reports `installed`. A `partial` or
+`not installed` package is named, with its missing objects and the command to run for it
+(`bed --install`, for example). Nothing is changed when it refuses.
+
+The package list is `src/zoid6/data/packages.json`. Packages are checked in list order.
+A package with `"enabled": false` is never read, checked, or refused on, so a disabled
+program does not block an install. To enable a program, set its `enabled` to `true` in
+that file and reinstall zoid6. Disabling a program after its install leaves its objects
+with their current owners; zoid6 does not move them back.
+
+Every enabled package must have its own enabled dependencies: `casino` requires `bed`, and
+`bed` requires `bbsengine6`. The list is refused if a dependency is disabled.
+
+Every install step runs as a database superuser. zoid6 itself does not need superuser.
+
 ## 5. Configuration
 
 zoid6 has no required configuration file. With no `--config`, the daemon uses the bundled
