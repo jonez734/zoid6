@@ -90,7 +90,7 @@ deploy-tui:
 deploy-prod:
 	$(MAKE) -C src deploy-prod VENV_DIR="$(VENV_DIR)" VENV_USER="$(VENV_USER)" VENV_GROUP="$(VENV_GROUP)" BED_DIR="$(BED_DIR)" WHEEL_DIR="$(WHEEL_DIR)"
 
-.PHONY: install-venv uninstall-venv install-fhs uninstall-fhs install-identd install-pgsql sync-wheels install-wheels
+.PHONY: install-venv uninstall-venv install-fhs uninstall-fhs install-root install-identd install-pgsql sync-wheels install-wheels
 
 install-venv:
 	$(MAKE) -C src install-venv VENV_DIR="$(VENV_DIR)" VENV_USER="$(VENV_USER)" VENV_GROUP="$(VENV_GROUP)" BED_DIR="$(BED_DIR)" WHEEL_DIR="$(WHEEL_DIR)"
@@ -102,6 +102,10 @@ sync-wheels:
 
 install-wheels:
 	$(MAKE) -C src install-wheels
+
+# Root-only host setup (sysusers, tmpfiles, identd). Forwards to src; the deploytool zoid6.root sub.
+install-root:
+	$(MAKE) -C src install-root VENV_DIR="$(VENV_DIR)"
 
 # Identd mapping on the PostgreSQL server (root). Forwards to src; not part of deploy-prod.
 install-identd:

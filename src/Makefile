@@ -246,6 +246,15 @@ endif
 # `make install-fhs` stay interchangeable.
 deploy-prod: install-fhs
 
+# Root-only host setup for zoid6.prod: the sysusers and tmpfiles entries, then the identd
+# mapping. Deliberately not install-fhs: that also installs the venv and systemd unit, which are
+# zoid6-account and separate steps. Refuses unless run as root, before any change.
+install-root:
+	@test "$$(id -u)" -eq 0 || { echo "install-root: run as root (sudo make install-root)"; exit 1; }
+	$(MAKE) install-sysusers install-tmpfiles
+	$(MAKE) install-identd VENV_DIR="$(VENV_DIR)"
+	@echo "install-root: sysusers, tmpfiles and identd installed"
+
 install-tmpfiles: install-sysusers
 	sudo install -m 0644 -o root -g root $(TMPFILES_SRC) $(TMPFILES_DST)
 	sudo chown root:root $(TMPFILES_DST)
