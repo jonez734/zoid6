@@ -83,3 +83,10 @@ $listed
 $name
 "*) ;; *) rm -f "$w"; echo "pruned $name" ;; esac
 done
+
+# Copy the install scripts into the stage from the meta-repo's scripts/ directory. dist-wheels is a copy
+# target, never the source: a hand-copied installer went stale once and reinstalled a bug.
+for script in INSTALL-zoid6-venv.sh sync-zoid6-wheels.sh; do
+    cp "$ROOT/scripts/$script" "$STAGE/$script"
+    chmod 0755 "$STAGE/$script"
+done
