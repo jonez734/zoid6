@@ -10,8 +10,10 @@ import subprocess
 
 import pytest
 
-ROOT = pathlib.Path(__file__).resolve().parents[3]
-INSTALLER = ROOT / "scripts" / "INSTALL-zoid6-venv.sh"
+# The installer that is staged and copied into the account is the meta-repo's scripts/ copy: the build
+# helper and sync-zoid6-wheels.sh both take it from there. This test reads that same file.
+META_ROOT = pathlib.Path(__file__).resolve().parents[4]
+INSTALLER = META_ROOT / "scripts" / "INSTALL-zoid6-venv.sh"
 
 
 @pytest.mark.unit
@@ -33,9 +35,20 @@ def test_installer_clears_only_pip_leftovers(tmp_path):
     text = INSTALLER.read_text()
     assert 'for stale in "$sp"/~*' in text, "the installer must remove pip's ~ leftovers"
     # Run only the cleanup block, extracted from the installer.
-    block = text[text.index("for sp in"):text.index('"$VENV/bin/python" -m pip install --upgrade pip')]
+    block = text[text.index("for sp in"):text.index('"$VENV/bin/pip" install --upgrade pip')]
     subprocess.run(["sh", "-c", f'VENV="$1"\n{block}', "sh", str(venv)], check=True)
     assert not (sp / "~asino").exists()
     assert not (sp / "~asino-0.4.0.dev1.dist-info").exists()
     assert (sp / "casino").is_dir()
     assert (sp / "bed.pth").is_file()
+
+
+@pytest.mark.unit
+def test_installer_calls_the_venv_pip_directly_not_python_dash_m():
+    """The account installs through $VENV/bin/pip, so the sudo rule need not grant the interpreter for installs."""
+    code = "\n".join(
+        ln for ln in INSTALLER.read_text(encoding="utf-8").splitlines() if not ln.lstrip().startswith("#")
+    )
+    assert '"$VENV/bin/pip" install --upgrade pip' in code
+    assert '"$VENV/bin/pip" install --upgrade "$@"' in code
+    assert "-m pip" not in code

@@ -470,8 +470,10 @@ WHEEL_STAGE ?= $(CURDIR)/../../dist-wheels
 SCRIPTS_DIR ?= $(CURDIR)/../../scripts
 ZOID6_DIST  ?= /home/zoid6/dist-wheels
 
+# Copies the staged wheels, manifest, and installer into the zoid6 account's dist-wheels. Runs as the caller:
+# the destination is zoid6-owned and group-writable, so no root is needed. Run as root only to set an owner
+# other than the caller; the script does that itself when it is root.
 sync-wheels:
-	@test "$$(id -u)" -eq 0 || { echo "sync-wheels: run as root (sudo make sync-wheels)"; exit 1; }
 	SRC=$(WHEEL_STAGE) DEST=$(ZOID6_DIST) OWNER=$(VENV_OWNER):$(VENV_GROUP) sh $(SCRIPTS_DIR)/sync-zoid6-wheels.sh
 
 install-wheels:
