@@ -18,15 +18,14 @@ Group=zoid6
 UMask=0027
 WorkingDirectory=/home/zoid6
 
-# The daemon connects to PostgreSQL as bed_zoid6, which identd maps from this OS user.
-# The database login is bed_zoid6 (identd maps the zoid6 OS user to it); zoid6 stays a non-login
-# owner. No password and no environment file. --config names the zoid6.json packaged in the venv: the
-# zoid6 router requires the services block that only that file carries.
-ExecStart=@VENV_DIR@/bin/bed \
+# Run zoid6's own entry point (zoid6d -> zoid6.main:main). It resolves the zoid6 config (the packaged
+# zoid6.json, which carries the services block the router needs) and the zoid6 router, then starts bed.
+# Running bed directly skipped that resolution and started the generic daemon.
+# The daemon connects to PostgreSQL as bed_zoid6, which identd maps from this OS user; the database flags
+# are passed through to bed. No password and no environment file.
+ExecStart=@VENV_DIR@/bin/zoid6d \
   --databasename zoid6 \
-  --databaseuser bed_zoid6 \
-  --config @VENV_DIR@/lib64/python3.12/site-packages/zoid6/data/zoid6.json \
-  --router zoid6.api.handler.MessageRouter
+  --databaseuser bed_zoid6
 
 ExecReload=/bin/kill -HUP $MAINPID
 

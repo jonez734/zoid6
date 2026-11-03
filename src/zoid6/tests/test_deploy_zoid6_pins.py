@@ -130,3 +130,13 @@ def test_service_install_requires_the_sync_first():
     text = DEPLOY.read_text()
     assert "sync-zoid6-wheels.sh" in text
     assert "SYNCED" in text
+
+
+@pytest.mark.unit
+def test_zoid6_unit_runs_zoid6d_not_bed():
+    """The daemon starts through zoid6's entry point (zoid6d), which resolves the zoid6 config and router.
+    Running bed directly starts the generic daemon instead."""
+    unit = (pathlib.Path(__file__).resolve().parents[1] / "daemon" / "zoid6.service").read_text(encoding="utf-8")
+    exec_line = next(ln for ln in unit.splitlines() if ln.startswith("ExecStart="))
+    assert "/bin/zoid6d" in exec_line
+    assert "/bin/bed" not in exec_line
