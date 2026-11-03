@@ -39,7 +39,9 @@ echo "$BUILDS" | while IFS='|' read -r name src prefix vfile; do
     mkdir -p "$out/export" "$out/wheel"
     # Export the whole repo: some builds read files beside the package (letteredolive's setup.py reads
     # ../bin), so a subdirectory export is not enough. The package is built from its source dir.
-    git -C "$ROOT/$repo" archive HEAD | tar -x -C "$out/export"
+    # The repo is owned by opencode; the build may run as another account (zoid6, jam). Trust this one path
+    # for this command only, so no global git config is needed for the build to read it.
+    git -c safe.directory="$ROOT/$repo" -C "$ROOT/$repo" archive HEAD | tar -x -C "$out/export"
     pkg="$out/export/$sub"
     version="$("$VERSION_SCRIPT" "$prefix" "$STAGE")"
     # Write every name a package's build reads: bed/bbsengine6/zoid6 use __version__, casino uses
