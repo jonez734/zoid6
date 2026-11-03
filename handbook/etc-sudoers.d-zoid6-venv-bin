@@ -1,0 +1,20 @@
+# /etc/sudoers.d/zoid6-venv-bin
+#
+# Lets jam run anything in the zoid6 venv's bin/ as the zoid6 account, so deploy, pip, and the zoid6
+# launchers can run without a root shell. The account that runs them is zoid6, not root.
+#
+# Install (as root), once per host:
+#   cp zoid6/handbook/etc-sudoers.d-zoid6-venv-bin /etc/sudoers.d/zoid6-venv-bin
+#   chown root:root /etc/sudoers.d/zoid6-venv-bin
+#   chmod 0440 /etc/sudoers.d/zoid6-venv-bin
+#   visudo -c -f /etc/sudoers.d/zoid6-venv-bin
+#
+# Prompting: no NOPASSWD. sudo asks for jam's password and keeps the default re-prompt window.
+#
+# Precondition: /home/zoid6/venv/bin must not be writable by jam (owner zoid6, mode 0755). Otherwise jam
+# could replace a launcher there and run it as zoid6. Set it once as root:
+#   chmod 0755 /home/zoid6/venv/bin
+#
+# Trust: the glob grants any Python code as zoid6, because python and pip are in bin/. Only jam is named.
+Cmnd_Alias ZOID6_VENV_BIN = /home/zoid6/venv/bin/*
+jam ALL=(zoid6) ZOID6_VENV_BIN

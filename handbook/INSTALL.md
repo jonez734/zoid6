@@ -71,10 +71,10 @@ section 2.
 **Create the venv (the commands to run, chained with `&&`):**
 
 ```
-cd /home/opencode/data/work/zoid6 && sudo make sync-wheels && sudo -u zoid6 sh /home/zoid6/dist-wheels/INSTALL-zoid6-venv.sh && sudo systemctl restart zoid6 && journalctl -u zoid6 --since "2 minutes ago" | tail -5
+cd /home/opencode/data/work/zoid6 && make sync-wheels && sudo -u zoid6 sh /home/zoid6/dist-wheels/INSTALL-zoid6-venv.sh && sudo systemctl restart zoid6 && journalctl -u zoid6 --since "2 minutes ago" | tail -5
 ```
 
-- `sudo make sync-wheels` (root) copies the wheels named in `dist-wheels/zoid6-wheels.txt` into
+- `make sync-wheels` (as `jam`, no root) copies the wheels named in `dist-wheels/zoid6-wheels.txt` into
   `/home/zoid6/dist-wheels`, owned by `zoid6`.
 - `sudo -u zoid6 sh /home/zoid6/dist-wheels/INSTALL-zoid6-venv.sh` (the account) creates `/home/zoid6/venv` with
   `/usr/bin/python3.12` and installs those wheels. It needs no root, because the account owns its home.
@@ -87,10 +87,10 @@ The two routes below explain how the wheels get there. Use 3a for the normal rou
 Use this when the wheels are built on a build host and the `zoid6` account has no access to the
 source tree. The `zoid6` account never reads `/home/opencode`: the wheels are copied into its home.
 
-**Sync (run as `jam`, with sudo, after each build):**
+**Sync (run as `jam`, after each build; no root needed):**
 
 ```
-sudo sh /home/opencode/data/work/dist-wheels/sync-zoid6-wheels.sh
+cd /home/opencode/data/work/zoid6 && make sync-wheels
 ```
 
 This copies the wheels named in `dist-wheels/zoid6-wheels.txt` into `/home/zoid6/dist-wheels`, owned
@@ -127,8 +127,9 @@ from the meta-repo at `/home/opencode/data/work`.
    cd /home/opencode/data/work/deploytool && make deploy-tui PYTHON=python3.12 PIP="python3.12 -m pip"
    ```
 
-2. One-time, per host: make the account's directories writable by the `zoid6` group, which jam is in.
-   Run it as root or as `zoid6`:
+2. One-time, per host: the sudo rule and the `bin/` lock (see [Sudo rule for jam](#sudo-rule-for-jam-zoid6-venv-bin)
+   below), then make the account's directories writable by the `zoid6` group, which jam is in. Run the
+   directory step as root or as `zoid6`:
 
    ```
    sudo -u zoid6 mkdir -p /home/zoid6/dist-wheels && sudo chmod -R g+rwX /home/zoid6/dist-wheels /home/zoid6/venv
@@ -158,6 +159,49 @@ from the meta-repo at `/home/opencode/data/work`.
 
 The manual sync and install commands above remain the way to install by hand. The one-command route
 does the same steps.
+
+## Sudo rule for jam (zoid6 venv bin)
+
+`jam` runs the zoid6 install commands as the `zoid6` account, through one sudo rule, so no root shell is
+needed for a deploy. The rule is the example file `handbook/etc-sudoers.d-zoid6-venv-bin` in this repo, and
+it must be installed as `/etc/sudoers.d/zoid6-venv-bin`. The file's header has the same steps.
+
+**Install (as root, once per host):**
+
+```
+sudo cp /home/opencode/data/work/zoid6/handbook/etc-sudoers.d-zoid6-venv-bin /etc/sudoers.d/zoid6-venv-bin
+sudo chown root:root /etc/sudoers.d/zoid6-venv-bin
+sudo chmod 0440 /etc/sudoers.d/zoid6-venv-bin
+sudo visudo -c -f /etc/sudoers.d/zoid6-venv-bin
+```
+
+`visudo -c` must print `parsed OK`. A broken sudoers file can lock out sudo, so check it before logging out.
+
+**Lock the venv's `bin/` (as root, once per host):**
+
+```
+sudo chmod 0755 /home/zoid6/venv/bin
+```
+
+`pip` and the install write launchers into `bin/` (`deploy`, `casino`, `jargon`, `auth`, and so on). The
+installer runs as `zoid6`, which owns `bin/`, so it can still write there. With the mode at `0755`, `jam` cannot
+replace a launcher and run it as `zoid6`. The sudo rule grants any file in `bin/`, so this lock is what keeps
+the rule from becoming a way for `jam` to plant code.
+
+**Check (as `jam`):**
+
+```
+test -w /home/zoid6/venv/bin && echo "BAD: jam can write bin/" || echo "ok: bin/ is locked"
+sudo -u zoid6 /home/zoid6/venv/bin/deploy --with-deps --prefix=/home/zoid6/venv zoid6.venv
+```
+
+The first command prints `ok`. The second prompts for jam's password (the default re-prompt window applies
+after that) and runs the install as `zoid6`.
+
+**Trust.** The rule allows any Python code as `zoid6`, because `python` and `pip` are in `bin/`. Only `jam`
+is named. The `zoid6` group also includes `bed`, `postoffice`, `opencode`, and `lo_test`, and the venv's `lib/`
+is group-writable; those accounts can already change code the daemon imports. This rule does not close that
+path.
 
 **The startup log (for `opencode` to read).** The daemon writes its startup lines to
 `/var/log/zoid6/startup.log` as well as the journal. The file is `0640` and group `zoid6`, and it rotates by
