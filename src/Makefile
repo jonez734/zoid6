@@ -299,8 +299,7 @@ install-venv: install-sysusers
 	sudo -u $(VENV_OWNER) $(VENV_DIR)/bin/pip install --upgrade pip
 	$(MAKE) build-env
 	rm -f $(WHEEL_DIR)/*.whl
-	$(MAKE) -C $(BED_DIR) version
-	$(BUILD_PYTHON) -m build --no-isolation --wheel --outdir $(WHEEL_DIR) $(BED_DIR)
+	$(call WHEEL_FROM_CLEAN_COPY,$(BED_DIR),bed)
 	sudo -u $(VENV_OWNER) $(VENV_DIR)/bin/pip install $(PIP_UPGRADE_FLAG) --quiet $(WHEEL_DIR)/*.whl
 	rm -rf $(WHEEL_DIR)
 	@command -v semanage >/dev/null 2>&1 && \
@@ -368,14 +367,10 @@ install-user:
 	$(VENV_DIR)/bin/pip install $(PIP_UPGRADE_FLAG) --quiet build setuptools wheel
 	mkdir -p $(WHEEL_DIR)
 	rm -f $(WHEEL_DIR)/*.whl
-	$(MAKE) -C $(BBSENGINE_DIR) version
-	$(MAKE) -C $(BED_DIR) version
-	$(MAKE) -C $(CASINO_DIR) version
-	$(MAKE) version
-	$(call WHEEL_FROM_CLEAN_COPY,$(BBSENGINE_DIR))
-	$(call WHEEL_FROM_CLEAN_COPY,$(BED_DIR))
-	$(call WHEEL_FROM_CLEAN_COPY,$(CASINO_DIR))
-	$(call WHEEL_FROM_CLEAN_COPY,$(CURDIR))
+	$(call WHEEL_FROM_CLEAN_COPY,$(BBSENGINE_DIR),bbsengine6)
+	$(call WHEEL_FROM_CLEAN_COPY,$(BED_DIR),bed)
+	$(call WHEEL_FROM_CLEAN_COPY,$(CASINO_DIR),casino)
+	$(call WHEEL_FROM_CLEAN_COPY,$(CURDIR),zoid6)
 	# Dependencies come from the package index. A transient reset is retried by pip (--retries), with a
 	# longer timeout, so it does not surface as a warning in the install output.
 	$(VENV_DIR)/bin/pip install $(PIP_UPGRADE_FLAG) --quiet --retries 10 --timeout 60 $(WHEEL_DIR)/*.whl
@@ -392,6 +387,7 @@ install-user:
 define WHEEL_FROM_CLEAN_COPY
 	rm -rf $(WHEEL_DIR)/.src-copy && mkdir -p $(WHEEL_DIR)/.src-copy
 	tar -C $(1) --exclude=./build --exclude=./dist --exclude='*.egg-info' --exclude=__pycache__ -cf - . | tar -C $(WHEEL_DIR)/.src-copy -xf -
+	$(PYTHON) scripts/stamp_version.py $(WHEEL_DIR)/.src-copy $(2) $(VERSION) "$$(git -C $(1) log -1 --format=%H 2>/dev/null | cut -c 1-16)"
 	$(PYTHON) -m pip wheel --no-deps --no-build-isolation --no-clean --wheel-dir $(WHEEL_DIR) $(WHEEL_DIR)/.src-copy
 	rm -rf $(WHEEL_DIR)/.src-copy
 endef
