@@ -2,7 +2,7 @@ PROJECT = zoid6
 OUTDIR = /srv/repo/$(PROJECT)/
 # Version line for this package, and the shared build stamp (scripts/next_version.sh). Set once, when the
 # Makefile is read, so every target sees the same version.
-VERSION_PREFIX ?= 0.4.0.dev
+VERSION_PREFIX ?= 0.5.0.dev
 VERSION_SCRIPT ?= $(CURDIR)/../../scripts/next_version.sh
 WHEELS_DIR ?= $(CURDIR)/../../dist-wheels
 VERSION := $(shell $(VERSION_SCRIPT) $(VERSION_PREFIX) $(WHEELS_DIR))

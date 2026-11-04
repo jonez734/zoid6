@@ -21,10 +21,10 @@ trap 'rm -rf "$WORK"' EXIT
 # name | source dir in the repo | version prefix | version file (relative to the source dir)
 # The prefixes are each package's version line; bump them here when a package starts a new line.
 BUILDS="
-bed|bed|0.4.0.dev|src/bed/_version.py
-bbsengine6|bbsengine6/py|0.4.0.dev|src/bbsengine6/_version.py
+bed|bed|0.5.0.dev|src/bed/_version.py
+bbsengine6|bbsengine6/py|0.5.0.dev|src/bbsengine6/_version.py
 casino|casino|0.4.0.dev|src/casino/_version.py
-zoid6|zoid6/src|0.4.0.dev|zoid6/_version.py
+zoid6|zoid6/src|0.5.0.dev|zoid6/_version.py
 letteredolive|letteredolive/src|0.0.2.dev|letteredolive/_version.py
 "
 

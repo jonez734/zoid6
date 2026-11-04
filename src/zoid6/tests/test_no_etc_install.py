@@ -119,5 +119,5 @@ def test_version_target_uses_the_version_line_not_a_literal():
     """zoid6's version is the 0.4.0.dev line from next_version.sh, not a hard-coded 0.0.3 prefix."""
     text = (ROOT / "src" / "Makefile").read_text()
     assert "0.0.3" not in text
-    assert "VERSION_PREFIX ?= 0.4.0.dev" in text
+    assert "VERSION_PREFIX ?= 0.5.0.dev" in text
     assert "next_version.sh" in text
