@@ -24,8 +24,8 @@ import sys
 # The version line each package is deployed from. Bump the line here when a package
 # starts a new one; nothing else in the deploy script names a wheel.
 PREFIXES = {
-    "bed": "0.4.0.dev",
-    "bbsengine6": "0.4.0.dev",
+    "bed": "0.5.0.dev",
+    "bbsengine6": "0.5.0.dev",
     "letteredolive": "0.0.2.dev",
 }
 

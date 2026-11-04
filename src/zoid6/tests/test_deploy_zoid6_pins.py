@@ -28,12 +28,14 @@ def _load_resolver():
 @pytest.fixture
 def wheels(tmp_path):
     names = [
-        # bed: an old line, then two builds on the current 0.4.0.dev line
+        # bed: an old line, then two builds on the current 0.5.0.dev line
         "bed-0.0.3.dev20261028130812-py3-none-any.whl",
         "bed-0.4.0.dev20261028100000-py3-none-any.whl",
-        "bed-0.4.0.dev20261028174838-py3-none-any.whl",
-        # bbsengine6: one build on the current line
+        "bed-0.5.0.dev20261028100000-py3-none-any.whl",
+        "bed-0.5.0.dev20261028174838-py3-none-any.whl",
+        # bbsengine6: one build on the current line, and an older 0.4 build the resolver must skip
         "bbsengine6-0.4.0.dev20261028174838-py3-none-any.whl",
+        "bbsengine6-0.5.0.dev20261028174838-py3-none-any.whl",
         # letteredolive: a bare-timestamp build sorts above the real line, and must be ignored
         "letteredolive-0.0.2.dev20261028110148-py3-none-any.whl",
         "letteredolive-202610232249-py3-none-any.whl",
@@ -47,7 +49,7 @@ def wheels(tmp_path):
 @pytest.mark.unit
 def test_newest_build_on_the_version_line_wins(wheels):
     r = _load_resolver()
-    assert r.resolve(str(wheels), "bed").endswith("bed-0.4.0.dev20261028174838-py3-none-any.whl")
+    assert r.resolve(str(wheels), "bed").endswith("bed-0.5.0.dev20261028174838-py3-none-any.whl")
 
 
 @pytest.mark.unit
