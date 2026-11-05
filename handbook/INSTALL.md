@@ -61,6 +61,25 @@ getent passwd zoid6
 ls -ld /home/zoid6
 ```
 
+**Read utmp** (operator, with sudo; needed for the remote-address lookup): zoid6 reads the login
+accounting file `/run/utmp` to find the address a member connected from. That file is group
+`utmp`, so the `zoid6` account must be in that group. Run this as **root or with sudo** after the
+account exists:
+
+```
+sudo usermod -aG utmp zoid6
+```
+
+The change applies to new sessions only, so restart the daemon afterwards (section 6). Verify:
+
+```
+id zoid6
+sudo -u zoid6 test -r /run/utmp && echo "utmp readable"
+```
+
+If `usermod` fails (no root, or no `utmp` group on this host), zoid6 still runs. Remote addresses
+then come from the `SSH_CONNECTION` environment variable instead of utmp.
+
 *(pending: `casino --install` will create the account itself as part of the database install.)*
 
 ## 3. The venv *(built)*
