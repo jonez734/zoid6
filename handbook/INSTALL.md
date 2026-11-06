@@ -61,24 +61,40 @@ getent passwd zoid6
 ls -ld /home/zoid6
 ```
 
-**Read utmp** (operator, with sudo; needed for the remote-address lookup): zoid6 reads the login
-accounting file `/run/utmp` to find the address a member connected from. That file is group
-`utmp`, so the `zoid6` account must be in that group. Run this as **root or with sudo** after the
-account exists:
+**Read utmp** (operator, as root; needed for the remote-address lookup). The daemon reads the login
+accounting file `/run/utmp` to find the address a member connected from. That file is group `utmp`,
+so the daemon's unit must add that group. zoid6 runs as the system unit `zoid6.service`. Grant the
+group with a drop-in, which leaves the installed unit and its `ExecStart` untouched:
 
 ```
-sudo usermod -aG utmp zoid6
+sudo mkdir -p /etc/systemd/system/zoid6.service.d
+sudo tee /etc/systemd/system/zoid6.service.d/utmp.conf >/dev/null <<'EOF2'
+[Service]
+SupplementaryGroups=utmp
+EOF2
+sudo systemctl daemon-reload
 ```
 
-The change applies to new sessions only, so restart the daemon afterwards (section 6). Verify:
+Restart the daemon when it is safe to interrupt live sessions (section 6). Then verify that the
+running process has group 22 (`utmp`):
 
 ```
-id zoid6
-sudo -u zoid6 test -r /run/utmp && echo "utmp readable"
+systemctl show zoid6 -p SupplementaryGroups
+grep ^Groups /proc/$(systemctl show -p MainPID --value zoid6)/status
 ```
 
-If `usermod` fails (no root, or no `utmp` group on this host), zoid6 still runs. Remote addresses
-then come from the `SSH_CONNECTION` environment variable instead of utmp.
+The `Groups:` line should include `22`. The account does not need `utmp` membership; `usermod -aG
+utmp zoid6` is not required. If an earlier install added it, it can be removed once the drop-in is
+verified:
+
+```
+sudo gpasswd -d zoid6 utmp
+```
+
+Removing the membership does not affect the daemon, because the drop-in grants the group on each start.
+
+If the drop-in is absent, zoid6 still runs. Remote addresses then come from the `SSH_CONNECTION`
+environment variable instead of utmp.
 
 *(pending: `casino --install` will create the account itself as part of the database install.)*
 
