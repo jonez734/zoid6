@@ -21,6 +21,11 @@ SYSUSERS_DST = /usr/lib/sysusers.d/$(PROJECT).conf
 # The zoid6 unit is zoid6's own file: it runs bed's daemon with zoid6's router and config.
 UNIT_SRC = $(PACKAGE)/daemon/$(PROJECT).service
 UNIT_DST = /usr/lib/systemd/system/$(PROJECT).service
+# utmp drop-in: adds the utmp group to the zoid6 service so it can read /run/utmp (the member's
+# connection address). The reference copy lives in bbsengine6; override DROPIN_SRC to use another.
+DROPIN_SRC ?= $(CURDIR)/../../bbsengine6/systemd/$(PROJECT).service.d/utmp.conf
+DROPIN_DIR = /etc/systemd/system/$(PROJECT).service.d
+DROPIN_DST = $(DROPIN_DIR)/utmp.conf
 
 VENV_DIR ?= /home/zoid6/venv
 VENV_OWNER ?= zoid6
@@ -57,7 +62,7 @@ endif
 .PHONY: install-tmpfiles install-fhs uninstall-tmpfiles
 .PHONY: install-sysusers uninstall-sysusers
 .PHONY: install-venv uninstall-venv restorecon
-.PHONY: install-systemd uninstall-systemd uninstall-fhs
+.PHONY: install-systemd uninstall-systemd uninstall-fhs install-dropin uninstall-dropin
 .PHONY: deploy-tui deploy-prod
 .PHONY: reassign-bootstrap-owners install-user install-systemd-user uninstall-systemd-user start stop status restart
 .PHONY: uninstall-user
@@ -79,6 +84,8 @@ help:
 	@echo "  uninstall-sysusers Remove sysusers drop-in"
 	@echo "  uninstall-venv Remove $(VENV_DIR)"
 	@echo "  uninstall-systemd Stop, disable, and remove the zoid6.service unit"
+	@echo "  install-dropin Install the utmp drop-in (SupplementaryGroups=utmp) to $(DROPIN_DST)"
+	@echo "  uninstall-dropin Remove the utmp drop-in"
 	@echo "  restorecon    Relabel $(VENV_DIR)/bin for SELinux"
 	@echo "  test          Run tests with pytest"
 	@echo "  test-verbose  Run tests with verbose output"
@@ -324,6 +331,20 @@ uninstall-systemd:
 	-sudo rm -f $(UNIT_DST)
 	-sudo systemctl daemon-reload
 	@echo "Removed $(UNIT_DST)"
+
+install-dropin:
+	@test -f "$(DROPIN_SRC)" || { echo "missing $(DROPIN_SRC)" >&2; exit 1; }
+	sudo mkdir -p $(DROPIN_DIR)
+	sudo install -m 0644 -o root -g root $(DROPIN_SRC) $(DROPIN_DST)
+	sudo systemctl daemon-reload
+	@echo "Installed $(DROPIN_DST)"
+	@echo "Restart to apply: sudo systemctl restart $(PROJECT)"
+
+uninstall-dropin:
+	-sudo rm -f $(DROPIN_DST)
+	-sudo rmdir $(DROPIN_DIR) 2>/dev/null
+	-sudo systemctl daemon-reload
+	@echo "Removed $(DROPIN_DST)"
 
 restorecon:
 	@command -v semanage >/dev/null 2>&1 && \

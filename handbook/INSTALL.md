@@ -67,13 +67,11 @@ so the daemon's unit must add that group. zoid6 runs as the system unit `zoid6.s
 group with a drop-in, which leaves the installed unit and its `ExecStart` untouched:
 
 ```
-sudo mkdir -p /etc/systemd/system/zoid6.service.d
-sudo tee /etc/systemd/system/zoid6.service.d/utmp.conf >/dev/null <<'EOF2'
-[Service]
-SupplementaryGroups=utmp
-EOF2
-sudo systemctl daemon-reload
+make -C /home/opencode/data/work/zoid6/src install-dropin
 ```
+
+The target copies `bbsengine6/systemd/zoid6.service.d/utmp.conf` to `/etc/systemd/system/zoid6.service.d/`
+and runs `daemon-reload`. To remove it: `make -C /home/opencode/data/work/zoid6/src uninstall-dropin`.
 
 Restart the daemon when it is safe to interrupt live sessions (section 6). Then verify that the
 running process has group 22 (`utmp`):
