@@ -94,6 +94,19 @@ Removing the membership does not affect the daemon, because the drop-in grants t
 If the drop-in is absent, zoid6 still runs. Remote addresses then come from the `SSH_CONNECTION`
 environment variable instead of utmp.
 
+**Session address and terminal** *(run by the database owner, `jam`)*: each session records the
+member's address (`remoteaddr`), where it came from (`remoteaddr_source`: `utmp` or `ssh_env`), and the
+login's terminal as utmp names it (`tty`: for example `pts/2`). These columns come from the bbsengine6
+migration `migrate_session_remoteaddr.sql`. Run it on each database the daemon uses:
+
+```
+psql -X -d zoid6 -f /home/opencode/data/work/bbsengine6/py/src/bbsengine6/sql/migrate_session_remoteaddr.sql
+```
+
+It is idempotent. It adds any missing column, refreshes `engine.session`, and keeps its grants. It
+refuses to run while a session still holds an old `ipaddress` value. Fresh installs get the same
+columns from `session.sql`.
+
 *(pending: `casino --install` will create the account itself as part of the database install.)*
 
 ## 3. The venv *(built)*
@@ -457,6 +470,14 @@ journalctl -u zoid6 --since "5 minutes ago" | grep -i "MessageRouter\|fatal\|err
   The reply is `table_list`.
 - Channels: a seated member subscribes to `casino:table:<table>:chat` and gets `subscribed`; a
   non-seated member gets `forbidden`.
+- The daemon has the `utmp` group (22) through the drop-in:
+  `grep ^Groups /proc/$(systemctl show -p MainPID --value zoid6)/status` includes `22`.
+- The session view has the origin fields: `select column_name from information_schema.columns where
+  table_schema='engine' and table_name='session' and column_name in ('remoteaddr','remoteaddr_source','tty')`
+  returns all three.
+- Origin lookup on a login: `python3 -c "from bbsengine6 import utmp; print(utmp.current_tty(), utmp.current_origin())"`
+  run inside an SSH session prints the terminal and the client address. A console login prints
+  `None` for the address, because a console login has no client address.
 
 ## 8. Troubleshooting
 
