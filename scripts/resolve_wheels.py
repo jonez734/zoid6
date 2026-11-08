@@ -26,7 +26,7 @@ import sys
 PREFIXES = {
     "bed": "0.5.0.dev",
     "bbsengine6": "0.5.0.dev",
-    "letteredolive": "0.0.2.dev",
+    "letteredolive": "0.1.0.dev",
 }
 
 

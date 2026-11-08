@@ -36,10 +36,12 @@ def wheels(tmp_path):
         # bbsengine6: one build on the current line, and an older 0.4 build the resolver must skip
         "bbsengine6-0.4.0.dev20261028174838-py3-none-any.whl",
         "bbsengine6-0.5.0.dev20261028174838-py3-none-any.whl",
-        # letteredolive: a bare-timestamp build sorts above the real line, and must be ignored
+        # letteredolive: builds on the old 0.0.2 line, a bare-timestamp build, and the current 0.1.0 line
         "letteredolive-0.0.2.dev20261028110148-py3-none-any.whl",
         "letteredolive-202610232249-py3-none-any.whl",
         "letteredolive-0.0.2.dev20261028174838-py3-none-any.whl",
+        "letteredolive-0.1.0.dev20261028100000-py3-none-any.whl",
+        "letteredolive-0.1.0.dev20261028174838-py3-none-any.whl",
     ]
     for n in names:
         (tmp_path / n).write_bytes(b"")
@@ -56,7 +58,8 @@ def test_newest_build_on_the_version_line_wins(wheels):
 def test_bare_timestamp_builds_are_not_picked(wheels):
     r = _load_resolver()
     got = r.resolve(str(wheels), "letteredolive")
-    assert got.endswith("letteredolive-0.0.2.dev20261028174838-py3-none-any.whl"), got
+    # The newest build on the 0.1.0 line wins; the 0.0.2 line and the bare timestamp are skipped.
+    assert got.endswith("letteredolive-0.1.0.dev20261028174838-py3-none-any.whl"), got
 
 
 @pytest.mark.unit
