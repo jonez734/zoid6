@@ -25,7 +25,7 @@ bed|bed|0.5.0.dev|src/bed/_version.py
 bbsengine6|bbsengine6/py|0.5.0.dev|src/bbsengine6/_version.py
 casino|casino|0.4.0.dev|src/casino/_version.py
 zoid6|zoid6/src|0.5.0.dev|zoid6/_version.py
-letteredolive|letteredolive/src|0.0.2.dev|letteredolive/_version.py
+letteredolive|letteredolive/src|0.1.0.dev|letteredolive/_version.py
 "
 
 [ -x "$VERSION_SCRIPT" ] || { echo "build: $VERSION_SCRIPT not found" >&2; exit 1; }
