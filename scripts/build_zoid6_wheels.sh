@@ -25,7 +25,7 @@ bed|bed|0.5.0.dev|src/bed/_version.py
 bbsengine6|bbsengine6/py|0.5.0.dev|src/bbsengine6/_version.py
 casino|casino|0.4.0.dev|src/casino/_version.py
 zoid6|zoid6/src|0.5.0.dev|zoid6/_version.py
-letteredolive|letteredolive/src|0.1.0.dev|letteredolive/_version.py
+letteredolive|letteredolive/src|0.1.0.dev|shell/_version.py
 "
 
 [ -x "$VERSION_SCRIPT" ] || { echo "build: $VERSION_SCRIPT not found" >&2; exit 1; }
@@ -49,6 +49,10 @@ echo "$BUILDS" | while IFS='|' read -r name src prefix vfile; do
     # `version` and broke its build.
     printf '__version__ = "%s"\n__datestamp__ = "%s"\nversion = "%s"\ndatestamp = "%s"\n' \
         "$version" "$version" "$version" "$version" > "$pkg/$vfile"
+    # The shell's version line also prints githash (lib.version_line), so the shell's stamp carries it.
+    if [ "$name" = "letteredolive" ]; then
+        printf 'githash = "%s"\n' "$(git -C "$ROOT/$repo" rev-parse HEAD | cut -c1-16)" >> "$pkg/$vfile"
+    fi
     ( cd "$pkg" && python3 -m build --wheel --outdir "$out/wheel" >"$out/build.log" 2>&1 ) \
         || { echo "build: $name failed; see $out/build.log" >&2; cat "$out/build.log" >&2; exit 1; }
     whl="$(ls "$out/wheel"/*.whl)"
