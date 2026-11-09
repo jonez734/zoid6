@@ -51,7 +51,8 @@ echo "$BUILDS" | while IFS='|' read -r name src prefix vfile; do
         "$version" "$version" "$version" "$version" > "$pkg/$vfile"
     # The shell's version line also prints githash (lib.version_line), so the shell's stamp carries it.
     if [ "$name" = "letteredolive" ]; then
-        printf 'githash = "%s"\n' "$(git -C "$ROOT/$repo" rev-parse HEAD | cut -c1-16)" >> "$pkg/$vfile"
+        # Same safe.directory trust as the archive above: the repo is opencode-owned and the build may run as zoid6.
+        printf 'githash = "%s"\n' "$(git -c safe.directory="$ROOT/$repo" -C "$ROOT/$repo" rev-parse HEAD | cut -c1-16)" >> "$pkg/$vfile"
     fi
     ( cd "$pkg" && python3 -m build --wheel --outdir "$out/wheel" >"$out/build.log" 2>&1 ) \
         || { echo "build: $name failed; see $out/build.log" >&2; cat "$out/build.log" >&2; exit 1; }
