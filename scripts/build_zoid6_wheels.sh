@@ -26,6 +26,7 @@ bbsengine6|bbsengine6/py|0.5.0.dev|src/bbsengine6/_version.py
 casino|casino|0.4.0.dev|src/casino/_version.py
 zoid6|zoid6/src|0.5.0.dev|zoid6/_version.py
 letteredolive|letteredolive/src|0.1.0.dev|shell/_version.py
+playingcarddata|playingcarddata|0.1.0|-
 "
 
 [ -x "$VERSION_SCRIPT" ] || { echo "build: $VERSION_SCRIPT not found" >&2; exit 1; }
@@ -47,8 +48,11 @@ echo "$BUILDS" | while IFS='|' read -r name src prefix vfile; do
     # Write every name a package's build reads: bed/bbsengine6/zoid6 use __version__, casino uses
     # version (pyproject attr casino._version.version). Writing only __version__ removed casino's
     # `version` and broke its build.
-    printf '__version__ = "%s"\n__datestamp__ = "%s"\nversion = "%s"\ndatestamp = "%s"\n' \
-        "$version" "$version" "$version" "$version" > "$pkg/$vfile"
+    # A vfile of "-" means the package's version is fixed in its pyproject.toml; nothing is stamped.
+    if [ "$vfile" != "-" ]; then
+        printf '__version__ = "%s"\n__datestamp__ = "%s"\nversion = "%s"\ndatestamp = "%s"\n' \
+            "$version" "$version" "$version" "$version" > "$pkg/$vfile"
+    fi
     # The shell's version line also prints githash (lib.version_line), so the shell's stamp carries it.
     if [ "$name" = "letteredolive" ]; then
         # Same safe.directory trust as the archive above: the repo is opencode-owned and the build may run as zoid6.
