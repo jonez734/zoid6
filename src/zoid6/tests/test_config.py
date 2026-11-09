@@ -161,3 +161,11 @@ class TestConfigSchemaConsistency:
                 assert field in db
 
 
+
+
+class TestCasinoPlayingcardSet:
+    """The shipped zoid6.json sets the default card set for casino's Tk UI."""
+
+    def test_casino_block_names_the_bicycle_set(self):
+        config = json.loads(_config_path().read_text())
+        assert config["casino"]["playingcard"]["set_name"] == "bicycle"
