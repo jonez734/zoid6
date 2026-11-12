@@ -1,5 +1,13 @@
 {
   "tz": "America/New_York",
+  "bbsengine6": {
+    "seam": {
+      "capacity": 1000,
+      "idle_seconds": 300,
+      "logger_name": "bbsengine6.seam",
+      "_comment": "Front-end seam settings (bbsengine6.seam). capacity: events kept per domain before a slow front end lags. idle_seconds: a front end's subscription expires after this long unread. logger_name: where lag and expiry warnings are logged. Defaults shown."
+    }
+  },
   "bed": {
     "name": "zoid6",
     "autorestart": false,
