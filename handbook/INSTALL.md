@@ -405,6 +405,14 @@ The keys operators most often change:
 | `services.<name>.enabled` | see below | Turns a service on or off. |
 | `casino.clock.max_turn_seconds` | `120` | Sysop ceiling for a table's turn clock. |
 | `session.idle_minutes` | `15` | Idle time before a session is dropped. |
+| `bed.token_gc_interval_seconds` | `300` | How often expired bearer tokens are removed (positive integer). |
+| `bbsengine6.seam.capacity` | `1000` | Events kept per domain before a slow front end lags. |
+| `bbsengine6.seam.idle_seconds` | `300` | A front end's subscription expires after this long unread. |
+| `bbsengine6.seam.logger_name` | `bbsengine6.seam` | Where seam lag and expiry warnings are logged. |
+
+The `bbsengine6.seam` settings control the front-end seam (see bbsengine6's
+`handbook/specs/front-end-seam.md`, section 7a). They take effect when the daemon starts; a bad value
+stops startup. Keys starting with `_` are comments.
 
 Services on by default: `member`, `channel`, `casino`. Off by default: `auth` (bed handles it),
 `bank` (bed serves it), `postoffice`, `empyre`, `murdermotel`, `mistermcfeely`.
